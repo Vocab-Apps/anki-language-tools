@@ -4,11 +4,68 @@ from aqt import mw
 from aqt.utils import showInfo
 # import all of the Qt GUI library
 from aqt.qt import *
+import requests
+import json
+import random
 
-# We're going to add a menu item below. First we want to create a function to
-# be called when the menu item is activated.
+
+
+
+
+base_url = 'http://0.0.0.0:5000'
+
+def retrieveLanguages():
+    response = requests.get(base_url + '/language_list')
+    result = json.loads(response.content)
+    print(result)
+
+def detectLanguage():
+    print('detectLanguage')
+    query = "mid:1354424015760 deck:Mandarin"
+    note_ids = mw.col.find_notes(query)
+
+
+    random_note_ids = random.sample(note_ids, 10)
+
+    english_fields = [mw.col.getNote(x)['English'] for x in random_note_ids]
+    chinese_fields = [mw.col.getNote(x)['Chinese'] for x in random_note_ids]
+    # print(english_fields)
+
+    response = requests.post(base_url + '/detect', json={
+            'text_list': chinese_fields
+    })
+
+    data = json.loads(response.content)
+    print(data)
+
+
+
+def listCollection():
+
+    # get all of the notetypes
+    note_types = mw.col.models.all_names_and_ids()
+
+    for note_type in note_types:
+        query = f"mid:{note_type.id}"
+        print(query)
+        notes = mw.col.find_notes(query)
+        print(f'found {len(notes)} notes with model {note_type.name}')
+    print(note_types)
+
+    deck_list = mw.col.decks.all_names_and_ids()
+    first_deck = deck_list[0]
+    first_deck_id = first_deck.id
+    # print(deck_list)
+
+    # obtain the deck
+    deck = mw.col.decks.get(first_deck_id)
+
+    print(type(deck))
+    print(deck.keys())
+    print(deck.values())
 
 def testFunction():
+    # print(f'testFunction')
     # get the number of cards in the current collection, which is stored in
     # the main window
     cardCount = mw.col.cardCount()
@@ -20,4 +77,17 @@ action = QAction("test", mw)
 # set it to call testFunction when it's clicked
 action.triggered.connect(testFunction)
 # and add it to the tools menu
+mw.form.menuTools.addAction(action)
+
+
+action = QAction("retrieveLanguages", mw)
+action.triggered.connect(retrieveLanguages)
+mw.form.menuTools.addAction(action)
+
+action = QAction("listCollection", mw)
+action.triggered.connect(listCollection)
+mw.form.menuTools.addAction(action)
+
+action = QAction("detectLanguage", mw)
+action.triggered.connect(detectLanguage)
 mw.form.menuTools.addAction(action)
