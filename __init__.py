@@ -8,6 +8,8 @@ import requests
 import json
 import random
 
+import anki.hooks
+
 
 
 
@@ -91,3 +93,34 @@ mw.form.menuTools.addAction(action)
 action = QAction("detectLanguage", mw)
 action.triggered.connect(detectLanguage)
 mw.form.menuTools.addAction(action)
+
+
+def translate_text(source_text):
+    url = base_url + '/translate'
+    query_json = {
+        'text': source_text,
+        'service': 'Azure',
+        'from_language_key': 'zh-Hans',
+        'to_language_key': 'en'
+    }
+    print(query_json)
+    response = requests.post(url, json=query_json)
+    data = json.loads(response.content)
+    print(data)
+    print(f"translation: {data['translated_text']}")
+
+# add context menu handler
+
+def on_context_menu(web_view, menu):
+    submenu = QMenu("Language Tools", menu)
+
+    selected_text = web_view.selectedText()
+
+    # action1 = QAction()
+    submenu.addAction(f'Test Language Tools: ', lambda: print('test1'))
+    submenu.addAction(f'translate: {selected_text}', lambda: translate_text(selected_text))
+
+    menu.addMenu(submenu)
+
+
+anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
