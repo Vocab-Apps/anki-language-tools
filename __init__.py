@@ -229,7 +229,7 @@ def show_translation(source_text, from_language, to_language):
     for key, value in result.items():
         entry = f'{key}: <b>{value}</b><br/>'
         translations += entry
-    text = f"""Translation of <i>{source_text}</i><br/>
+    text = f"""Translation of <i>{source_text}</i> from {languagetools.get_language_name(from_language)} to {languagetools.get_language_name(to_language)}<br/>
         {translations}
     """
     aqt.utils.showInfo(text, title='Language Tools Translation', textFormat="rich")
