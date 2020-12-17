@@ -10,6 +10,7 @@ import json
 import random
 import os
 
+import aqt.gui_hooks
 import anki.hooks
 
 
@@ -28,7 +29,12 @@ class LanguageTools():
         # get language list
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
-        
+
+        if len(self.config[LanguageTools.CONFIG_WANTED_LANGUAGES]) == 0:
+            # suggest running language detection
+            result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
+            if result == True:
+                self.perform_language_detection()
 
     def get_language_name(self, language):
         return self.language_list[language]
@@ -149,7 +155,6 @@ class LanguageTools():
 
 
 languagetools = LanguageTools()
-languagetools.initialize()
 
 # add menu items
 
@@ -212,5 +217,7 @@ def on_context_menu(web_view, menu):
 
         menu.addMenu(submenu)
 
-
 anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
+
+# run some stuff after anki has initialized
+aqt.gui_hooks.main_window_did_init.append(languagetools.initialize)
