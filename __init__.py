@@ -23,9 +23,6 @@ class LanguageTools():
         # get language list
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
-        # get translation language list
-        response = requests.get(self.base_url + '/translation_language_list')
-        self.translation_language_list = json.loads(response.content)
         
 
     def get_language_name(self, language):
@@ -263,12 +260,13 @@ def on_context_menu(web_view, menu):
         # action1 = QAction()
         wanted_languages = languagetools.get_wanted_languages()
         for wanted_language in wanted_languages:
-            menu_text = f'To {languagetools.get_language_name(wanted_language)}'
-            def get_translate_lambda(selected_text, language, wanted_language):
-                def translate():
-                    show_translation(selected_text, language, wanted_language)
-                return translate
-            submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
+            if wanted_language != language:
+                menu_text = f'To {languagetools.get_language_name(wanted_language)}'
+                def get_translate_lambda(selected_text, language, wanted_language):
+                    def translate():
+                        show_translation(selected_text, language, wanted_language)
+                    return translate
+                submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
 
         menu.addMenu(submenu)
 
