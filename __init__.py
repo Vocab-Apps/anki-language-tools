@@ -20,8 +20,16 @@ class LanguageTools():
         self.config = mw.addonManager.getConfig(__name__)
 
     def initialize(self):
+        # get language list
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
+        # get translation language list
+        response = requests.get(self.base_url + '/translation_language_list')
+        self.translation_language_list = json.loads(response.content)
+        
+
+    def get_language_name(self, language):
+        return self.language_list[language]
 
     def perform_language_detection(self):
         deck_list = mw.col.decks.all_names_and_ids()
@@ -87,6 +95,17 @@ class LanguageTools():
         print(f'model_name {model_name} deck_name {deck_name} field_name {field_name}')
         return self.config[LanguageTools.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name]
 
+    def get_wanted_languages(self):
+        return self.config[LanguageTools.CONFIG_WANTED_LANGUAGES].keys()
+
+    def get_translation(self, source_text, from_language, to_language):
+        response = requests.post(self.base_url + '/translate_all', json={
+                'text': source_text,
+                'from_language': from_language,
+                'to_language': to_language
+        })
+        data = json.loads(response.content)        
+        return data
 
 
 languagetools = LanguageTools()
@@ -202,8 +221,13 @@ def translate_text_google(source_text):
 
 # add context menu handler
 
-def on_context_menu(web_view, menu):
+def show_translation(source_text, from_language, to_language):
+    print(f'translate {source_text} from {from_language} to {to_language}')
+    result = languagetools.get_translation(source_text, from_language, to_language)
+    print(result)
 
+def on_context_menu(web_view, menu):
+    selected_text = web_view.selectedText()
     current_field_num = web_view.editor.currentField
     note = web_view.editor.note
     print(note)
@@ -218,14 +242,25 @@ def on_context_menu(web_view, menu):
 
         print(f'language for {field_name}: {language}')
 
-        submenu = QMenu("Language Tools", menu)
+        source_text_max_length = 25
+        source_text = selected_text
+        if len(selected_text) > source_text_max_length:
+            source_text = selected_text[0:source_text_max_length]
 
-        selected_text = web_view.selectedText()
+        menu_text = f'Language Tools: translate {source_text} from {languagetools.get_language_name(language)}'
+        
+        # source_text = 
+        submenu = QMenu(menu_text, menu)
 
         # action1 = QAction()
-        submenu.addAction(f'Test Language Tools: ', lambda: print('test1'))
-        submenu.addAction(f'translate (azure): {selected_text}', lambda: translate_text_azure(selected_text))
-        submenu.addAction(f'translate (google): {selected_text}', lambda: translate_text_google(selected_text))
+        wanted_languages = languagetools.get_wanted_languages()
+        for wanted_language in wanted_languages:
+            menu_text = f'To {languagetools.get_language_name(wanted_language)}'
+            def get_translate_lambda(selected_text, language, wanted_language):
+                def translate():
+                    show_translation(selected_text, language, wanted_language)
+                return translate
+            submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
 
         menu.addMenu(submenu)
 
