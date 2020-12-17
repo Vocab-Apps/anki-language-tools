@@ -11,10 +11,49 @@ import random
 import anki.hooks
 
 
+class LanguageTools():
+    def __init__(self):
+        self.base_url = 'http://0.0.0.0:5000'
+
+    def perform_language_detection(self):
+        deck_list = mw.col.decks.all_names_and_ids()
+        note_types = mw.col.models.all_names_and_ids()
+
+        for deck_entry in deck_list:
+            for note_type_entry in note_types:
+                deck_id = deck_entry.id
+                note_type_id = note_type_entry.id
+                self.perform_language_detection_deck_note_type(deck_entry, note_type_entry)
+                
+        
+    def perform_language_detection_deck_note_type(self, deck, note_type):
+        sample_size = 100
+        # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
+        query = f'did:{deck.id} mid:{note_type.id}'
+        notes = mw.col.find_notes(query)
+        if len(notes) > 0:  
+            print(f'found {len(notes)} notes in {deck.name}, {note_type.name}')
+            if len(notes) < sample_size:
+                random_note_ids = notes
+            else:
+                random_note_ids = random.sample(notes, sample_size)
+            model = mw.col.models.get(note_type.id)
+            fields = model['flds']
+            for field in fields:
+                field_name = field['name']
+                print(f'  field: {field_name}, performing detection')
+                field_sample = [mw.col.getNote(x)[field_name] for x in random_note_ids]
+                response = requests.post(self.base_url + '/detect', json={
+                        'text_list': field_sample
+                })
+                data = json.loads(response.content)                
+                print(data)
 
 
 
-base_url = 'http://0.0.0.0:5000'
+languagetools = LanguageTools()
+
+
 
 def retrieveLanguages():
     response = requests.get(base_url + '/language_list')
@@ -91,11 +130,11 @@ action.triggered.connect(listCollection)
 mw.form.menuTools.addAction(action)
 
 action = QAction("detectLanguage", mw)
-action.triggered.connect(detectLanguage)
+action.triggered.connect(languagetools.perform_language_detection)
 mw.form.menuTools.addAction(action)
 
 
-def translate_text(source_text):
+def translate_text_azure(source_text):
     url = base_url + '/translate'
     query_json = {
         'text': source_text,
@@ -109,6 +148,20 @@ def translate_text(source_text):
     print(data)
     print(f"translation: {data['translated_text']}")
 
+def translate_text_google(source_text):
+    url = base_url + '/translate'
+    query_json = {
+        'text': source_text,
+        'service': 'Google',
+        'from_language_key': 'zh-CN',
+        'to_language_key': 'en'
+    }
+    print(query_json)
+    response = requests.post(url, json=query_json)
+    data = json.loads(response.content)
+    print(data)
+    print(f"translation: {data['translated_text']}")    
+
 # add context menu handler
 
 def on_context_menu(web_view, menu):
@@ -118,7 +171,8 @@ def on_context_menu(web_view, menu):
 
     # action1 = QAction()
     submenu.addAction(f'Test Language Tools: ', lambda: print('test1'))
-    submenu.addAction(f'translate: {selected_text}', lambda: translate_text(selected_text))
+    submenu.addAction(f'translate (azure): {selected_text}', lambda: translate_text_azure(selected_text))
+    submenu.addAction(f'translate (google): {selected_text}', lambda: translate_text_google(selected_text))
 
     menu.addMenu(submenu)
 
