@@ -4,6 +4,7 @@ from aqt import mw
 import aqt.utils
 # import all of the Qt GUI library
 from aqt.qt import *
+import aqt.progress
 import requests
 import json
 import random
@@ -33,17 +34,55 @@ class LanguageTools():
         return self.language_list[language]
 
     def perform_language_detection(self):
+        # print('perform_language_detection')
+        mw.progress.start(max=100, min=0, label='language detection', immediate=True)
+        mw.progress.update(label='Retrieving Decks', value=1)
+
+        populated_deck_models = self.get_populated_deck_models()
+        step_max = len(populated_deck_models)
+        mw.progress.update(label='Processing Decks', value=2, max=step_max)
+
+        i=0
+        for entry in populated_deck_models:
+            deck_entry = entry['deck']
+            note_type_entry = entry['model']
+            self.perform_language_detection_deck_note_type(deck_entry, note_type_entry, i, step_max)
+            i += 1
+
+        mw.progress.finish()
+
+        # display a summary
+        wanted_languages = self.config[LanguageTools.CONFIG_WANTED_LANGUAGES]
+
+        languages_found = ''
+        for key, value in wanted_languages.items():
+            entry = f'<b>{self.get_language_name(key)}</b><br/>'
+            languages_found += entry
+        text = f'Found the following languages:<br/>{languages_found}'
+        aqt.utils.showInfo(text, title='Language Tools Detection', textFormat="rich")
+
+                
+    def get_populated_deck_models(self):
         deck_list = mw.col.decks.all_names_and_ids()
         note_types = mw.col.models.all_names_and_ids()
 
+        result = []
+
         for deck_entry in deck_list:
             for note_type_entry in note_types:
-                deck_id = deck_entry.id
-                note_type_id = note_type_entry.id
-                self.perform_language_detection_deck_note_type(deck_entry, note_type_entry)
-                
+                query = f'did:{deck_entry.id} mid:{note_type_entry.id}'
+                notes = mw.col.find_notes(query)
+
+                if len(notes) > 0:
+                    result.append({'deck': deck_entry, 'model': note_type_entry})
+
+        return result
+
         
-    def perform_language_detection_deck_note_type(self, deck, note_type):
+    def perform_language_detection_deck_note_type(self, deck, note_type, step_num, step_max):
+        label = f'Analyzing {deck.name} / {note_type.name}'
+        mw.progress.update(label=label, value=step_num, max=step_max)
+
         sample_size = 100
         # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
         query = f'did:{deck.id} mid:{note_type.id}'
@@ -114,6 +153,12 @@ languagetools.initialize()
 
 # add menu items
 
+def run_language_detection():
+    languagetools.perform_language_detection()
+
+action = QAction("Language Tools: Run Language Detection", mw)
+action.triggered.connect(run_language_detection)
+mw.form.menuTools.addAction(action)
 
 
 # add context menu handler
