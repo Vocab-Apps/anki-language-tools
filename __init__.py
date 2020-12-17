@@ -224,8 +224,15 @@ def translate_text_google(source_text):
 def show_translation(source_text, from_language, to_language):
     print(f'translate {source_text} from {from_language} to {to_language}')
     result = languagetools.get_translation(source_text, from_language, to_language)
-    # print(result)
-    aqt.utils.showInfo(str(result))
+
+    translations = ''
+    for key, value in result.items():
+        entry = f'{key}: <b>{value}</b><br/>'
+        translations += entry
+    text = f"""Translation of <i>{source_text}</i><br/>
+        {translations}
+    """
+    aqt.utils.showInfo(text, title='Language Tools Translation', textFormat="rich")
 
 def on_context_menu(web_view, menu):
     selected_text = web_view.selectedText()
