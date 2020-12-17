@@ -14,6 +14,7 @@ import anki.hooks
 class LanguageTools():
     def __init__(self):
         self.base_url = 'http://0.0.0.0:5000'
+        self.config = mw.addonManager.getConfig(__name__)
 
     def perform_language_detection(self):
         deck_list = mw.col.decks.all_names_and_ids()
@@ -46,9 +47,24 @@ class LanguageTools():
                 response = requests.post(self.base_url + '/detect', json={
                         'text_list': field_sample
                 })
-                data = json.loads(response.content)                
-                print(data)
+                data = json.loads(response.content)
+                detected_language = data['detected_language']
 
+                self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
+
+                # store result
+
+                # print(data)
+
+    def store_language_detection_result(self, note_type_name, deck_name, field_name, language):
+        if 'deck_languages' not in self.config:
+            self.config['deck_languages'] = {}
+        if note_type_name not in self.config['deck_languages']:
+            self.config['deck_languages'][note_type_name] = {}
+        if deck_name not in self.config['deck_languages'][note_type_name]:
+            self.config['deck_languages'][note_type_name][deck_name] = {}
+        self.config['deck_languages'][note_type_name][deck_name][field_name] = language
+        mw.addonManager.writeConfig(__name__, self.config)
 
 
 languagetools = LanguageTools()
