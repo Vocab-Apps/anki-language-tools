@@ -12,6 +12,9 @@ import anki.hooks
 
 
 class LanguageTools():
+    CONFIG_DECK_LANGUAGES = 'deck_languages'
+    CONFIG_WANTED_LANGUAGES = 'wanted_languages'
+
     def __init__(self):
         self.base_url = 'http://0.0.0.0:5000'
         self.config = mw.addonManager.getConfig(__name__)
@@ -51,16 +54,25 @@ class LanguageTools():
                 detected_language = data['detected_language']
 
                 self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
-                
+
 
     def store_language_detection_result(self, note_type_name, deck_name, field_name, language):
-        if 'deck_languages' not in self.config:
-            self.config['deck_languages'] = {}
-        if note_type_name not in self.config['deck_languages']:
-            self.config['deck_languages'][note_type_name] = {}
-        if deck_name not in self.config['deck_languages'][note_type_name]:
-            self.config['deck_languages'][note_type_name][deck_name] = {}
-        self.config['deck_languages'][note_type_name][deck_name][field_name] = language
+        # write per-deck detected languages
+        CONFIG_DECK_LANGUAGES = LanguageTools.CONFIG_DECK_LANGUAGES
+        CONFIG_WANTED_LANGUAGES = LanguageTools.CONFIG_WANTED_LANGUAGES
+        if CONFIG_DECK_LANGUAGES not in self.config:
+            self.config[CONFIG_DECK_LANGUAGES] = {}
+        if note_type_name not in self.config[CONFIG_DECK_LANGUAGES]:
+            self.config[CONFIG_DECK_LANGUAGES][note_type_name] = {}
+        if deck_name not in self.config[CONFIG_DECK_LANGUAGES][note_type_name]:
+            self.config[CONFIG_DECK_LANGUAGES][note_type_name][deck_name] = {}
+        self.config[CONFIG_DECK_LANGUAGES][note_type_name][deck_name][field_name] = language
+
+        # store the languages we're interested in
+        if CONFIG_WANTED_LANGUAGES not in self.config:
+            self.config[CONFIG_WANTED_LANGUAGES] = {}
+        self.config[CONFIG_WANTED_LANGUAGES][language] = True
+
         mw.addonManager.writeConfig(__name__, self.config)
 
 
