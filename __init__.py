@@ -7,6 +7,7 @@ from aqt.qt import *
 import requests
 import json
 import random
+import os
 
 import anki.hooks
 
@@ -14,9 +15,12 @@ import anki.hooks
 class LanguageTools():
     CONFIG_DECK_LANGUAGES = 'deck_languages'
     CONFIG_WANTED_LANGUAGES = 'wanted_languages'
+    
 
     def __init__(self):
-        self.base_url = 'http://0.0.0.0:5000'
+        self.base_url = 'https://cloud-language-tools-6e7b3.ondigitalocean.app'
+        if 'ANKI_LANGUAGE_TOOLS_BASE_URL' in os.environ:
+            self.base_url = os.environ['ANKI_LANGUAGE_TOOLS_BASE_URL']
         self.config = mw.addonManager.getConfig(__name__)
 
     def initialize(self):
@@ -107,6 +111,9 @@ class LanguageTools():
 
 languagetools = LanguageTools()
 languagetools.initialize()
+
+# add menu items
+
 
 
 # add context menu handler
