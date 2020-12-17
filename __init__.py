@@ -19,6 +19,10 @@ class LanguageTools():
         self.base_url = 'http://0.0.0.0:5000'
         self.config = mw.addonManager.getConfig(__name__)
 
+    def initialize(self):
+        response = requests.get(self.base_url + '/language_list')
+        self.language_list = json.loads(response.content)
+
     def perform_language_detection(self):
         deck_list = mw.col.decks.all_names_and_ids()
         note_types = mw.col.models.all_names_and_ids()
@@ -75,9 +79,18 @@ class LanguageTools():
 
         mw.addonManager.writeConfig(__name__, self.config)
 
+    def get_language(self, deck_id, model_id, field_name):
+        model = mw.col.models.get(model_id)
+        model_name = model['name']
+        deck = mw.col.decks.get(deck_id)
+        deck_name = deck['name']
+        print(f'model_name {model_name} deck_name {deck_name} field_name {field_name}')
+        return self.config[LanguageTools.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name]
+
+
 
 languagetools = LanguageTools()
-
+languagetools.initialize()
 
 
 def retrieveLanguages():
@@ -190,16 +203,31 @@ def translate_text_google(source_text):
 # add context menu handler
 
 def on_context_menu(web_view, menu):
-    submenu = QMenu("Language Tools", menu)
 
-    selected_text = web_view.selectedText()
+    current_field_num = web_view.editor.currentField
+    note = web_view.editor.note
+    print(note)
+    model_id = note.mid
+    model = mw.col.models.get(model_id)
+    field_name = model['flds'][current_field_num]['name']
+    card = web_view.editor.card
+    if card != None:
+        deck_id = card.did
 
-    # action1 = QAction()
-    submenu.addAction(f'Test Language Tools: ', lambda: print('test1'))
-    submenu.addAction(f'translate (azure): {selected_text}', lambda: translate_text_azure(selected_text))
-    submenu.addAction(f'translate (google): {selected_text}', lambda: translate_text_google(selected_text))
+        language = languagetools.get_language(deck_id, model_id, field_name)
 
-    menu.addMenu(submenu)
+        print(f'language for {field_name}: {language}')
+
+        submenu = QMenu("Language Tools", menu)
+
+        selected_text = web_view.selectedText()
+
+        # action1 = QAction()
+        submenu.addAction(f'Test Language Tools: ', lambda: print('test1'))
+        submenu.addAction(f'translate (azure): {selected_text}', lambda: translate_text_azure(selected_text))
+        submenu.addAction(f'translate (google): {selected_text}', lambda: translate_text_google(selected_text))
+
+        menu.addMenu(submenu)
 
 
 anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
