@@ -11,7 +11,7 @@ git push origin ${GIT_TAG}
 
 # create .addon file
 ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION}.ankiaddon
-zip -r ../${ADDON_FILENAME} *
+zip -r ${ADDON_FILENAME} *
 
 
 
