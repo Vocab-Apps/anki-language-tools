@@ -1,7 +1,7 @@
 # import the main window object (mw) from aqt
 from aqt import mw
 # import the "show info" tool from utils.py
-from aqt.utils import showInfo
+import aqt.utils
 # import all of the Qt GUI library
 from aqt.qt import *
 import requests
@@ -224,7 +224,8 @@ def translate_text_google(source_text):
 def show_translation(source_text, from_language, to_language):
     print(f'translate {source_text} from {from_language} to {to_language}')
     result = languagetools.get_translation(source_text, from_language, to_language)
-    print(result)
+    # print(result)
+    aqt.utils.showInfo(str(result))
 
 def on_context_menu(web_view, menu):
     selected_text = web_view.selectedText()
