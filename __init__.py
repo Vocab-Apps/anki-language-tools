@@ -13,6 +13,8 @@ import os
 import aqt.gui_hooks
 import anki.hooks
 
+from . import version
+
 
 class LanguageTools():
     CONFIG_DECK_LANGUAGES = 'deck_languages'
@@ -35,6 +37,10 @@ class LanguageTools():
             result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
             if result == True:
                 self.perform_language_detection()
+
+    def show_about(self):
+        text = f'Language Tools v{version.ANKI_LANGUAGE_TOOLS_VERSION}'
+        aqt.utils.showInfo(text, title='Language Tools')
 
     def get_language_name(self, language):
         return self.language_list[language]
@@ -158,11 +164,12 @@ languagetools = LanguageTools()
 
 # add menu items
 
-def run_language_detection():
-    languagetools.perform_language_detection()
-
 action = QAction("Language Tools: Run Language Detection", mw)
-action.triggered.connect(run_language_detection)
+action.triggered.connect(languagetools.perform_language_detection)
+mw.form.menuTools.addAction(action)
+
+action = QAction("Language Tools: About", mw)
+action.triggered.connect(languagetools.show_about)
 mw.form.menuTools.addAction(action)
 
 
