@@ -51,10 +51,7 @@ class LanguageTools():
                 detected_language = data['detected_language']
 
                 self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
-
-                # store result
-
-                # print(data)
+                
 
     def store_language_detection_result(self, note_type_name, deck_name, field_name, language):
         if 'deck_languages' not in self.config:
