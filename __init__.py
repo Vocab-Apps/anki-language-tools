@@ -32,6 +32,9 @@ class LanguageTools():
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
 
+        response = requests.get(self.base_url + '/transliteration_language_list')
+        self.transliteration_language_list = json.loads(response.content)
+
         if len(self.config[LanguageTools.CONFIG_WANTED_LANGUAGES]) == 0:
             # suggest running language detection
             result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
@@ -158,6 +161,20 @@ class LanguageTools():
         })
         data = json.loads(response.content)        
         return data
+    
+    def get_transliteration(self, source_text, service, transliteration_key):
+        response = requests.post(self.base_url + '/transliterate', json={
+                'text': source_text,
+                'service': service,
+                'transliteration_key': transliteration_key
+        })
+        data = json.loads(response.content)
+        return data['transliterated_text']
+
+    def get_transliteration_options(self, language):
+        candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]
+        return candidates
+
 
 
 languagetools = LanguageTools()
@@ -188,41 +205,73 @@ def show_translation(source_text, from_language, to_language):
     """
     aqt.utils.showInfo(text, title='Language Tools Translation', textFormat="rich")
 
+def show_transliteration(selected_text, service, transliteration_key):
+    result = languagetools.get_transliteration(selected_text, service, transliteration_key)
+    text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
+    aqt.utils.showInfo(text, title='Language Tools Transliteration', textFormat="rich")    
+
 def on_context_menu(web_view, menu):
+    # gather some information about the context from the editor
+    # =========================================================
+
     selected_text = web_view.selectedText()
     current_field_num = web_view.editor.currentField
+    if current_field_num == None:
+        # we don't have a field selected, don't do anything
+        return
     note = web_view.editor.note
+    if note == None:
+        # can't do anything without a note
+        return
     model_id = note.mid
     model = mw.col.models.get(model_id)
     field_name = model['flds'][current_field_num]['name']
     card = web_view.editor.card
-    if card != None:
-        deck_id = card.did
+    if card == None:
+        # we can't get the deck without a a card
+        return
 
-        language = languagetools.get_language(deck_id, model_id, field_name)
+    # all pre-requisites are met, proceed
+    # ===================================
 
-        source_text_max_length = 25
-        source_text = selected_text
-        if len(selected_text) > source_text_max_length:
-            source_text = selected_text[0:source_text_max_length]
+    deck_id = card.did
+    language = languagetools.get_language(deck_id, model_id, field_name)
 
-        menu_text = f'Language Tools: translate {source_text} from {languagetools.get_language_name(language)}'
-        
-        # source_text = 
-        submenu = QMenu(menu_text, menu)
+    source_text_max_length = 25
+    source_text = selected_text
+    if len(selected_text) > source_text_max_length:
+        source_text = selected_text[0:source_text_max_length]
 
-        # action1 = QAction()
-        wanted_languages = languagetools.get_wanted_languages()
-        for wanted_language in wanted_languages:
-            if wanted_language != language:
-                menu_text = f'To {languagetools.get_language_name(wanted_language)}'
-                def get_translate_lambda(selected_text, language, wanted_language):
-                    def translate():
-                        show_translation(selected_text, language, wanted_language)
-                    return translate
-                submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
+    # add translation options
+    # =======================
+    menu_text = f'Language Tools: translate from {languagetools.get_language_name(language)}'
+    submenu = QMenu(menu_text, menu)
+    wanted_languages = languagetools.get_wanted_languages()
+    for wanted_language in wanted_languages:
+        if wanted_language != language:
+            menu_text = f'To {languagetools.get_language_name(wanted_language)}'
+            def get_translate_lambda(selected_text, language, wanted_language):
+                def translate():
+                    show_translation(selected_text, language, wanted_language)
+                return translate
+            submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
+    menu.addMenu(submenu)
 
-        menu.addMenu(submenu)
+    # add transliteration options
+    # ===========================
+
+    menu_text = f'Language Tools: transliterate {languagetools.get_language_name(language)}'
+    submenu = QMenu(menu_text, menu)
+    transliteration_options = languagetools.get_transliteration_options(language)
+    for transliteration_option in transliteration_options:
+        menu_text = transliteration_option['transliteration_name']
+        def get_transliterate_lambda(selected_text, service, transliteration_key):
+            def transliterate():
+                show_transliteration(selected_text, service, transliteration_key)
+            return transliterate
+        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
+    menu.addMenu(submenu)
+
 
 anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
 
