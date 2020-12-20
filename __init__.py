@@ -39,6 +39,9 @@ class DeckNoteTypeField():
     def get_deck_name(self):
         return self.deck_note_type.deck_name
 
+    def __str__(self):
+        return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
+
 def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
     model = mw.col.models.get(model_id)
     model_name = model['name']
@@ -168,7 +171,7 @@ class LanguageTools():
         self.store_language_detection_result(deck_note_type_field, detected_language)
 
 
-    def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language):
+    def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language, tooltip=False):
         # write per-deck detected languages
         CONFIG_DECK_LANGUAGES = LanguageTools.CONFIG_DECK_LANGUAGES
         CONFIG_WANTED_LANGUAGES = LanguageTools.CONFIG_WANTED_LANGUAGES
@@ -191,6 +194,9 @@ class LanguageTools():
         self.config[CONFIG_WANTED_LANGUAGES][language] = True
 
         mw.addonManager.writeConfig(__name__, self.config)
+
+        if tooltip:
+            aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
 
     def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
@@ -261,7 +267,7 @@ def show_change_language(deck_note_type_field: DeckNoteTypeField):
     chosen_index = aqt.utils.chooseList(f'{MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', name_list, startrow=current_row)
 
     new_language = language_code_list[chosen_index]
-    languagetools.store_language_detection_result(deck_note_type_field, new_language)
+    languagetools.store_language_detection_result(deck_note_type_field, new_language, tooltip=True)
 
 
 def show_translation(source_text, from_language, to_language):
