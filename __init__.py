@@ -15,6 +15,8 @@ import anki.hooks
 
 from . import version
 
+ADDON_NAME = 'Language Tools'
+MENU_PREFIX = ADDON_NAME + ':'
 
 class LanguageTools():
     CONFIG_DECK_LANGUAGES = 'deck_languages'
@@ -98,29 +100,40 @@ class LanguageTools():
         label = f'Analyzing {deck.name} / {note_type.name}'
         mw.progress.update(label=label, value=step_num, max=step_max)
 
-        sample_size = 100
         # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
         query = f'did:{deck.id} mid:{note_type.id}'
         notes = mw.col.find_notes(query)
         if len(notes) > 0:  
-            # print(f'found {len(notes)} notes in {deck.name}, {note_type.name}')
-            if len(notes) < sample_size:
-                random_note_ids = notes
-            else:
-                random_note_ids = random.sample(notes, sample_size)
             model = mw.col.models.get(note_type.id)
             fields = model['flds']
             for field in fields:
                 field_name = field['name']
-                # print(f'  field: {field_name}, performing detection')
-                field_sample = [mw.col.getNote(x)[field_name] for x in random_note_ids]
-                response = requests.post(self.base_url + '/detect', json={
-                        'text_list': field_sample
-                })
-                data = json.loads(response.content)
-                detected_language = data['detected_language']
+                self.perform_language_detection_deck_note_type_field(deck, note_type, field_name, notes)
 
-                self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
+
+
+    def perform_language_detection_deck_note_type_field(self, deck, note_type, field_name, notes):
+        # retain notes which have a non-empty field
+        sample_size = 100
+
+        all_field_values = [mw.col.getNote(x)[field_name] for x in notes]
+        non_empty_fields = [x for x in all_field_values if len(x) > 0]
+
+        if len(non_empty_fields) == 0:
+            # no data to perform detection on
+            return
+        
+        if len(non_empty_fields) < sample_size:
+            field_sample = non_empty_fields
+        else:
+            field_sample = random.sample(non_empty_fields, sample_size)
+        response = requests.post(self.base_url + '/detect', json={
+                'text_list': field_sample
+        })
+        data = json.loads(response.content)
+        detected_language = data['detected_language']
+
+        self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
 
 
     def store_language_detection_result(self, note_type_name, deck_name, field_name, language):
@@ -236,8 +249,20 @@ def on_context_menu(web_view, menu):
     if language == None:
         return
 
-    # all pre-requisites are met, proceed
-    # ===================================
+    # show information about the field 
+    # ================================
+
+    menu_text = f'{MENU_PREFIX} language: {languagetools.get_language_name(language)}'
+    submenu = QMenu(menu_text, menu)
+    menu.addMenu(submenu)
+
+    # all pre-requisites for translation/transliteration are met, proceed
+    # ===================================================================
+
+    # check whether there is any text selected
+    if len(selected_text) == 0:
+        # can't show translation/transliteration options
+        return
 
     source_text_max_length = 25
     source_text = selected_text
@@ -246,7 +271,7 @@ def on_context_menu(web_view, menu):
 
     # add translation options
     # =======================
-    menu_text = f'Language Tools: translate from {languagetools.get_language_name(language)}'
+    menu_text = f'{MENU_PREFIX} translate from {languagetools.get_language_name(language)}'
     submenu = QMenu(menu_text, menu)
     wanted_languages = languagetools.get_wanted_languages()
     for wanted_language in wanted_languages:
@@ -262,7 +287,7 @@ def on_context_menu(web_view, menu):
     # add transliteration options
     # ===========================
 
-    menu_text = f'Language Tools: transliterate {languagetools.get_language_name(language)}'
+    menu_text = f'{MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
     submenu = QMenu(menu_text, menu)
     transliteration_options = languagetools.get_transliteration_options(language)
     for transliteration_option in transliteration_options:
