@@ -143,12 +143,12 @@ class LanguageTools():
         mw.addonManager.writeConfig(__name__, self.config)
 
     def get_language(self, deck_id, model_id, field_name):
+        """will return None if no language is associated with this field"""
         model = mw.col.models.get(model_id)
         model_name = model['name']
         deck = mw.col.decks.get(deck_id)
         deck_name = deck['name']
-        # print(f'model_name {model_name} deck_name {deck_name} field_name {field_name}')
-        return self.config[LanguageTools.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name]
+        return self.config.get(LanguageTools.CONFIG_DECK_LANGUAGES, {}).get(model_name, {}).get(deck_name, {}).get(field_name, None)
 
     def get_wanted_languages(self):
         return self.config[LanguageTools.CONFIG_WANTED_LANGUAGES].keys()
@@ -231,11 +231,13 @@ def on_context_menu(web_view, menu):
         # we can't get the deck without a a card
         return
 
-    # all pre-requisites are met, proceed
-    # ===================================
-
     deck_id = card.did
     language = languagetools.get_language(deck_id, model_id, field_name)
+    if language == None:
+        return
+
+    # all pre-requisites are met, proceed
+    # ===================================
 
     source_text_max_length = 25
     source_text = selected_text
