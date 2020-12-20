@@ -78,8 +78,8 @@ class LanguageTools():
                 self.perform_language_detection()
 
     def show_about(self):
-        text = f'Language Tools v{version.ANKI_LANGUAGE_TOOLS_VERSION}'
-        aqt.utils.showInfo(text, title='Language Tools')
+        text = f'{ADDON_NAME}: v{version.ANKI_LANGUAGE_TOOLS_VERSION}'
+        aqt.utils.showInfo(text, title=ADDON_NAME)
 
     def get_language_name(self, language):
         return self.language_list[language]
@@ -111,7 +111,7 @@ class LanguageTools():
             entry = f'<b>{self.get_language_name(key)}</b><br/>'
             languages_found += entry
         text = f'Found the following languages:<br/>{languages_found}'
-        aqt.utils.showInfo(text, title='Language Tools Detection', textFormat="rich")
+        aqt.utils.showInfo(text, title=f'{MENU_PREFIX} Detection', textFormat="rich")
 
                 
     def get_populated_deck_models(self) -> List[DeckNoteType]:
@@ -149,7 +149,7 @@ class LanguageTools():
                 deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
                 result = self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
                 if result != None:
-                    self.store_language_detection_result(deck_note_type_field, detected_language)
+                    self.store_language_detection_result(deck_note_type_field, result)
 
     def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField, notes):
         # retain notes which have a non-empty field
@@ -244,11 +244,11 @@ languagetools = LanguageTools()
 
 # add menu items
 
-action = QAction("Language Tools: Run Language Detection", mw)
+action = QAction(f"{MENU_PREFIX} Run Language Detection", mw)
 action.triggered.connect(languagetools.perform_language_detection)
 mw.form.menuTools.addAction(action)
 
-action = QAction("Language Tools: About", mw)
+action = QAction(f"{MENU_PREFIX} About", mw)
 action.triggered.connect(languagetools.show_about)
 mw.form.menuTools.addAction(action)
 
@@ -289,12 +289,12 @@ def show_translation(source_text, from_language, to_language):
     text = f"""Translation of <i>{source_text}</i> from {languagetools.get_language_name(from_language)} to {languagetools.get_language_name(to_language)}<br/>
         {translations}
     """
-    aqt.utils.showInfo(text, title='Language Tools Translation', textFormat="rich")
+    aqt.utils.showInfo(text, title=f'{MENU_PREFIX} Translation', textFormat="rich")
 
 def show_transliteration(selected_text, service, transliteration_key):
     result = languagetools.get_transliteration(selected_text, service, transliteration_key)
     text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
-    aqt.utils.showInfo(text, title='Language Tools Transliteration', textFormat="rich")    
+    aqt.utils.showInfo(text, title=f'{MENU_PREFIX} Transliteration', textFormat="rich")
 
 def on_context_menu(web_view, menu):
     # gather some information about the context from the editor
