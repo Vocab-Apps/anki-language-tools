@@ -1,4 +1,6 @@
 {
     "deck_languages": {},
-    "wanted_languages": {}
+    "wanted_languages": {
+        "en": true
+    }
 }

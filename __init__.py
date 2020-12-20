@@ -19,6 +19,7 @@ from . import version
 
 ADDON_NAME = 'Language Tools'
 MENU_PREFIX = ADDON_NAME + ':'
+DEFAULT_LANGUAGE = 'en' # always add this language, even if the user didn't add it themselves
 
 # util functions
 class DeckNoteType():
@@ -129,23 +130,26 @@ class LanguageTools():
 
         return result
 
+    def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType):
+        query = f'did:{deck_note_type.deck_id} mid:{deck_note_type.model_id}'
+        notes = mw.col.find_notes(query)
+        return notes
         
     def perform_language_detection_deck_note_type(self, deck_note_type: DeckNoteType, step_num, step_max):
         label = f'Analyzing {deck_note_type.deck_name} / {deck_note_type.model_name}'
         mw.progress.update(label=label, value=step_num, max=step_max)
 
         # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
-        query = f'did:{deck_note_type.deck_id} mid:{deck_note_type.model_id}'
-        notes = mw.col.find_notes(query)
+        notes = self.get_notes_for_deck_note_type(deck_note_type)
         if len(notes) > 0:  
             model = mw.col.models.get(deck_note_type.model_id)
             fields = model['flds']
             for field in fields:
                 field_name = field['name']
                 deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
-                self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
-
-
+                result = self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
+                if result != None:
+                    self.store_language_detection_result(deck_note_type_field, detected_language)
 
     def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField, notes):
         # retain notes which have a non-empty field
@@ -156,7 +160,7 @@ class LanguageTools():
 
         if len(non_empty_fields) == 0:
             # no data to perform detection on
-            return
+            return None
         
         if len(non_empty_fields) < sample_size:
             field_sample = non_empty_fields
@@ -168,8 +172,12 @@ class LanguageTools():
         data = json.loads(response.content)
         detected_language = data['detected_language']
 
-        self.store_language_detection_result(deck_note_type_field, detected_language)
+        return detected_language
 
+    def guess_language(self, deck_note_type_field: DeckNoteTypeField):
+        # retrieve notes
+        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
+        return self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
 
     def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language, tooltip=False):
         # write per-deck detected languages
@@ -252,7 +260,7 @@ def show_change_language(deck_note_type_field: DeckNoteTypeField):
 
     if current_language == None:
         # perform detection
-        pass
+        current_language = languagetools.guess_language(deck_note_type_field)
 
     language_dict = languagetools.get_all_languages()
     language_list = []
