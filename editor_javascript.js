@@ -14,3 +14,11 @@ function add_inline_fields() {
         }
     }
 }
+
+function add_inline_field(field_id) {
+    var div_id = 'f' + field_id;
+    $field_div = $("#" + div_id);
+    $tr_element = $field_div.parent().parent();
+    $("<tr><td><span>yo4</span></td></tr>").insertAfter($tr_element);
+    // $tr_element.insertAfter('<tr><td><span>yo4</span></td></tr>');
+}

@@ -16,11 +16,11 @@ def init(languagetools):
             return
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
         javascript_path = f"/_addons/{addon_package}/editor_javascript.js"
-        print(f'javascript_path: {javascript_path}')
         web_content.js.insert(0,  javascript_path)
 
     def loadNote(self):
-        self.web.eval('add_inline_fields()')
+        # self.web.eval('add_inline_fields()')
+        self.web.eval('add_inline_field(0)')
         # self.web.eval(f"""set_html_src_fields()""")
         # flds = self.note.model()["flds"]
         # srcs = [fld.get("src remembered", False) for fld in flds]
