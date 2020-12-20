@@ -243,61 +243,71 @@ def on_context_menu(web_view, menu):
     if card == None:
         # we can't get the deck without a a card
         return
-
     deck_id = card.did
+
     language = languagetools.get_language(deck_id, model_id, field_name)
-    if language == None:
-        return
+
+
+
+    # check whether a language is set
+    # ===============================
+
+    if language != None:
+        # all pre-requisites for translation/transliteration are met, proceed
+        # ===================================================================
+
+        if len(selected_text) > 0:
+            source_text_max_length = 25
+            source_text = selected_text
+            if len(selected_text) > source_text_max_length:
+                source_text = selected_text[0:source_text_max_length]
+
+            # add translation options
+            # =======================
+            menu_text = f'{MENU_PREFIX} translate from {languagetools.get_language_name(language)}'
+            submenu = QMenu(menu_text, menu)
+            wanted_languages = languagetools.get_wanted_languages()
+            for wanted_language in wanted_languages:
+                if wanted_language != language:
+                    menu_text = f'To {languagetools.get_language_name(wanted_language)}'
+                    def get_translate_lambda(selected_text, language, wanted_language):
+                        def translate():
+                            show_translation(selected_text, language, wanted_language)
+                        return translate
+                    submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
+            menu.addMenu(submenu)
+
+            # add transliteration options
+            # ===========================
+
+            menu_text = f'{MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
+            submenu = QMenu(menu_text, menu)
+            transliteration_options = languagetools.get_transliteration_options(language)
+            for transliteration_option in transliteration_options:
+                menu_text = transliteration_option['transliteration_name']
+                def get_transliterate_lambda(selected_text, service, transliteration_key):
+                    def transliterate():
+                        show_transliteration(selected_text, service, transliteration_key)
+                    return transliterate
+                submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
+            menu.addMenu(submenu)
 
     # show information about the field 
     # ================================
 
-    menu_text = f'{MENU_PREFIX} language: {languagetools.get_language_name(language)}'
+    if language == None:
+        menu_text = f'{MENU_PREFIX} No language set'
+    else:
+        menu_text = f'{MENU_PREFIX} language: {languagetools.get_language_name(language)}'
     submenu = QMenu(menu_text, menu)
-    menu.addMenu(submenu)
-
-    # all pre-requisites for translation/transliteration are met, proceed
-    # ===================================================================
-
-    # check whether there is any text selected
-    if len(selected_text) == 0:
-        # can't show translation/transliteration options
-        return
-
-    source_text_max_length = 25
-    source_text = selected_text
-    if len(selected_text) > source_text_max_length:
-        source_text = selected_text[0:source_text_max_length]
-
-    # add translation options
-    # =======================
-    menu_text = f'{MENU_PREFIX} translate from {languagetools.get_language_name(language)}'
-    submenu = QMenu(menu_text, menu)
-    wanted_languages = languagetools.get_wanted_languages()
-    for wanted_language in wanted_languages:
-        if wanted_language != language:
-            menu_text = f'To {languagetools.get_language_name(wanted_language)}'
-            def get_translate_lambda(selected_text, language, wanted_language):
-                def translate():
-                    show_translation(selected_text, language, wanted_language)
-                return translate
-            submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
-    menu.addMenu(submenu)
-
-    # add transliteration options
-    # ===========================
-
-    menu_text = f'{MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
-    submenu = QMenu(menu_text, menu)
-    transliteration_options = languagetools.get_transliteration_options(language)
-    for transliteration_option in transliteration_options:
-        menu_text = transliteration_option['transliteration_name']
-        def get_transliterate_lambda(selected_text, service, transliteration_key):
-            def transliterate():
-                show_transliteration(selected_text, service, transliteration_key)
-            return transliterate
-        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
-    menu.addMenu(submenu)
+    # add change language option
+    menu_text = f'Change Language'
+    def get_change_language_lambda():
+        def translate():
+            show_translation(selected_text, language, wanted_language)
+        return translate
+    submenu.addAction(menu_text, get_change_language_lambda())
+    menu.addMenu(submenu)        
 
 
 anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
