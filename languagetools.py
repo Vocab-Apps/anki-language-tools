@@ -34,12 +34,16 @@ class DeckNoteTypeField():
     def __str__(self):
         return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
 
-def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
+def build_deck_note_type(deck_id, model_id) -> DeckNoteType:
     model = aqt.mw.col.models.get(model_id)
     model_name = model['name']
     deck = aqt.mw.col.decks.get(deck_id)
     deck_name = deck['name']
     deck_note_type = DeckNoteType(deck_id, deck_name, model_id, model_name)
+    return deck_note_type
+
+def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
+    deck_note_type = build_deck_note_type(deck_id, model_id)
     return DeckNoteTypeField(deck_note_type, field_name)
 
 
@@ -208,6 +212,12 @@ class LanguageTools():
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
         aqt.utils.tooltip(f'Add Inline Translation on {deck_note_type_field} to {self.get_language_name(target_language)}')
+
+    def get_inline_translations(self, deck_note_type: DeckNoteType):
+        model_name = deck_note_type.model_name
+        deck_name = deck_note_type.deck_name
+
+        return self.config.get(constants.CONFIG_INLINE_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
 
     def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
