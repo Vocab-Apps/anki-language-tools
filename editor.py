@@ -7,6 +7,16 @@ import aqt.gui_hooks
 import aqt.editor
 import aqt.webview
 
+# addon imports
+from .languagetools import DeckNoteTypeField
+
+
+def apply_inline_translation_changes(editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, target_language):
+    model = aqt.mw.col.models.get(deck_note_type_field.deck_note_type.model_id)
+    fields = model['flds']
+    field_names = [x['name'] for x in fields]
+    field_index = field_names.index(deck_note_type_field.field_name)
+    editor.web.eval(f'add_inline_field({field_index})')    
 
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
@@ -18,9 +28,13 @@ def init(languagetools):
         javascript_path = f"/_addons/{addon_package}/editor_javascript.js"
         web_content.js.insert(0,  javascript_path)
 
-    def loadNote(self):
+    def loadNote(editor: aqt.editor.Editor):
+        pass
         # self.web.eval('add_inline_fields()')
-        self.web.eval('add_inline_field(0)')
+        # editor.web.eval('add_inline_field(0)')
+
+        # load inline translation using self.mw.taskman.run_in_background(self._check, self._on_finished)
+        
         # self.web.eval(f"""set_html_src_fields()""")
         # flds = self.note.model()["flds"]
         # srcs = [fld.get("src remembered", False) for fld in flds]

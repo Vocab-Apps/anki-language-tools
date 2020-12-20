@@ -5,6 +5,7 @@ import anki.hooks
 
 # addon imports
 from . import constants
+from . import editor
 from .languagetools import DeckNoteTypeField, build_deck_note_type_field
 
 def init(languagetools):
@@ -26,7 +27,10 @@ def init(languagetools):
         language_list = sorted(language_list, key=lambda x: x['name'])
         language_code_list = [x['key'] for x in language_list]
         # locate current language
-        current_row = language_code_list.index(current_language)
+        if current_language == None:
+            current_row = 0
+        else:
+            current_row = language_code_list.index(current_language)
         name_list = [x['name'] for x in language_list]
         chosen_index = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', name_list, startrow=current_row)
 
@@ -52,12 +56,19 @@ def init(languagetools):
         text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Transliteration', textFormat="rich")
 
+    def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: DeckNoteTypeField):
+        # determine the ranking of this field in the note type
+        languagetools.add_inline_translation(deck_note_type_field, target_language)
+        editor.apply_inline_translation_changes(note_editor, deck_note_type_field, target_language)
+
     def on_context_menu(web_view, menu):
         # gather some information about the context from the editor
         # =========================================================
 
+        editor: aqt.editor.Editor = web_view.editor
+
         selected_text = web_view.selectedText()
-        current_field_num = web_view.editor.currentField
+        current_field_num = editor.currentField
         if current_field_num == None:
             # we don't have a field selected, don't do anything
             return
@@ -83,6 +94,8 @@ def init(languagetools):
         if language != None:
             # all pre-requisites for translation/transliteration are met, proceed
             # ===================================================================
+
+            # these options require text to be selected
 
             if len(selected_text) > 0:
                 source_text_max_length = 25
@@ -120,6 +133,23 @@ def init(languagetools):
                     submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
                 menu.addMenu(submenu)
 
+            # these options don't require text to be selected
+
+            # add inline translation options
+            # ==============================
+            menu_text = f'{constants.MENU_PREFIX} Add Inline Translation'
+            submenu = aqt.qt.QMenu(menu_text, menu)
+            wanted_languages = languagetools.get_wanted_languages()
+            for wanted_language in wanted_languages:
+                if wanted_language != language:
+                    menu_text = f'To {languagetools.get_language_name(wanted_language)}'
+                    def get_add_inline_translation_lambda(editor, source_language, target_language, deck_note_type_field):
+                        def add_inline_translation_fn():
+                            add_inline_translation(editor, source_language, target_language, deck_note_type_field)
+                        return add_inline_translation_fn                    
+                    submenu.addAction(menu_text, get_add_inline_translation_lambda(editor, language, wanted_language, deck_note_type_field))
+            menu.addMenu(submenu)                
+
         # show information about the field 
         # ================================
 
@@ -128,6 +158,7 @@ def init(languagetools):
         else:
             menu_text = f'{constants.MENU_PREFIX} language: {languagetools.get_language_name(language)}'
         submenu = aqt.qt.QMenu(menu_text, menu)
+
         # add change language option
         menu_text = f'Change Language'
         def get_change_language_lambda(deck_note_type_field):
@@ -135,7 +166,8 @@ def init(languagetools):
                 show_change_language(deck_note_type_field)
             return change_language
         submenu.addAction(menu_text, get_change_language_lambda(deck_note_type_field))
-        menu.addMenu(submenu)        
+
+        menu.addMenu(submenu)
 
     # add menu items
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Run Language Detection", aqt.mw)

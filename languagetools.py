@@ -192,6 +192,23 @@ class LanguageTools():
         if tooltip:
             aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
 
+    def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, target_language):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
+
+        if constants.CONFIG_INLINE_TRANSLATION not in self.config:
+            self.config[constants.CONFIG_INLINE_TRANSLATION] = {}
+        if model_name not in self.config[constants.CONFIG_INLINE_TRANSLATION]:
+            self.config[constants.CONFIG_INLINE_TRANSLATION][model_name] = {}
+        if deck_name not in self.config[constants.CONFIG_INLINE_TRANSLATION][model_name]:
+            self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name] = {}
+        self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name][field_name] = target_language
+
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+        aqt.utils.tooltip(f'Add Inline Translation on {deck_note_type_field} to {self.get_language_name(target_language)}')
+
     def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
         model_name = deck_note_type_field.get_model_name()
