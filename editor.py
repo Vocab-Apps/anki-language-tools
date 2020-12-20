@@ -9,14 +9,18 @@ import aqt.webview
 
 
 def init(languagetools):
+    aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
+
     def on_webview_will_set_content(web_content: aqt.webview.WebContent, context):
         if not isinstance(context, aqt.editor.Editor):
             return
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
-        web_content.js.insert(0,  f"/_addons/{addon_package}/editor_javascript.js")
+        javascript_path = f"/_addons/{addon_package}/editor_javascript.js"
+        print(f'javascript_path: {javascript_path}')
+        web_content.js.insert(0,  javascript_path)
 
     def loadNote(self):
-        pass
+        self.web.eval('add_inline_fields()')
         # self.web.eval(f"""set_html_src_fields()""")
         # flds = self.note.model()["flds"]
         # srcs = [fld.get("src remembered", False) for fld in flds]
