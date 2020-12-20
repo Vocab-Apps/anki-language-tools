@@ -184,7 +184,7 @@ class LanguageTools():
             self.config[CONFIG_DECK_LANGUAGES] = {}
         if model_name not in self.config[CONFIG_DECK_LANGUAGES]:
             self.config[CONFIG_DECK_LANGUAGES][model_name] = {}
-        if deck_name not in self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name]:
+        if deck_name not in self.config[CONFIG_DECK_LANGUAGES][model_name]:
             self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name] = {}
         self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name] = language
 
