@@ -13,10 +13,40 @@ import os
 import aqt.gui_hooks
 import anki.hooks
 
+from typing import List
+
 from . import version
 
 ADDON_NAME = 'Language Tools'
 MENU_PREFIX = ADDON_NAME + ':'
+
+# util functions
+class DeckNoteType():
+    def __init__(self, deck_id, deck_name, model_id, model_name):
+        self.deck_id = deck_id
+        self.deck_name = deck_name
+        self.model_id = model_id 
+        self.model_name = model_name
+
+class DeckNoteTypeField():
+    def __init__(self, deck_note_type, field_name):
+        self.deck_note_type = deck_note_type
+        self.field_name = field_name
+
+    def get_model_name(self):
+        return self.deck_note_type.model_name
+
+    def get_deck_name(self):
+        return self.deck_note_type.deck_name
+
+def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
+    model = mw.col.models.get(model_id)
+    model_name = model['name']
+    deck = mw.col.decks.get(deck_id)
+    deck_name = deck['name']
+    deck_note_type = DeckNoteType(deck_id, deck_name, model_id, model_name)
+    return DeckNoteTypeField(deck_note_type, field_name)
+
 
 class LanguageTools():
     CONFIG_DECK_LANGUAGES = 'deck_languages'
@@ -50,6 +80,9 @@ class LanguageTools():
     def get_language_name(self, language):
         return self.language_list[language]
 
+    def get_all_languages(self):
+        return self.language_list
+
     def perform_language_detection(self):
         # print('perform_language_detection')
         mw.progress.start(max=100, min=0, label='language detection', immediate=True)
@@ -60,10 +93,8 @@ class LanguageTools():
         mw.progress.update(label='Processing Decks', value=2, max=step_max)
 
         i=0
-        for entry in populated_deck_models:
-            deck_entry = entry['deck']
-            note_type_entry = entry['model']
-            self.perform_language_detection_deck_note_type(deck_entry, note_type_entry, i, step_max)
+        for deck_note_type in populated_deck_models:
+            self.perform_language_detection_deck_note_type(deck_note_type, i, step_max)
             i += 1
 
         mw.progress.finish()
@@ -79,11 +110,11 @@ class LanguageTools():
         aqt.utils.showInfo(text, title='Language Tools Detection', textFormat="rich")
 
                 
-    def get_populated_deck_models(self):
+    def get_populated_deck_models(self) -> List[DeckNoteType]:
         deck_list = mw.col.decks.all_names_and_ids()
         note_types = mw.col.models.all_names_and_ids()
 
-        result = []
+        result: List[DeckNoteType] = []
 
         for deck_entry in deck_list:
             for note_type_entry in note_types:
@@ -91,32 +122,33 @@ class LanguageTools():
                 notes = mw.col.find_notes(query)
 
                 if len(notes) > 0:
-                    result.append({'deck': deck_entry, 'model': note_type_entry})
+                    result.append(DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name))
 
         return result
 
         
-    def perform_language_detection_deck_note_type(self, deck, note_type, step_num, step_max):
-        label = f'Analyzing {deck.name} / {note_type.name}'
+    def perform_language_detection_deck_note_type(self, deck_note_type: DeckNoteType, step_num, step_max):
+        label = f'Analyzing {deck_note_type.deck_name} / {deck_note_type.model_name}'
         mw.progress.update(label=label, value=step_num, max=step_max)
 
         # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
-        query = f'did:{deck.id} mid:{note_type.id}'
+        query = f'did:{deck_note_type.deck_id} mid:{deck_note_type.model_id}'
         notes = mw.col.find_notes(query)
         if len(notes) > 0:  
-            model = mw.col.models.get(note_type.id)
+            model = mw.col.models.get(deck_note_type.model_id)
             fields = model['flds']
             for field in fields:
                 field_name = field['name']
-                self.perform_language_detection_deck_note_type_field(deck, note_type, field_name, notes)
+                deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+                self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
 
 
 
-    def perform_language_detection_deck_note_type_field(self, deck, note_type, field_name, notes):
+    def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField, notes):
         # retain notes which have a non-empty field
         sample_size = 100
 
-        all_field_values = [mw.col.getNote(x)[field_name] for x in notes]
+        all_field_values = [mw.col.getNote(x)[deck_note_type_field.field_name] for x in notes]
         non_empty_fields = [x for x in all_field_values if len(x) > 0]
 
         if len(non_empty_fields) == 0:
@@ -133,20 +165,25 @@ class LanguageTools():
         data = json.loads(response.content)
         detected_language = data['detected_language']
 
-        self.store_language_detection_result(note_type.name, deck.name, field_name, detected_language)
+        self.store_language_detection_result(deck_note_type_field, detected_language)
 
 
-    def store_language_detection_result(self, note_type_name, deck_name, field_name, language):
+    def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language):
         # write per-deck detected languages
         CONFIG_DECK_LANGUAGES = LanguageTools.CONFIG_DECK_LANGUAGES
         CONFIG_WANTED_LANGUAGES = LanguageTools.CONFIG_WANTED_LANGUAGES
+
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
+
         if CONFIG_DECK_LANGUAGES not in self.config:
             self.config[CONFIG_DECK_LANGUAGES] = {}
-        if note_type_name not in self.config[CONFIG_DECK_LANGUAGES]:
-            self.config[CONFIG_DECK_LANGUAGES][note_type_name] = {}
-        if deck_name not in self.config[CONFIG_DECK_LANGUAGES][note_type_name]:
-            self.config[CONFIG_DECK_LANGUAGES][note_type_name][deck_name] = {}
-        self.config[CONFIG_DECK_LANGUAGES][note_type_name][deck_name][field_name] = language
+        if model_name not in self.config[CONFIG_DECK_LANGUAGES]:
+            self.config[CONFIG_DECK_LANGUAGES][model_name] = {}
+        if deck_name not in self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name]:
+            self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name] = {}
+        self.config[CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name] = language
 
         # store the languages we're interested in
         if CONFIG_WANTED_LANGUAGES not in self.config:
@@ -155,12 +192,11 @@ class LanguageTools():
 
         mw.addonManager.writeConfig(__name__, self.config)
 
-    def get_language(self, deck_id, model_id, field_name):
+    def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
-        model = mw.col.models.get(model_id)
-        model_name = model['name']
-        deck = mw.col.decks.get(deck_id)
-        deck_name = deck['name']
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
         return self.config.get(LanguageTools.CONFIG_DECK_LANGUAGES, {}).get(model_name, {}).get(deck_name, {}).get(field_name, None)
 
     def get_wanted_languages(self):
@@ -205,6 +241,29 @@ mw.form.menuTools.addAction(action)
 
 # add context menu handler
 
+def show_change_language(deck_note_type_field: DeckNoteTypeField):
+    current_language = languagetools.get_language(deck_note_type_field)
+
+    if current_language == None:
+        # perform detection
+        pass
+
+    language_dict = languagetools.get_all_languages()
+    language_list = []
+    for key, name in language_dict.items():
+        language_list.append({'key': key, 'name': name})
+    # sort by language name
+    language_list = sorted(language_list, key=lambda x: x['name'])
+    language_code_list = [x['key'] for x in language_list]
+    # locate current language
+    current_row = language_code_list.index(current_language)
+    name_list = [x['name'] for x in language_list]
+    chosen_index = aqt.utils.chooseList(f'{MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', name_list, startrow=current_row)
+
+    new_language = language_code_list[chosen_index]
+    languagetools.store_language_detection_result(deck_note_type_field, new_language)
+
+
 def show_translation(source_text, from_language, to_language):
     # print(f'translate {source_text} from {from_language} to {to_language}')
     result = languagetools.get_translation(source_text, from_language, to_language)
@@ -245,9 +304,8 @@ def on_context_menu(web_view, menu):
         return
     deck_id = card.did
 
-    language = languagetools.get_language(deck_id, model_id, field_name)
-
-
+    deck_note_type_field = build_deck_note_type_field(deck_id, model_id, field_name)
+    language = languagetools.get_language(deck_note_type_field)
 
     # check whether a language is set
     # ===============================
@@ -302,11 +360,11 @@ def on_context_menu(web_view, menu):
     submenu = QMenu(menu_text, menu)
     # add change language option
     menu_text = f'Change Language'
-    def get_change_language_lambda():
-        def translate():
-            show_translation(selected_text, language, wanted_language)
-        return translate
-    submenu.addAction(menu_text, get_change_language_lambda())
+    def get_change_language_lambda(deck_note_type_field):
+        def change_language():
+            show_change_language(deck_note_type_field)
+        return change_language
+    submenu.addAction(menu_text, get_change_language_lambda(deck_note_type_field))
     menu.addMenu(submenu)        
 
 
