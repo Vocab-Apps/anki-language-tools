@@ -2,5 +2,6 @@
     "deck_languages": {},
     "wanted_languages": {
         "en": true
-    }
+    },
+    "inline_translations": {}
 }
