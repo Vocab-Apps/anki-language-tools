@@ -77,16 +77,6 @@ def init(languagetools):
             deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
             apply_inline_translation_changes(languagetools, editor, deck_note_type_field, target_language)
 
-        # self.web.eval('add_inline_fields()')
-        # editor.web.eval('add_inline_field(0)')
-
-        # load inline translation using self.mw.taskman.run_in_background(self._check, self._on_finished)
-        
-        # self.web.eval(f"""set_html_src_fields()""")
-        # flds = self.note.model()["flds"]
-        # srcs = [fld.get("src remembered", False) for fld in flds]
-        # self.web.eval(f"set_src_fields({json.dumps(srcs)});")
-
     def onBridge(handled, str, editor):
         return handled # don't do anything for now
 
