@@ -3,9 +3,9 @@ function add_inline_field(field_type, field_id, header_text) {
     $field_div = $("#" + div_id);
     $tr_element = $field_div.parent().parent();
     var row_id = 'row_'+field_type+field_id;
-    $(`<tr id="${row_id}">
-        <td width=100%>
-            <b>${header_text}</b>: <span id="${field_type}${field_id}">translation loading...</span>
+    $(`<tr id="${row_id}"  >
+        <td width=100% style='padding-bottom: 10px;'>
+            <i>${header_text}</i>: <span id="${field_type}${field_id}">translation loading...</span>
         </td>
       </tr>`).insertAfter($tr_element);
 }
