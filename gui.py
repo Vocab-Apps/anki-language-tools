@@ -59,7 +59,7 @@ def init(languagetools):
     def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: DeckNoteTypeField):
         # determine the ranking of this field in the note type
         languagetools.add_inline_translation(deck_note_type_field, target_language)
-        editor.apply_inline_translation_changes(note_editor, deck_note_type_field, target_language)
+        editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, target_language)
 
     def on_context_menu(web_view, menu):
         # gather some information about the context from the editor
