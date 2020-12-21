@@ -8,6 +8,7 @@ from typing import List
 # anki imports
 import aqt
 import aqt.progress
+import anki.notes
 
 from . import constants
 from . import version
@@ -33,6 +34,14 @@ class DeckNoteTypeField():
 
     def __str__(self):
         return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
+
+def build_deck_note_type_from_note(note: anki.notes.Note) -> DeckNoteType:
+    model_id = note.mid
+    deck_id = note.model()["did"]
+
+    deck_note_type = build_deck_note_type(deck_id, model_id)
+
+    return deck_note_type
 
 def build_deck_note_type(deck_id, model_id) -> DeckNoteType:
     model = aqt.mw.col.models.get(model_id)
@@ -268,3 +277,10 @@ class LanguageTools():
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]
         return candidates
+
+    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> DeckNoteTypeField:
+        model = aqt.mw.col.models.get(deck_note_type.model_id)
+        fields = model['flds']
+        field_name = fields[field_index]['name']
+        return DeckNoteTypeField(deck_note_type, field_name)
+

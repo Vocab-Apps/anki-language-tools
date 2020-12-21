@@ -7,10 +7,12 @@ import aqt
 import aqt.gui_hooks
 import aqt.editor
 import aqt.webview
+import anki.notes
 
 # addon imports
-from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type
+from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note
 from . import constants
+
 
 def get_field_id(deck_note_type_field: DeckNoteTypeField):
     model = aqt.mw.col.models.get(deck_note_type_field.deck_note_type.model_id)
@@ -28,12 +30,17 @@ def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.e
     field_index = get_field_id(deck_note_type_field)
     editor.web.eval(f"add_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, 'Translation')")
 
-    # now, we need to do the translation, asynchronously
-    # prepare lambdas
-
     note = editor.note
     field_value = note[deck_note_type_field.field_name]
+    load_inline_translation(languagetools, editor, field_value, deck_note_type_field, target_language)
+
+def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_value: str, deck_note_type_field: DeckNoteTypeField, target_language):
+    field_index = get_field_id(deck_note_type_field)
     source_language = languagetools.get_language(deck_note_type_field)
+
+    # now, we need to do the translation, asynchronously
+    # prepare lambdas
+    #     
     def get_request_translation_lambda(languagetools, field_value, source_language, target_language):
         def request_translation():
             return languagetools.get_translation(field_value, source_language, target_language)
@@ -42,6 +49,7 @@ def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.e
     def get_apply_translation_lambda(editor, field_index):
         def apply_translation(future_result):
             result_dict = future_result.result()
+            # print(f'received translation result: {result_dict}')
             final_str = ' / '.join(result_dict.values())
             js_command = f"""set_inline_field_value('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, "{final_str}")"""
             editor.web.eval(js_command)
@@ -49,8 +57,6 @@ def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.e
 
     aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, source_language, target_language), 
                                      get_apply_translation_lambda(editor, field_index))
-
-
 
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
@@ -64,12 +70,7 @@ def init(languagetools):
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
-
-        model_id = note.mid
-        card = editor.card
-        deck_id = card.did        
-
-        deck_note_type = build_deck_note_type(deck_id, model_id)
+        deck_note_type = build_deck_note_type_from_note(note)
 
         inline_translations = languagetools.get_inline_translations(deck_note_type)
 
@@ -78,24 +79,23 @@ def init(languagetools):
             apply_inline_translation_changes(languagetools, editor, deck_note_type_field, target_language)
 
     def onBridge(handled, str, editor):
-        return handled # don't do anything for now
-
-        """Extends the js<->py bridge with our pycmd handler"""
+        # return handled # don't do anything for now
         if not isinstance(editor, aqt.editor.Editor):
             return handled
-        elif not str.startswith("src remembered"):
-            return handled
-        elif not editor.note:
-            # shutdown
-            return handled
-        elif not getUserOption(keys="src remembered", default=False):
-            return handled
-        else:
-            (cmd, ord, to) = str.split(":", 2)
-            cur = int(ord)
-            flds = editor.note.model()['flds']
-            flds[cur]['src remembered'] = json.loads(to)
-        return (True, None)
+        if str.startswith("key:"):
+            (key_str, field_index_str, note_id_str, field_value) = str.split(':')
+            field_index = int(field_index_str)
+            note_id = int(note_id_str)
+            note = editor.note
+            deck_note_type = build_deck_note_type_from_note(note)
+            deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
+            # check whether we have inline translations on this deck_note_type
+            inline_translations = languagetools.get_inline_translations(deck_note_type)
+            if deck_note_type_field.field_name in inline_translations:
+                # found inline translation, we should update it
+                load_inline_translation(languagetools, editor, field_value, deck_note_type_field, inline_translations[deck_note_type_field.field_name])
+        return handled
+
 
     aqt.gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
     aqt.gui_hooks.editor_did_load_note.append(loadNote)
