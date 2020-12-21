@@ -12,12 +12,20 @@ import aqt.webview
 from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type
 from . import constants
 
-
-def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, target_language):
+def get_field_id(deck_note_type_field: DeckNoteTypeField):
     model = aqt.mw.col.models.get(deck_note_type_field.deck_note_type.model_id)
     fields = model['flds']
     field_names = [x['name'] for x in fields]
     field_index = field_names.index(deck_note_type_field.field_name)
+    return field_index    
+
+def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
+    field_index = get_field_id(deck_note_type_field)
+    js_command = f"remove_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index})"
+    editor.web.eval(js_command)
+
+def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, target_language):
+    field_index = get_field_id(deck_note_type_field)
     editor.web.eval(f"add_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, 'Translation')")
 
     # now, we need to do the translation, asynchronously

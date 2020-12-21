@@ -2,11 +2,17 @@ function add_inline_field(field_type, field_id, header_text) {
     var div_id = 'f' + field_id;
     $field_div = $("#" + div_id);
     $tr_element = $field_div.parent().parent();
-    $(`<tr>
+    var row_id = 'row_'+field_type+field_id;
+    $(`<tr id="${row_id}">
         <td width=100%>
             <b>${header_text}</b>: <span id="${field_type}${field_id}">translation loading...</span>
         </td>
       </tr>`).insertAfter($tr_element);
+}
+
+function remove_inline_field(field_type, field_id) {
+    var row_id = 'row_'+field_type+field_id;
+    $("#"+row_id).remove();
 }
 
 function set_inline_field_value(field_type, field_id, value) {

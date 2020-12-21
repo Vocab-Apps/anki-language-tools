@@ -219,6 +219,24 @@ class LanguageTools():
 
         return self.config.get(constants.CONFIG_INLINE_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
 
+    def remove_inline_translations(self, deck_note_type_field: DeckNoteTypeField):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
+
+        if constants.CONFIG_INLINE_TRANSLATION not in self.config:
+            return
+        if model_name not in self.config[constants.CONFIG_INLINE_TRANSLATION]:
+            return
+        if deck_name not in self.config[constants.CONFIG_INLINE_TRANSLATION][model_name]:
+            return
+        del self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name][field_name]
+
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+        aqt.utils.tooltip(f'Removed Inline Translation on {deck_note_type_field}')
+
+
     def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
         model_name = deck_note_type_field.get_model_name()

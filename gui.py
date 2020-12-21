@@ -61,6 +61,10 @@ def init(languagetools):
         languagetools.add_inline_translation(deck_note_type_field, target_language)
         editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, target_language)
 
+    def disable_inline_translation(note_editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
+        languagetools.remove_inline_translations(deck_note_type_field)
+        editor.remove_inline_translation_changes(languagetools, note_editor, deck_note_type_field)
+
     def on_context_menu(web_view, menu):
         # gather some information about the context from the editor
         # =========================================================
@@ -146,8 +150,16 @@ def init(languagetools):
                     def get_add_inline_translation_lambda(editor, source_language, target_language, deck_note_type_field):
                         def add_inline_translation_fn():
                             add_inline_translation(editor, source_language, target_language, deck_note_type_field)
-                        return add_inline_translation_fn                    
+                        return add_inline_translation_fn
                     submenu.addAction(menu_text, get_add_inline_translation_lambda(editor, language, wanted_language, deck_note_type_field))
+            # do we need to add a disable action ?
+            submenu.addSeparator()
+            menu_text = 'Disable'
+            def get_disable_inline_translation_lambda(editor, deck_note_type_field):
+                def disable_inline_translation_fn():
+                    disable_inline_translation(editor, deck_note_type_field)
+                return disable_inline_translation_fn
+            submenu.addAction(menu_text, get_disable_inline_translation_lambda(editor, deck_note_type_field))
             menu.addMenu(submenu)                
 
         # show information about the field 
