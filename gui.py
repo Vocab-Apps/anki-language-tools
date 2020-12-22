@@ -42,7 +42,7 @@ def init(languagetools):
 
     def show_translation(source_text, from_language, to_language):
         # print(f'translate {source_text} from {from_language} to {to_language}')
-        result = languagetools.get_translation(source_text, from_language, to_language)
+        result = languagetools.get_translation_all(source_text, from_language, to_language)
 
         translations = ''
         for key, value in result.items():

@@ -12,7 +12,7 @@ import anki.notes
 import anki.models
 
 # addon imports
-from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note
+from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card
 from . import constants
 
 
@@ -73,10 +73,15 @@ def init(languagetools):
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
-        deck_note_type = build_deck_note_type_from_note(note)
+        # can we get the card from the editor ?
+        if editor.card != None:
+            deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
+        else:
+            deck_note_type = build_deck_note_type_from_note(note)
         # print(f'loadNote, deck_note_type: {deck_note_type}')
 
         inline_translations = languagetools.get_inline_translations(deck_note_type)
+        # print(f'loadNote {deck_note_type} inline_translations: {inline_translations}')
 
         for field_name, target_language in inline_translations.items():
             deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)

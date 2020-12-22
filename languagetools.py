@@ -9,6 +9,7 @@ from typing import List
 import aqt
 import aqt.progress
 import anki.notes
+import anki.cards
 
 from . import constants
 from . import version
@@ -36,6 +37,12 @@ class DeckNoteTypeField():
 
     def __str__(self):
         return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
+
+def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
+    model_id = note.mid
+    deck_id = card.did
+    deck_note_type = build_deck_note_type(deck_id, model_id)
+    return deck_note_type
 
 def build_deck_note_type_from_note(note: anki.notes.Note) -> DeckNoteType:
     model_id = note.mid
@@ -77,7 +84,7 @@ class LanguageTools():
         response = requests.get(self.base_url + '/transliteration_language_list')
         self.transliteration_language_list = json.loads(response.content)
 
-        if len(self.config[constants.CONFIG_WANTED_LANGUAGES]) == 0:
+        if len(self.config[constants.CONFIG_DECK_LANGUAGES]) == 0:
             # suggest running language detection
             result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
             if result == True:
