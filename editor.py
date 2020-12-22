@@ -92,17 +92,19 @@ def init(languagetools):
         if not isinstance(editor, aqt.editor.Editor):
             return handled
         if str.startswith("key:"):
-            (key_str, field_index_str, note_id_str, field_value) = str.split(':')
-            field_index = int(field_index_str)
-            note_id = int(note_id_str)
-            note = editor.note
-            deck_note_type = build_deck_note_type_from_note(note)
-            deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
-            # check whether we have inline translations on this deck_note_type
-            inline_translations = languagetools.get_inline_translations(deck_note_type)
-            if deck_note_type_field.field_name in inline_translations:
-                # found inline translation, we should update it
-                load_inline_translation(languagetools, editor, field_value, deck_note_type_field, inline_translations[deck_note_type_field.field_name])
+            components = str.split(':')
+            if len(components) == 4:
+                (key_str, field_index_str, note_id_str, field_value) = components
+                field_index = int(field_index_str)
+                note_id = int(note_id_str)
+                note = editor.note
+                deck_note_type = build_deck_note_type_from_note(note)
+                deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
+                # check whether we have inline translations on this deck_note_type
+                inline_translations = languagetools.get_inline_translations(deck_note_type)
+                if deck_note_type_field.field_name in inline_translations:
+                    # found inline translation, we should update it
+                    load_inline_translation(languagetools, editor, field_value, deck_note_type_field, inline_translations[deck_note_type_field.field_name])
         return handled
 
 
