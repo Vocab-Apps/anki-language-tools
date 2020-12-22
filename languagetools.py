@@ -20,6 +20,8 @@ class DeckNoteType():
         self.deck_name = deck_name
         self.model_id = model_id 
         self.model_name = model_name
+    def __str__(self):
+        return f'{self.model_name} / {self.deck_name}'
 
 class DeckNoteTypeField():
     def __init__(self, deck_note_type, field_name):

@@ -9,6 +9,7 @@ import aqt.gui_hooks
 import aqt.editor
 import aqt.webview
 import anki.notes
+import anki.models
 
 # addon imports
 from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note
@@ -73,6 +74,7 @@ def init(languagetools):
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
         deck_note_type = build_deck_note_type_from_note(note)
+        # print(f'loadNote, deck_note_type: {deck_note_type}')
 
         inline_translations = languagetools.get_inline_translations(deck_note_type)
 
