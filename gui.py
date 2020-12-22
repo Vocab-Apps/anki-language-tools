@@ -135,17 +135,18 @@ def init(languagetools):
                 # add transliteration options
                 # ===========================
 
-                menu_text = f'{constants.MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
-                submenu = aqt.qt.QMenu(menu_text, menu)
                 transliteration_options = languagetools.get_transliteration_options(language)
-                for transliteration_option in transliteration_options:
-                    menu_text = transliteration_option['transliteration_name']
-                    def get_transliterate_lambda(selected_text, service, transliteration_key):
-                        def transliterate():
-                            show_transliteration(selected_text, service, transliteration_key)
-                        return transliterate
-                    submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
-                menu.addMenu(submenu)
+                if len(transliteration_options) > 0:
+                    menu_text = f'{constants.MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
+                    submenu = aqt.qt.QMenu(menu_text, menu)
+                    for transliteration_option in transliteration_options:
+                        menu_text = transliteration_option['transliteration_name']
+                        def get_transliterate_lambda(selected_text, service, transliteration_key):
+                            def transliterate():
+                                show_transliteration(selected_text, service, transliteration_key)
+                            return transliterate
+                        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
+                    menu.addMenu(submenu)
 
             # these options don't require text to be selected
 
