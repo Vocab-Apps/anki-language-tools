@@ -154,16 +154,15 @@ class LanguageTools():
 
         for deck_entry in deck_list:
             for note_type_entry in note_types:
-                query = f'did:{deck_entry.id} mid:{note_type_entry.id}'
-                notes = aqt.mw.col.find_notes(query)
-
+                deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
+                notes = self.get_notes_for_deck_note_type(deck_note_type)
                 if len(notes) > 0:
                     result.append(DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name))
 
         return result
 
     def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType):
-        query = f'did:{deck_note_type.deck_id} mid:{deck_note_type.model_id}'
+        query = f'deck:"{deck_note_type.deck_name}" note:"{deck_note_type.model_name}"'
         notes = aqt.mw.col.find_notes(query)
         return notes
         
