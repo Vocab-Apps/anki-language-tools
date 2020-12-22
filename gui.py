@@ -176,24 +176,34 @@ def init(languagetools):
             
             menu.addMenu(submenu)
 
-        # show information about the field 
-        # ================================
+        # was language detection run ?
+        # ============================
 
-        if language == None:
-            menu_text = f'{constants.MENU_PREFIX} No language set'
+        if languagetools.language_detection_done():
+
+            # show information about the field 
+            # ================================
+
+            if language == None:
+                menu_text = f'{constants.MENU_PREFIX} No language set'
+            else:
+                menu_text = f'{constants.MENU_PREFIX} language: {languagetools.get_language_name(language)}'
+            submenu = aqt.qt.QMenu(menu_text, menu)
+
+            # add change language option
+            menu_text = f'Change Language'
+            def get_change_language_lambda(deck_note_type_field):
+                def change_language():
+                    show_change_language(deck_note_type_field)
+                return change_language
+            submenu.addAction(menu_text, get_change_language_lambda(deck_note_type_field))
+
+            menu.addMenu(submenu)
+
         else:
-            menu_text = f'{constants.MENU_PREFIX} language: {languagetools.get_language_name(language)}'
-        submenu = aqt.qt.QMenu(menu_text, menu)
-
-        # add change language option
-        menu_text = f'Change Language'
-        def get_change_language_lambda(deck_note_type_field):
-            def change_language():
-                show_change_language(deck_note_type_field)
-            return change_language
-        submenu.addAction(menu_text, get_change_language_lambda(deck_note_type_field))
-
-        menu.addMenu(submenu)
+            # give user an option to run language detection
+            menu_text = f'{constants.MENU_PREFIX} Run Language Detection'
+            menu.addAction(menu_text, languagetools.run_language_detection)
 
     # add menu items to anki deck picker / main screen
     # ================================================

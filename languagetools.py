@@ -102,11 +102,13 @@ class LanguageTools():
         response = requests.get(self.base_url + '/transliteration_language_list')
         self.transliteration_language_list = json.loads(response.content)
 
-        if len(self.config[constants.CONFIG_DECK_LANGUAGES]) == 0:
-            # suggest running language detection
-            result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
-            if result == True:
-                self.perform_language_detection()
+    def language_detection_done(self):
+        return len(self.config[constants.CONFIG_DECK_LANGUAGES]) > 0
+
+    def run_language_detection(self):
+        result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
+        if result == True:
+            self.perform_language_detection()
 
     def show_about(self):
         text = f'{constants.ADDON_NAME}: v{version.ANKI_LANGUAGE_TOOLS_VERSION}'
