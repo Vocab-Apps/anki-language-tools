@@ -14,4 +14,6 @@ ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION_NUMBER
 zip -r ${ADDON_FILENAME} *
 
 
-
+# if you need to undo a release:
+# git tag -d v0.2
+# git push --delete origin v0.2
