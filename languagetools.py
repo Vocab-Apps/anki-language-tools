@@ -102,18 +102,20 @@ class LanguageTools():
 
     def perform_language_detection(self):
         # print('perform_language_detection')
-        aqt.mw.progress.start(max=100, min=0, label='language detection', immediate=True)
-        aqt.mw.progress.update(label='Retrieving Decks', value=1)
+        aqt.mw.progress.start(label='Language Detection')
 
+        aqt.mw.taskman.run_in_background(self.perform_language_detection_task, self.perform_language_detection_done)
+
+    def perform_language_detection_task(self):
         populated_deck_models = self.get_populated_deck_models()
         step_max = len(populated_deck_models)
-        aqt.mw.progress.update(label='Processing Decks', value=2, max=step_max)
-
+        
         i=0
         for deck_note_type in populated_deck_models:
             self.perform_language_detection_deck_note_type(deck_note_type, i, step_max)
             i += 1
 
+    def perform_language_detection_done(self, future):
         aqt.mw.progress.finish()
 
         # display a summary
@@ -125,8 +127,7 @@ class LanguageTools():
             languages_found += entry
         text = f'Found the following languages:<br/>{languages_found}'
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Detection', textFormat="rich")
-
-                
+    
     def get_populated_deck_models(self) -> List[DeckNoteType]:
         deck_list = aqt.mw.col.decks.all_names_and_ids()
         note_types = aqt.mw.col.models.all_names_and_ids()
@@ -150,7 +151,6 @@ class LanguageTools():
         
     def perform_language_detection_deck_note_type(self, deck_note_type: DeckNoteType, step_num, step_max):
         label = f'Analyzing {deck_note_type.deck_name} / {deck_note_type.model_name}'
-        aqt.mw.progress.update(label=label, value=step_num, max=step_max)
 
         # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
         notes = self.get_notes_for_deck_note_type(deck_note_type)
