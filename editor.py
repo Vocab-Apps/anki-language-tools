@@ -28,6 +28,9 @@ def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.
     editor.web.eval(js_command)
 
 def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, translation_option):
+    # first, remove any inline translation which may be present already
+    remove_inline_translation_changes(languagetools, editor, deck_note_type_field)
+
     field_index = get_field_id(deck_note_type_field)
     editor.web.eval(f"add_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, 'Translation')")
 
