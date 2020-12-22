@@ -209,5 +209,8 @@ def init(languagetools):
     # right click menu
     aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
 
+    def collectionDidLoad(col: anki.collection.Collection):
+        languagetools.initialize()
+
     # run some stuff after anki has initialized
-    aqt.gui_hooks.main_window_did_init.append(languagetools.initialize)
+    aqt.gui_hooks.collection_did_load.append(collectionDidLoad)
