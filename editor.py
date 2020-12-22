@@ -1,6 +1,7 @@
 #python imports
 import json
 import urllib.parse
+from typing import List, Dict
 
 # anki imports
 import aqt
@@ -26,37 +27,35 @@ def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.
     js_command = f"remove_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index})"
     editor.web.eval(js_command)
 
-def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, target_language):
+def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, translation_option):
     field_index = get_field_id(deck_note_type_field)
     editor.web.eval(f"add_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, 'Translation')")
 
     note = editor.note
     field_value = note[deck_note_type_field.field_name]
-    load_inline_translation(languagetools, editor, field_value, deck_note_type_field, target_language)
+    load_inline_translation(languagetools, editor, field_value, deck_note_type_field, translation_option)
 
-def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_value: str, deck_note_type_field: DeckNoteTypeField, target_language):
+def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_value: str, deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
     field_index = get_field_id(deck_note_type_field)
-    source_language = languagetools.get_language(deck_note_type_field)
 
     # now, we need to do the translation, asynchronously
     # prepare lambdas
     #     
-    def get_request_translation_lambda(languagetools, field_value, source_language, target_language):
+    def get_request_translation_lambda(languagetools, field_value, translation_option):
         def request_translation():
-            return languagetools.get_translation(field_value, source_language, target_language)
+            return languagetools.get_translation_async(field_value, translation_option)
         return request_translation
 
-    def get_apply_translation_lambda(editor, field_index):
+    def get_apply_translation_lambda(languagetools, editor, field_index):
         def apply_translation(future_result):
-            result_dict = future_result.result()
-            # print(f'received translation result: {result_dict}')
-            final_str = ' / '.join(result_dict.values())
-            js_command = f"""set_inline_field_value('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, "{final_str}")"""
+            translation_response = future_result.result()
+            translated_text = languagetools.interpret_translation_response_async(translation_response)
+            js_command = f"""set_inline_field_value('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, "{translated_text}")"""
             editor.web.eval(js_command)
         return apply_translation
 
-    aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, source_language, target_language), 
-                                     get_apply_translation_lambda(editor, field_index))
+    aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
+                                     get_apply_translation_lambda(languagetools, editor, field_index))
 
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")

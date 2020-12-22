@@ -1,5 +1,7 @@
 
 # anki imports
+import aqt.qt
+import aqt.editor
 import aqt.gui_hooks
 import anki.hooks
 
@@ -57,15 +59,23 @@ def init(languagetools):
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Transliteration', textFormat="rich")
 
     def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: DeckNoteTypeField):
+        # choose translation service
+        translation_options = languagetools.get_translation_options(source_language, target_language)
+
+        # ask the user which one they want
+        services = [x['service'] for x in translation_options]
+        choice = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Translation Service', services)
+        chosen_option = translation_options[choice]
+
         # determine the ranking of this field in the note type
-        languagetools.add_inline_translation(deck_note_type_field, target_language)
-        editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, target_language)
+        languagetools.add_inline_translation(deck_note_type_field, chosen_option, target_language)
+        editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, chosen_option)
 
     def disable_inline_translation(note_editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
         languagetools.remove_inline_translations(deck_note_type_field)
         editor.remove_inline_translation_changes(languagetools, note_editor, deck_note_type_field)
 
-    def on_context_menu(web_view, menu):
+    def on_context_menu(web_view: aqt.editor.EditorWebView, menu: aqt.qt.QMenu):
         # gather some information about the context from the editor
         # =========================================================
 
@@ -184,7 +194,9 @@ def init(languagetools):
 
         menu.addMenu(submenu)
 
-    # add menu items
+    # add menu items to anki deck picker / main screen
+    # ================================================
+
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Run Language Detection", aqt.mw)
     action.triggered.connect(languagetools.perform_language_detection)
     aqt.mw.form.menuTools.addAction(action)
@@ -193,7 +205,8 @@ def init(languagetools):
     action.triggered.connect(languagetools.show_about)
     aqt.mw.form.menuTools.addAction(action)
 
-    anki.hooks.addHook('EditorWebView.contextMenuEvent', on_context_menu)
+    # right click menu
+    aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
 
     # run some stuff after anki has initialized
     aqt.gui_hooks.main_window_did_init.append(languagetools.initialize)

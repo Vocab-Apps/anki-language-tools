@@ -69,6 +69,9 @@ class LanguageTools():
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
 
+        response = requests.get(self.base_url + '/translation_language_list')
+        self.translation_language_list = json.loads(response.content)
+
         response = requests.get(self.base_url + '/transliteration_language_list')
         self.transliteration_language_list = json.loads(response.content)
 
@@ -205,7 +208,7 @@ class LanguageTools():
         if tooltip:
             aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
 
-    def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, target_language):
+    def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, translation_option, target_language: str):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name
@@ -216,7 +219,7 @@ class LanguageTools():
             self.config[constants.CONFIG_INLINE_TRANSLATION][model_name] = {}
         if deck_name not in self.config[constants.CONFIG_INLINE_TRANSLATION][model_name]:
             self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name] = {}
-        self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name][field_name] = target_language
+        self.config[constants.CONFIG_INLINE_TRANSLATION][model_name][deck_name][field_name] = translation_option
 
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
@@ -256,7 +259,30 @@ class LanguageTools():
     def get_wanted_languages(self):
         return self.config[constants.CONFIG_WANTED_LANGUAGES].keys()
 
-    def get_translation(self, source_text, from_language, to_language):
+    def get_translation_async(self, source_text, translation_option):
+        response = requests.post(self.base_url + '/translate', json={
+            'text': source_text,
+            'service': translation_option['service'],
+            'from_language_key': translation_option['source_language_id'],
+            'to_language_key': translation_option['target_language_id']
+        })
+        return response
+
+    def interpret_translation_response_async(self, response):
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            return data['translated_text'] 
+        if response.status_code == 400:
+            data = json.loads(response.content)
+            error_text = f"Could not load translation: {data['error']}"
+            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
+            return error_text
+        error_text = f"Could not load translation: {response.text}"
+        aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
+        return error_text
+
+
+    def get_translation_all(self, source_text, from_language, to_language):
         response = requests.post(self.base_url + '/translate_all', json={
                 'text': source_text,
                 'from_language': from_language,
@@ -277,6 +303,30 @@ class LanguageTools():
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]
         return candidates
+
+    def build_translation_option(self, service, source_language_id, target_language_id):
+        return {
+            'service': service,
+            'source_language_id': source_language_id,
+            'target_language_id': target_language_id
+        }
+        
+
+    def get_translation_options(self, source_language: str, target_language: str):
+        # get list of services which support source_language
+        translation_options = []
+        source_language_options = [x for x in self.translation_language_list if x['language_code'] == source_language]
+        for source_language_option in source_language_options:
+            service = source_language_option['service']
+            # find out whether target language is supported
+            target_language_options = [x for x in self.translation_language_list if x['language_code'] == target_language and x['service'] == service]
+            if len(target_language_options) == 1:
+                # found an option
+                target_language_option = target_language_options[0]
+                translation_option = self.build_translation_option(service, source_language_option['language_id'], target_language_option['language_id'])
+                translation_options.append(translation_option)
+        return translation_options
+
 
     def get_deck_note_type_field_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> DeckNoteTypeField:
         model = aqt.mw.col.models.get(deck_note_type.model_id)
