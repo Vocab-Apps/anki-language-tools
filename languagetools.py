@@ -73,7 +73,25 @@ class LanguageTools():
             self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
         self.config = aqt.mw.addonManager.getConfig(__name__)
 
+        self.collectionLoaded = False
+        self.mainWindowInitialized = False
+        self.initDone = False
+
+    def setCollectionLoaded(self):
+        self.collectionLoaded = True
+        self.checkInitialize()
+
+    def setMainWindowInit(self):
+        self.mainWindowInitialized = True
+        self.checkInitialize()
+
+    def checkInitialize(self):
+        if self.collectionLoaded and self.mainWindowInitialized and self.initDone == False:
+            self.initialize()
+
     def initialize(self):
+        self.initDone = True
+
         # get language list
         response = requests.get(self.base_url + '/language_list')
         self.language_list = json.loads(response.content)
