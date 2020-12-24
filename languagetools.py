@@ -77,6 +77,8 @@ class LanguageTools():
         self.mainWindowInitialized = False
         self.initDone = False
 
+        self.api_key_checked = False
+
     def setCollectionLoaded(self):
         self.collectionLoaded = True
         self.checkInitialize()
@@ -102,10 +104,54 @@ class LanguageTools():
         response = requests.get(self.base_url + '/transliteration_language_list')
         self.transliteration_language_list = json.loads(response.content)
 
+    def run_api_key_verification(self):
+        (api_key, return_code) = aqt.utils.getText(f'{constants.MENU_PREFIX} Enter API Key', title=constants.MENU_PREFIX, default=self.config['api_key'])
+        result = self.api_key_validate_query(api_key)
+        if result['key_valid'] == True:
+            self.config['api_key'] = api_key
+            aqt.mw.addonManager.writeConfig(__name__, self.config)
+            aqt.utils.showInfo('API Key is valid', title=constants.MENU_PREFIX)
+        else:
+            aqt.utils.showInfo(result['msg'], title=constants.MENU_PREFIX)
+
+
+    def check_api_key_valid(self):
+        if self.api_key_checked == False:
+            # perform a check on API key
+            # do we have an API key set ?
+            if len(self.config['api_key']) == 0:
+                # ask user for API key
+                (api_key, return_code) = aqt.utils.getText(f'{constants.MENU_PREFIX} Enter API Key', title=constants.MENU_PREFIX)
+                self.config['api_key'] = api_key
+            else:
+                api_key = self.config['api_key']
+            # verify the key
+            data = self.api_key_validate_query(api_key)
+            print(data)
+            if data['key_valid'] == True:
+                self.api_key_checked = True
+                return True
+            else:
+                aqt.utils.showWarning(data['msg'])
+                enter_new_key = aq.utils.askUser(f'{constants.MENU_PREFIX} Enter new API Key?', title=constants.MENU_PREFIX)
+                if enter_new_key:
+                    self.config['api_key'] = '' # force entering a new key
+                    return self.check_api_key_valid()
+        return False
+
+    def api_key_validate_query(self, api_key):
+        response = requests.post(self.base_url + '/verify_api_key', json={
+            'api_key': api_key
+        })
+        data = json.loads(response.content)
+        return data
+
     def language_detection_done(self):
         return len(self.config[constants.CONFIG_DECK_LANGUAGES]) > 0
 
     def run_language_detection(self):
+        if not self.check_api_key_valid():
+            return
         result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
         if result == True:
             self.perform_language_detection()
@@ -311,6 +357,9 @@ class LanguageTools():
 
 
     def get_translation_all(self, source_text, from_language, to_language):
+        if not self.check_api_key_valid():
+            return
+
         response = requests.post(self.base_url + '/translate_all', json={
                 'text': source_text,
                 'from_language': from_language,
@@ -320,6 +369,9 @@ class LanguageTools():
         return data
     
     def get_transliteration(self, source_text, service, transliteration_key):
+        if not self.check_api_key_valid():
+            return
+
         response = requests.post(self.base_url + '/transliterate', json={
                 'text': source_text,
                 'service': service,

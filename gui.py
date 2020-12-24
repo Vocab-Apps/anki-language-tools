@@ -212,6 +212,10 @@ def init(languagetools):
     action.triggered.connect(languagetools.perform_language_detection)
     aqt.mw.form.menuTools.addAction(action)
 
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key", aqt.mw)
+    action.triggered.connect(languagetools.run_api_key_verification)
+    aqt.mw.form.menuTools.addAction(action)    
+
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} About", aqt.mw)
     action.triggered.connect(languagetools.show_about)
     aqt.mw.form.menuTools.addAction(action)
