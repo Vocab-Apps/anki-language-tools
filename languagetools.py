@@ -104,40 +104,34 @@ class LanguageTools():
         response = requests.get(self.base_url + '/transliteration_language_list')
         self.transliteration_language_list = json.loads(response.content)
 
+        # do we have an API key in the config ?
+        if len(self.config['api_key']) > 0:
+            validation_result = self.api_key_validate_query(self.config['api_key'])
+            if validation_result['key_valid'] == True:
+                self.api_key_checked = True
+
+    def get_api_key_checked(self):
+        return self.api_key_checked
+
     def run_api_key_verification(self):
         (api_key, return_code) = aqt.utils.getText(f'{constants.MENU_PREFIX} Enter API Key', title=constants.MENU_PREFIX, default=self.config['api_key'])
         result = self.api_key_validate_query(api_key)
         if result['key_valid'] == True:
             self.config['api_key'] = api_key
             aqt.mw.addonManager.writeConfig(__name__, self.config)
-            aqt.utils.showInfo('API Key is valid', title=constants.MENU_PREFIX)
+            aqt.utils.showInfo(f"API Key is valid: {result['msg']}", title=constants.MENU_PREFIX)
+            self.api_key_checked = True
+            return True
         else:
             aqt.utils.showInfo(result['msg'], title=constants.MENU_PREFIX)
+            return False
 
 
     def check_api_key_valid(self):
-        if self.api_key_checked == False:
-            # perform a check on API key
-            # do we have an API key set ?
-            if len(self.config['api_key']) == 0:
-                # ask user for API key
-                (api_key, return_code) = aqt.utils.getText(f'{constants.MENU_PREFIX} Enter API Key', title=constants.MENU_PREFIX)
-                self.config['api_key'] = api_key
-            else:
-                api_key = self.config['api_key']
-            # verify the key
-            data = self.api_key_validate_query(api_key)
-            print(data)
-            if data['key_valid'] == True:
-                self.api_key_checked = True
-                return True
-            else:
-                aqt.utils.showWarning(data['msg'])
-                enter_new_key = aq.utils.askUser(f'{constants.MENU_PREFIX} Enter new API Key?', title=constants.MENU_PREFIX)
-                if enter_new_key:
-                    self.config['api_key'] = '' # force entering a new key
-                    return self.check_api_key_valid()
-        return False
+        # print(f'self.api_key_checked: {self.api_key_checked}')
+        if self.api_key_checked:
+            return True
+        return self.run_api_key_verification()
 
     def api_key_validate_query(self, api_key):
         response = requests.post(self.base_url + '/verify_api_key', json={
@@ -246,7 +240,7 @@ class LanguageTools():
             field_sample = random.sample(non_empty_fields, sample_size)
         response = requests.post(self.base_url + '/detect', json={
                 'text_list': field_sample
-        })
+        }, headers={'api_key': self.config['api_key']})
         data = json.loads(response.content)
         detected_language = data['detected_language']
 
@@ -339,7 +333,7 @@ class LanguageTools():
             'service': translation_option['service'],
             'from_language_key': translation_option['source_language_id'],
             'to_language_key': translation_option['target_language_id']
-        })
+        }, headers={'api_key': self.config['api_key']})
         return response
 
     def interpret_translation_response_async(self, response):
@@ -351,6 +345,9 @@ class LanguageTools():
             error_text = f"Could not load translation: {data['error']}"
             aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
             return error_text
+        if response.status_code == 401:
+            data = json.loads(response.content)
+            return data['error'] # API key invalid
         error_text = f"Could not load translation: {response.text}"
         aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
         return error_text
@@ -364,7 +361,7 @@ class LanguageTools():
                 'text': source_text,
                 'from_language': from_language,
                 'to_language': to_language
-        })
+        }, headers={'api_key': self.config['api_key']})
         data = json.loads(response.content)        
         return data
     
@@ -376,7 +373,7 @@ class LanguageTools():
                 'text': source_text,
                 'service': service,
                 'transliteration_key': transliteration_key
-        })
+        }, headers={'api_key': self.config['api_key']})
         data = json.loads(response.content)
         return data['transliterated_text']
 
