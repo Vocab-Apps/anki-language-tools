@@ -33,15 +33,10 @@ class LanguageMappingDialog_UI(object):
         self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
 
-        self.scrollArea.setGeometry(QtCore.QRect(59, 29, 391, 501))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
-        # self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        # self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 389, 499))
-        # self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
 
         self.layoutWidget = QtWidgets.QWidget()
-        # self.layoutWidget.setGeometry(QtCore.QRect(70, 20, 239, 358))
         self.layoutWidget.setObjectName("layoutWidget")
 
         self.all_decks = QtWidgets.QVBoxLayout(self.layoutWidget)
