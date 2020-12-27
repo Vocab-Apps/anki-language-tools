@@ -3,7 +3,7 @@ import os
 import random
 import requests
 import json
-from typing import List
+from typing import List, Dict
 
 # anki imports
 import aqt
@@ -15,6 +15,8 @@ from . import constants
 from . import version
 
 # util functions
+
+
 class DeckNoteType():
     def __init__(self, deck_id, deck_name, model_id, model_name):
         self.deck_id = deck_id
@@ -37,6 +39,16 @@ class DeckNoteTypeField():
 
     def __str__(self):
         return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
+
+class Deck():
+    def __init__(self):
+        self.note_type_map = {}
+
+    def add_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
+        note_type = deck_note_type_field.get_model_name()
+        if note_type not in self.note_type_map:
+            self.note_type_map[note_type] = []
+        self.note_type_map[note_type].append(deck_note_type_field.field_name)
 
 def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
     model_id = note.mid
@@ -75,6 +87,7 @@ class LanguageTools():
 
         self.collectionLoaded = False
         self.mainWindowInitialized = False
+        self.deckBrowserRendered = False
         self.initDone = False
 
         self.api_key_checked = False
@@ -87,9 +100,13 @@ class LanguageTools():
         self.mainWindowInitialized = True
         self.checkInitialize()
 
+    def setDeckBrowserRendered(self):
+        self.deckBrowserRendered = True
+        self.checkInitialize()
+
     def checkInitialize(self):
-        if self.collectionLoaded and self.mainWindowInitialized and self.initDone == False:
-            self.initialize()
+        if self.collectionLoaded and self.mainWindowInitialized and self.deckBrowserRendered and self.initDone == False:
+            aqt.mw.taskman.run_in_background(self.initialize, self.initializeDone)
 
     def initialize(self):
         self.initDone = True
@@ -109,6 +126,9 @@ class LanguageTools():
             validation_result = self.api_key_validate_query(self.config['api_key'])
             if validation_result['key_valid'] == True:
                 self.api_key_checked = True
+
+    def initializeDone(self, future):
+        pass
 
     def get_api_key_checked(self):
         return self.api_key_checked
@@ -202,6 +222,46 @@ class LanguageTools():
                     result.append(DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name))
 
         return result
+
+    def get_populated_dntf(self) -> List[DeckNoteTypeField]:
+        deck_list = aqt.mw.col.decks.all_names_and_ids()
+        note_types = aqt.mw.col.models.all_names_and_ids()
+
+        result: List[DeckNoteTypeField] = []
+
+        for deck_entry in deck_list:
+            for note_type_entry in note_types:
+                deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
+                notes = self.get_notes_for_deck_note_type(deck_note_type)
+                if len(notes) > 0:
+                    # get field list
+                    model = aqt.mw.col.models.get(deck_note_type.model_id)
+                    fields = model['flds']
+                    for field in fields:
+                        field_name = field['name']
+                        deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
+                        deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+                        result.append(deck_note_type_field)
+
+        return result        
+
+
+    def get_populated_decks(self) -> Dict[str, Deck]:
+        deck_note_type_field_list: List[DeckNoteTypeField] = self.get_populated_dntf()
+        deck_map = {}
+        for deck_note_type_field in deck_note_type_field_list:
+            deck_name = deck_note_type_field.deck_note_type.deck_name
+            note_type_name = deck_note_type_field.deck_note_type.model_name
+            if deck_name not in deck_map:
+                deck_map[deck_name] = {}
+            if note_type_name not in deck_map[deck_name]:
+                deck_map[deck_name][note_type_name] = []
+            deck_map[deck_name][note_type_name].append(deck_note_type_field)
+        return deck_map
+            
+            
+
+
 
     def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType):
         query = f'deck:"{deck_note_type.deck_name}" note:"{deck_note_type.model_name}"'

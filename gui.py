@@ -8,11 +8,16 @@ import anki.hooks
 # addon imports
 from . import constants
 from . import editor
+from . import dialogs
 from .languagetools import DeckNoteTypeField, build_deck_note_type_field
+
 
 def init(languagetools):
 
     # add context menu handler
+
+    def show_language_mapping():
+        dialogs.language_mapping_dialogue(languagetools)
 
     def show_change_language(deck_note_type_field: DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
@@ -220,6 +225,10 @@ def init(languagetools):
     action.triggered.connect(languagetools.show_about)
     aqt.mw.form.menuTools.addAction(action)
 
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Language Mapping", aqt.mw)
+    action.triggered.connect(show_language_mapping)
+    aqt.mw.form.menuTools.addAction(action)    
+
     # right click menu
     aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
 
@@ -228,7 +237,11 @@ def init(languagetools):
 
     def mainWindowInit():
         languagetools.setMainWindowInit()
+    
+    def deckBrowserDidRender(deck_browser: aqt.deckbrowser.DeckBrowser):
+        languagetools.setDeckBrowserRendered()
 
     # run some stuff after anki has initialized
     aqt.gui_hooks.collection_did_load.append(collectionDidLoad)
     aqt.gui_hooks.main_window_did_init.append(mainWindowInit)
+    aqt.gui_hooks.deck_browser_did_render.append(deckBrowserDidRender)
