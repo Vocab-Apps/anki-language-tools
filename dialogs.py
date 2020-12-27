@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 import aqt.qt
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 from .languagetools import DeckNoteType, Deck, DeckNoteTypeField
 
 class LanguageMappingDeckWidgets(object):
@@ -27,7 +27,20 @@ class LanguageMappingDialog_UI(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(608, 900)
 
-        self.layoutWidget = QtWidgets.QWidget(Dialog)
+        self.scrollArea = QtWidgets.QScrollArea(Dialog)
+        
+        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+
+        self.scrollArea.setGeometry(QtCore.QRect(59, 29, 391, 501))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        # self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        # self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 389, 499))
+        # self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+
+        self.layoutWidget = QtWidgets.QWidget()
         # self.layoutWidget.setGeometry(QtCore.QRect(70, 20, 239, 358))
         self.layoutWidget.setObjectName("layoutWidget")
 
@@ -37,6 +50,8 @@ class LanguageMappingDialog_UI(object):
 
         for deck_name, deck in deck_map.items():
             self.layoutDecks(deck_name, deck)
+
+        self.scrollArea.setWidget(self.layoutWidget)
 
     def layoutDecks(self, deck_name, deck: Deck):
         deckWidgets = LanguageMappingDeckWidgets()
