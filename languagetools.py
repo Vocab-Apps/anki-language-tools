@@ -251,12 +251,9 @@ class LanguageTools():
         deck_map = {}
         for deck_note_type_field in deck_note_type_field_list:
             deck_name = deck_note_type_field.deck_note_type.deck_name
-            note_type_name = deck_note_type_field.deck_note_type.model_name
             if deck_name not in deck_map:
-                deck_map[deck_name] = {}
-            if note_type_name not in deck_map[deck_name]:
-                deck_map[deck_name][note_type_name] = []
-            deck_map[deck_name][note_type_name].append(deck_note_type_field)
+                deck_map[deck_name] = Deck()
+            deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
             
