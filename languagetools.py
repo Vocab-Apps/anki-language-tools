@@ -48,7 +48,7 @@ class Deck():
         note_type = deck_note_type_field.get_model_name()
         if note_type not in self.note_type_map:
             self.note_type_map[note_type] = []
-        self.note_type_map[note_type].append(deck_note_type_field.field_name)
+        self.note_type_map[note_type].append(deck_note_type_field)
 
 def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
     model_id = note.mid

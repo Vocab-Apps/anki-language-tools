@@ -12,17 +12,23 @@ class LanguageMappingNoteTypeWidgets(object):
     def __init__(self):
         pass
 
+class LanguageMappingFieldWidgets(object):
+    def __init__(self):
+        pass
+
+
 class LanguageMappingDialog_UI(object):
     def __init__(self):
         self.deckWidgetMap = {}
         self.deckNoteTypeWidgetMap = {}
+        self.fieldWidgetMap = {}
 
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(608, 535)
+        Dialog.resize(608, 900)
 
         self.layoutWidget = QtWidgets.QWidget(Dialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(70, 20, 239, 358))
+        # self.layoutWidget.setGeometry(QtCore.QRect(70, 20, 239, 358))
         self.layoutWidget.setObjectName("layoutWidget")
 
         self.all_decks = QtWidgets.QVBoxLayout(self.layoutWidget)
@@ -36,6 +42,7 @@ class LanguageMappingDialog_UI(object):
         deckWidgets = LanguageMappingDeckWidgets()
         self.deckWidgetMap[deck_name] = deckWidgets
         self.deckNoteTypeWidgetMap[deck_name] = {}
+        self.fieldWidgetMap[deck_name] = {}
 
         deckWidgets.deck_info = QtWidgets.QHBoxLayout()
         deckWidgets.deck_info.setObjectName("deck_info")
@@ -63,6 +70,7 @@ class LanguageMappingDialog_UI(object):
 
         noteTypeWidgets = LanguageMappingNoteTypeWidgets()
         self.deckNoteTypeWidgetMap[deck_name][note_type_name] = noteTypeWidgets
+        self.fieldWidgetMap[deck_name][note_type_name] = {}
 
         noteTypeWidgets.note_type_info = QtWidgets.QHBoxLayout()
         noteTypeWidgets.note_type_info.setObjectName("note_type_info")
@@ -76,36 +84,36 @@ class LanguageMappingDialog_UI(object):
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_name)
         self.all_decks.addLayout(noteTypeWidgets.note_type_info)
 
-        # noteTypeWidgets.field_info = QtWidgets.QGridLayout()
-        # noteTypeWidgets.field_info.setObjectName("field_info")
-        # noteTypeWidgets.field_1_label = QtWidgets.QLabel(self.layoutWidget)
-        # noteTypeWidgets.field_1_label.setObjectName("field_1_label")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_1_label, 0, 0, 1, 1)
-        # noteTypeWidgets.field_1_language = QtWidgets.QComboBox(self.layoutWidget)
-        # noteTypeWidgets.field_1_language.setObjectName("field_1_language")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_1_language, 0, 1, 1, 1)
-        # noteTypeWidgets.field_1_samples = QtWidgets.QPushButton(self.layoutWidget)
-        # noteTypeWidgets.field_1_samples.setObjectName("field_1_samples")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_1_samples, 0, 2, 1, 1)
-        # noteTypeWidgets.field_2_label = QtWidgets.QLabel(self.layoutWidget)
-        # noteTypeWidgets.field_2_label.setObjectName("field_2_label")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_2_label, 1, 0, 1, 1)
-        # noteTypeWidgets.field_2_language = QtWidgets.QComboBox(self.layoutWidget)
-        # noteTypeWidgets.field_2_language.setObjectName("field_2_language")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_2_language, 1, 1, 1, 1)
-        # noteTypeWidgets.field_2_samples = QtWidgets.QPushButton(self.layoutWidget)
-        # noteTypeWidgets.field_2_samples.setObjectName("field_2_samples")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_2_samples, 1, 2, 1, 1)
-        # noteTypeWidgets.field_3_label = QtWidgets.QLabel(self.layoutWidget)
-        # noteTypeWidgets.field_3_label.setObjectName("field_3_label")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_3_label, 2, 0, 1, 1)
-        # noteTypeWidgets.field_3_language = QtWidgets.QComboBox(self.layoutWidget)
-        # noteTypeWidgets.field_3_language.setObjectName("field_3_language")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_3_language, 2, 1, 1, 1)
-        # noteTypeWidgets.field_3_samples = QtWidgets.QPushButton(self.layoutWidget)
-        # noteTypeWidgets.field_3_samples.setObjectName("field_3_samples")
-        # noteTypeWidgets.field_info.addWidget(noteTypeWidgets.field_3_samples, 2, 2, 1, 1)
-        # self.all_decks.addLayout(noteTypeWidgets.field_info)        
+        noteTypeWidgets.field_info = QtWidgets.QGridLayout()
+        noteTypeWidgets.field_info.setObjectName("field_info")        
+
+        row = 0
+        for deck_note_type_field in dntf_list:
+            self.layoutField(row, deck_note_type_field, noteTypeWidgets.field_info)
+            row += 1
+
+        self.all_decks.addLayout(noteTypeWidgets.field_info)
+
+        print(f'columnCount: {noteTypeWidgets.field_info.columnCount()} rowCount: {noteTypeWidgets.field_info.rowCount()}')
+
+    def layoutField(self, row:int, deck_note_type_field: DeckNoteTypeField, gridLayout: QtWidgets.QGridLayout):
+        print(f'layoutField: {deck_note_type_field} row {row}')
+
+        fieldWidgets = LanguageMappingFieldWidgets()
+        self.fieldWidgetMap[deck_note_type_field.deck_note_type.deck_name][deck_note_type_field.deck_note_type.model_name][deck_note_type_field.field_name] = fieldWidgets
+
+        fieldWidgets.field_label = QtWidgets.QLabel(self.layoutWidget)
+        fieldWidgets.field_label.setObjectName("field_label")
+        fieldWidgets.field_label.setText(deck_note_type_field.field_name)
+        gridLayout.addWidget(fieldWidgets.field_label, row, 0, 1, 1)
+
+        fieldWidgets.field_language = QtWidgets.QComboBox(self.layoutWidget)
+        fieldWidgets.field_language.setObjectName("field_language")
+        gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
+
+        fieldWidgets.field_samples_button = QtWidgets.QPushButton(self.layoutWidget)
+        fieldWidgets.field_samples_button.setObjectName("field_samples_button")
+        gridLayout.addWidget(fieldWidgets.field_samples_button, row, 2, 1, 1)
 
 
 def language_mapping_dialogue(languagetools):
