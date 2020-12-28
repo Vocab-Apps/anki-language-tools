@@ -181,13 +181,6 @@ class LanguageTools():
     def language_detection_done(self):
         return len(self.config[constants.CONFIG_DECK_LANGUAGES]) > 0
 
-    def run_language_detection(self):
-        if not self.check_api_key_valid():
-            return
-        result = aqt.utils.askUser('Would you like to run language detection ? It takes a few minutes.', title='Language Tools')
-        if result == True:
-            self.perform_language_detection()
-
     def show_about(self):
         text = f'{constants.ADDON_NAME}: v{version.ANKI_LANGUAGE_TOOLS_VERSION}'
         aqt.utils.showInfo(text, title=constants.ADDON_NAME)

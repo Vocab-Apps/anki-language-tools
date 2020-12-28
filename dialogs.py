@@ -37,7 +37,7 @@ class LanguageMappingDialog_UI(object):
 
         self.dntfComboxBoxMap = {}
 
-        self.greenStylesheet = "background-color: #69F0AE"
+        self.greenStylesheet = "background-color: #69F0AE;"
 
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
@@ -248,7 +248,7 @@ class LanguageMappingDialog_UI(object):
             language_code = self.language_code_list[currentIndex]
         self.language_mapping_changes[deck_note_type_field] = language_code
         # change stylesheet of combobox
-        comboBox.setStyleSheet(self.greenStylesheet)
+        comboBox.setStyleSheet(self.greenStylesheet + "combobox-popup: 0;")
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
@@ -268,6 +268,9 @@ class LanguageMappingDialog_UI(object):
             self.languagetools.store_language_detection_result(key, value)
 
     def runLanguageDetection(self):
+        if self.languagetools.check_api_key_valid() == False:
+            return
+
         aqt.mw.taskman.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
 
     def runLanguageDetectionBackground(self):
