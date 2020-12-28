@@ -212,35 +212,6 @@ class LanguageTools():
                 'language_code_list': language_code_list
         }
 
-    def perform_language_detection(self):
-        # print('perform_language_detection')
-        aqt.mw.progress.start(label='Language Detection')
-
-        aqt.mw.taskman.run_in_background(self.perform_language_detection_task, self.perform_language_detection_done)
-
-    def perform_language_detection_task(self):
-        populated_deck_models = self.get_populated_deck_models()
-        step_max = len(populated_deck_models)
-        
-        i=0
-        for deck_note_type in populated_deck_models:
-            self.perform_language_detection_deck_note_type(deck_note_type, i, step_max)
-            i += 1
-
-    def perform_language_detection_done(self, future):
-        aqt.mw.progress.finish()
-
-        # display a summary
-        wanted_languages = self.config[constants.CONFIG_WANTED_LANGUAGES]
-
-        languages_found = ''
-        for key, value in wanted_languages.items():
-            entry = f'<b>{self.get_language_name(key)}</b><br/>'
-            languages_found += entry
-        text = f'Found the following languages:<br/>{languages_found}'
-        aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Detection', textFormat="rich")
-    
-
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
         deck_list = aqt.mw.col.decks.all_names_and_ids()
         note_types = aqt.mw.col.models.all_names_and_ids()
@@ -311,8 +282,7 @@ class LanguageTools():
 
     def guess_language(self, deck_note_type_field: DeckNoteTypeField):
         # retrieve notes
-        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
-        return self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
+        return self.perform_language_detection_deck_note_type_field(deck_note_type_field)
 
     def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language, tooltip=False):
         # write per-deck detected languages

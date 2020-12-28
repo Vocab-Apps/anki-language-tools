@@ -35,8 +35,7 @@ def init(languagetools):
             current_row = 0
         else:
             current_row = language_code_list.index(current_language)
-        name_list = [x['name'] for x in language_list]
-        chosen_index = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', name_list, startrow=current_row)
+        chosen_index = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', language_list, startrow=current_row)
 
         new_language = language_code_list[chosen_index]
         languagetools.store_language_detection_result(deck_note_type_field, new_language, tooltip=True)
@@ -210,6 +209,10 @@ def init(languagetools):
     # add menu items to anki deck picker / main screen
     # ================================================
 
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Language Mapping", aqt.mw)
+    action.triggered.connect(show_language_mapping)
+    aqt.mw.form.menuTools.addAction(action)
+
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key", aqt.mw)
     action.triggered.connect(languagetools.run_api_key_verification)
     aqt.mw.form.menuTools.addAction(action)    
@@ -217,10 +220,6 @@ def init(languagetools):
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} About", aqt.mw)
     action.triggered.connect(languagetools.show_about)
     aqt.mw.form.menuTools.addAction(action)
-
-    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Language Mapping", aqt.mw)
-    action.triggered.connect(show_language_mapping)
-    aqt.mw.form.menuTools.addAction(action)    
 
     # right click menu
     aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
