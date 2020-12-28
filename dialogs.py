@@ -27,12 +27,12 @@ class LanguageMappingDialog_UI(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(608, 900)
 
-        self.scrollArea = QtWidgets.QScrollArea(Dialog)
+        self.topLevel = QtWidgets.QVBoxLayout(Dialog)
+
+        self.scrollArea = QtWidgets.QScrollArea()
         
         self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setWidgetResizable(True)
-
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
 
@@ -47,6 +47,7 @@ class LanguageMappingDialog_UI(object):
             self.layoutDecks(deck_name, deck)
 
         self.scrollArea.setWidget(self.layoutWidget)
+        self.topLevel.addWidget(self.scrollArea)
 
     def layoutDecks(self, deck_name, deck: Deck):
         deckWidgets = LanguageMappingDeckWidgets()
