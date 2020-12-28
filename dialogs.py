@@ -34,6 +34,8 @@ class LanguageMappingDialog_UI(object):
         self.deckNoteTypeWidgetMap = {}
         self.fieldWidgetMap = {}
 
+        self.dntfComboxBoxMap = {}
+
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 800)
@@ -65,6 +67,23 @@ class LanguageMappingDialog_UI(object):
         font.setPointSize(20)
         header.setFont(font)
         self.topLevel.addWidget(header)
+
+        # add auto-detection widgets
+        hlayout = QtWidgets.QHBoxLayout()
+        self.autodetect_progressbar = QtWidgets.QProgressBar()
+        hlayout.addWidget(self.autodetect_progressbar)
+
+        font2 = QtGui.QFont()
+        font2.setPointSize(14)
+        autodetect_button = QtWidgets.QPushButton()
+        autodetect_button.setText('Run Auto Detection')
+        autodetect_button.setFont(font2)
+        autodetect_button.setStyleSheet("background-color: #2ecc71")
+        autodetect_button.pressed.connect(self.runLanguageDetection)
+        hlayout.addWidget(autodetect_button)
+
+        self.topLevel.addLayout(hlayout)
+
 
         for deck_name, deck in deck_map.items():
             self.layoutDecks(deck_name, deck)
@@ -185,12 +204,7 @@ class LanguageMappingDialog_UI(object):
         fieldWidgets.field_language.setMaxVisibleItems(15)
         fieldWidgets.field_language.setStyleSheet("combobox-popup: 0;")
         fieldWidgets.field_language.setObjectName("field_language")
-        if language_set != None:
-            # locate index of language
-            current_index = self.language_code_list.index(language_set)
-            fieldWidgets.field_language.setCurrentIndex(current_index)
-        else:
-            fieldWidgets.field_language.setCurrentIndex(len(self.language_name_list) - 1)
+        self.setFieldLanguageIndex(fieldWidgets.field_language, language_set)
 
         # listen to events
         def get_currentIndexChangedLambda(deck_note_type_field: DeckNoteTypeField):
@@ -198,6 +212,8 @@ class LanguageMappingDialog_UI(object):
                 self.fieldLanguageIndexChanged(deck_note_type_field, currentIndex)
             return callback
         fieldWidgets.field_language.currentIndexChanged.connect(get_currentIndexChangedLambda(deck_note_type_field)) 
+
+        self.dntfComboxBoxMap[deck_note_type_field] = fieldWidgets.field_language
 
         gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
 
@@ -212,6 +228,15 @@ class LanguageMappingDialog_UI(object):
         fieldWidgets.field_samples_button.pressed.connect(getShowFieldSamplesLambda(deck_note_type_field))
 
         gridLayout.addWidget(fieldWidgets.field_samples_button, row, 2, 1, 1)
+
+    def setFieldLanguageIndex(self, comboBox, language):
+        if language != None:
+            # locate index of language
+            current_index = self.language_code_list.index(language)
+            comboBox.setCurrentIndex(current_index)
+        else:
+            # not set
+            comboBox.setCurrentIndex(len(self.language_name_list) - 1)
 
     def fieldLanguageIndexChanged(self, deck_note_type_field: DeckNoteTypeField, currentIndex):
         # print(f'fieldLanguageIndexChanged: {deck_note_type_field}')
@@ -236,6 +261,26 @@ class LanguageMappingDialog_UI(object):
     def saveLanguageMappingChanges(self):
         for key, value in self.language_mapping_changes.items():
             self.languagetools.store_language_detection_result(key, value)
+
+    def runLanguageDetection(self):
+        dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
+        progress_max = len(dtnf_list)
+        self.autodetect_progressbar.setMaximum(progress_max)
+
+        progress = 0
+        for dntf in dtnf_list:
+            language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
+            #self.language_mapping_changes[deck_note_type_field] = language
+            # need to set combo box correctly.
+            comboBox = self.dntfComboxBoxMap[dntf]
+            self.setFieldLanguageIndex(comboBox, language)
+
+            # progress bar
+            self.autodetect_progressbar.setValue(progress)
+            progress += 1
+        
+        self.autodetect_progressbar.setValue(progress_max)
+
 
 
 

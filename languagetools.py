@@ -240,20 +240,6 @@ class LanguageTools():
         text = f'Found the following languages:<br/>{languages_found}'
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Detection', textFormat="rich")
     
-    def get_populated_deck_models(self) -> List[DeckNoteType]:
-        deck_list = aqt.mw.col.decks.all_names_and_ids()
-        note_types = aqt.mw.col.models.all_names_and_ids()
-
-        result: List[DeckNoteType] = []
-
-        for deck_entry in deck_list:
-            for note_type_entry in note_types:
-                deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
-                notes = self.get_notes_for_deck_note_type(deck_note_type)
-                if len(notes) > 0:
-                    result.append(DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name))
-
-        return result
 
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
         deck_list = aqt.mw.col.decks.all_names_and_ids()
@@ -288,29 +274,10 @@ class LanguageTools():
             deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
-            
-
-
-
     def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType):
         query = f'deck:"{deck_note_type.deck_name}" note:"{deck_note_type.model_name}"'
         notes = aqt.mw.col.find_notes(query)
         return notes
-        
-    def perform_language_detection_deck_note_type(self, deck_note_type: DeckNoteType, step_num, step_max):
-        label = f'Analyzing {deck_note_type.deck_name} / {deck_note_type.model_name}'
-
-        # print(f'perform_language_detection_deck_note_type, {deck.name}, {note_type.name}')
-        notes = self.get_notes_for_deck_note_type(deck_note_type)
-        if len(notes) > 0:  
-            model = aqt.mw.col.models.get(deck_note_type.model_id)
-            fields = model['flds']
-            for field in fields:
-                field_name = field['name']
-                deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
-                result = self.perform_language_detection_deck_note_type_field(deck_note_type_field, notes)
-                if result != None:
-                    self.store_language_detection_result(deck_note_type_field, result)
 
     def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
@@ -326,21 +293,14 @@ class LanguageTools():
         return field_sample
 
 
-    def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField, notes):
-        # retain notes which have a non-empty field
+    def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
+        # get a random sample of data within this field
+
         sample_size = 100
-
-        all_field_values = [aqt.mw.col.getNote(x)[deck_note_type_field.field_name] for x in notes]
-        non_empty_fields = [x for x in all_field_values if len(x) > 0]
-
-        if len(non_empty_fields) == 0:
-            # no data to perform detection on
+        field_sample = self.get_field_samples(deck_note_type_field, sample_size)
+        if len(field_sample) == 0:
             return None
-        
-        if len(non_empty_fields) < sample_size:
-            field_sample = non_empty_fields
-        else:
-            field_sample = random.sample(non_empty_fields, sample_size)
+
         response = requests.post(self.base_url + '/detect', json={
                 'text_list': field_sample
         }, headers={'api_key': self.config['api_key']})
