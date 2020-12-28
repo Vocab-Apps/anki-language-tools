@@ -3,6 +3,7 @@ from typing import List, Dict
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools
+from . import constants
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
@@ -203,6 +204,13 @@ class LanguageMappingDialog_UI(object):
         fieldWidgets.field_samples_button = QtWidgets.QPushButton(self.layoutWidget)
         fieldWidgets.field_samples_button.setObjectName("field_samples_button")
         fieldWidgets.field_samples_button.setText('Show Samples')
+
+        def getShowFieldSamplesLambda(deck_note_type_field: DeckNoteTypeField):
+            def callback():
+                self.showFieldSamples(deck_note_type_field)
+            return callback
+        fieldWidgets.field_samples_button.pressed.connect(getShowFieldSamplesLambda(deck_note_type_field))
+
         gridLayout.addWidget(fieldWidgets.field_samples_button, row, 2, 1, 1)
 
     def fieldLanguageIndexChanged(self, deck_note_type_field: DeckNoteTypeField, currentIndex):
@@ -211,6 +219,12 @@ class LanguageMappingDialog_UI(object):
         if currentIndex < len(self.language_code_list):
             language_code = self.language_code_list[currentIndex]
         self.language_mapping_changes[deck_note_type_field] = language_code
+
+    def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
+        field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
+        joined_text = ', '.join(field_samples)
+        text = f'<b>Samples</b>: {joined_text}'
+        aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
 
     def accept(self):
         self.saveLanguageMappingChanges()

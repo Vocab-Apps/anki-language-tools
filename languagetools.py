@@ -312,6 +312,20 @@ class LanguageTools():
                 if result != None:
                     self.store_language_detection_result(deck_note_type_field, result)
 
+    def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
+        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
+        
+        all_field_values = [aqt.mw.col.getNote(x)[deck_note_type_field.field_name] for x in notes]
+        non_empty_fields = [x for x in all_field_values if len(x) > 0]
+
+        if len(non_empty_fields) < sample_size:
+            field_sample = non_empty_fields
+        else:
+            field_sample = random.sample(non_empty_fields, sample_size)
+
+        return field_sample
+
+
     def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField, notes):
         # retain notes which have a non-empty field
         sample_size = 100
