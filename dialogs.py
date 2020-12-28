@@ -35,7 +35,7 @@ class LanguageMappingDialog_UI(object):
 
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(608, 900)
+        Dialog.resize(700, 800)
 
         self.Dialog = Dialog
 
@@ -52,7 +52,7 @@ class LanguageMappingDialog_UI(object):
         self.layoutWidget.setObjectName("layoutWidget")
 
         self.all_decks = QtWidgets.QVBoxLayout(self.layoutWidget)
-        self.all_decks.setContentsMargins(0, 0, 0, 0)
+        self.all_decks.setContentsMargins(20, 20, 20, 20)
         self.all_decks.setObjectName("all_decks")
 
         # add header
@@ -152,7 +152,8 @@ class LanguageMappingDialog_UI(object):
         self.all_decks.addLayout(noteTypeWidgets.note_type_info)
 
         noteTypeWidgets.field_info = QtWidgets.QGridLayout()
-        noteTypeWidgets.field_info.setObjectName("field_info")        
+        noteTypeWidgets.field_info.setContentsMargins(20, 0, 0, 0)
+        noteTypeWidgets.field_info.setObjectName("field_info")
 
         row = 0
         for deck_note_type_field in dntf_list:
