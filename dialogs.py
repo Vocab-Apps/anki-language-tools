@@ -64,7 +64,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         hlayout.addWidget(from_combobox)
 
         self.from_language_label = aqt.qt.QLabel()
-        self.from_language_label.setText('language')
+        self.from_language_label.setText(self.languagetools.get_language_name(self.field_language[0]))
         hlayout.addWidget(self.from_language_label)
 
         to_label = aqt.qt.QLabel()
@@ -77,7 +77,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         hlayout.addWidget(to_combobox)
 
         self.to_language_label = aqt.qt.QLabel()
-        self.to_language_label.setText('language')
+        self.to_language_label.setText(self.languagetools.get_language_name(self.field_language[0]))
         hlayout.addWidget(self.to_language_label)
 
         vlayout.addLayout(hlayout)
