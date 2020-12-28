@@ -1,4 +1,5 @@
 from typing import List, Dict
+import sys
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
@@ -77,12 +78,12 @@ class LanguageMappingDialog_UI(object):
 
         font2 = QtGui.QFont()
         font2.setPointSize(14)
-        autodetect_button = QtWidgets.QPushButton()
-        autodetect_button.setText('Run Auto Detection')
-        autodetect_button.setFont(font2)
-        autodetect_button.setStyleSheet(self.greenStylesheet)
-        autodetect_button.pressed.connect(self.runLanguageDetection)
-        hlayout.addWidget(autodetect_button)
+        self.autodetect_button = QtWidgets.QPushButton()
+        self.autodetect_button.setText('Run Auto Detection')
+        self.autodetect_button.setFont(font2)
+        self.autodetect_button.setStyleSheet(self.greenStylesheet)
+        self.autodetect_button.pressed.connect(self.runLanguageDetection)
+        hlayout.addWidget(self.autodetect_button)
 
         self.topLevel.addLayout(hlayout)
 
@@ -267,9 +268,14 @@ class LanguageMappingDialog_UI(object):
             self.languagetools.store_language_detection_result(key, value)
 
     def runLanguageDetection(self):
+        aqt.mw.taskman.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
+
+    def runLanguageDetectionBackground(self):
+        self.autodetect_button.setEnabled(False)
+
         dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
         progress_max = len(dtnf_list)
-        self.autodetect_progressbar.setMaximum(progress_max)
+        self.setProgressBarMax(progress_max)
 
         progress = 0
         for dntf in dtnf_list:
@@ -280,12 +286,19 @@ class LanguageMappingDialog_UI(object):
             self.setFieldLanguageIndex(comboBox, language)
 
             # progress bar
-            self.autodetect_progressbar.setValue(progress)
+            self.setProgressValue(progress)
             progress += 1
         
-        self.autodetect_progressbar.setValue(progress_max)
+        self.setProgressValue(progress_max)
 
+    def setProgressBarMax(self, progress_max):
+        aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setMaximum(progress_max))
 
+    def setProgressValue(self, progress):
+        aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
+
+    def runLanguageDetectionDone(self, future_result):
+        self.autodetect_button.setEnabled(True)
 
 
 def language_mapping_dialogue(languagetools):
