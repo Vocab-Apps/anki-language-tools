@@ -28,7 +28,22 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # get field list
         model = aqt.mw.col.models.get(deck_note_type.model_id)
         fields = model['flds']
-        self.field_names = [x['name'] for x in fields]
+        field_names = [x['name'] for x in fields]
+
+        # these are the available fields
+        self.field_name_list = []
+        self.deck_note_type_field_list = []
+        self.field_language = []
+
+        # retain fields which have a language set
+        for field_name in field_names:
+            deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+            language = self.languagetools.get_language(deck_note_type_field)
+            if language != None:
+                self.field_name_list.append(field_name)
+                self.deck_note_type_field_list.append(deck_note_type_field)
+                self.field_language.append(language)
+
 
     def setupUi(self):
         self.resize(700, 800)
@@ -44,27 +59,39 @@ class BatchConversionDialog(aqt.qt.QDialog):
         hlayout.addWidget(from_label)
 
         from_combobox = QtWidgets.QComboBox()
-        from_combobox.addItems(self.field_names)
+        from_combobox.addItems(self.field_name_list)
+        from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
         hlayout.addWidget(from_combobox)
 
-        from_language = aqt.qt.QLabel()
-        from_language.setText('language')
-        hlayout.addWidget(from_language)
+        self.from_language_label = aqt.qt.QLabel()
+        self.from_language_label.setText('language')
+        hlayout.addWidget(self.from_language_label)
 
         to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
         hlayout.addWidget(to_label)
 
         to_combobox = QtWidgets.QComboBox()
-        to_combobox.addItems(self.field_names)
+        to_combobox.addItems(self.field_name_list)
+        to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
         hlayout.addWidget(to_combobox)
 
-        to_language = aqt.qt.QLabel()
-        to_language.setText('language')
-        hlayout.addWidget(to_language)
+        self.to_language_label = aqt.qt.QLabel()
+        self.to_language_label.setText('language')
+        hlayout.addWidget(self.to_language_label)
 
         vlayout.addLayout(hlayout)
 
+    def fromFieldIndexChanged(self, currentIndex):
+        language_code = self.field_language[currentIndex]
+        language_name = self.languagetools.get_language_name(language_code)
+        self.from_language_label.setText(language_name)
+
+
+    def toFieldIndexChanged(self, currentIndex):
+        language_code = self.field_language[currentIndex]
+        language_name = self.languagetools.get_language_name(language_code)
+        self.to_language_label.setText(language_name)
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
