@@ -3,8 +3,20 @@ import sys
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools
+from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card
 from . import constants
+
+
+
+class BatchConversionDialog(aqt.qt.QDialog):
+    def __init__(self, languagetools: LanguageTools, deck_note_type):
+        self.languagetools = languagetools
+        self.deck_note_type = deck_note_type
+
+    def setupUi(self):
+        pass
+
+
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
@@ -311,3 +323,30 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.ui = LanguageMappingDialog_UI(languagetools)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
+
+def add_translation_dialog(languagetools, note_id_list):
+    print(f'* add_translation_dialog {note_id_list}')
+
+    # ensure we only have one deck/notetype selected
+    deck_note_type_map = {}
+
+    for note_id in note_id_list:
+        note = aqt.mw.col.getNote(note_id)
+        cards = note.cards()
+        for card in cards:
+            deck_note_type = build_deck_note_type_from_note_card(note, card)
+            if deck_note_type not in deck_note_type_map:
+                deck_note_type_map[deck_note_type] = 0
+            deck_note_type_map[deck_note_type] += 1
+
+    if len(deck_note_type_map) > 1:
+        # too many deck / model combinations
+        summary_str = ', '.join([f'{numCards} note from {key}' for key, numCards in deck_note_type_map.items()])
+        aqt.utils.showCritical(f'You must select notes from the same Deck / Note Type combination. You have selected {summary_str}', title=contants.ADDON_NAME)
+        return
+    
+    deck_note_type = deck_note_type_map.values()[0]
+
+
+
+

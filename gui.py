@@ -237,3 +237,14 @@ def init(languagetools):
     aqt.gui_hooks.collection_did_load.append(collectionDidLoad)
     aqt.gui_hooks.main_window_did_init.append(mainWindowInit)
     aqt.gui_hooks.deck_browser_did_render.append(deckBrowserDidRender)
+
+    def browerMenusInit(browser: aqt.browser.Browser):
+        menu = aqt.qt.QMenu(constants.ADDON_NAME, browser.form.menubar)
+        browser.form.menubar.addMenu(menu)
+
+        action = aqt.qt.QAction(f'Add Translation To Selected Notes...', browser)
+        action.triggered.connect(lambda: dialogs.add_translation_dialog(languagetools, browser.selectedNotes()))
+        menu.addAction(action)
+
+    # browser menus
+    aqt.gui_hooks.browser_menus_did_init.append(browerMenusInit)
