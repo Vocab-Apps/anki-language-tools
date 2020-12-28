@@ -7,23 +7,63 @@ from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools,
 from . import constants
 
 
+def get_header_label(text):
+        header = QtWidgets.QLabel()
+        header.setText(text)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)  
+        font.setPointSize(20)
+        header.setFont(font)
+        return header
+
 
 class BatchConversionDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type, note_id_list):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
         self.note_id_list = note_id_list
+
+        # get field list
+        model = aqt.mw.col.models.get(deck_note_type.model_id)
+        fields = model['flds']
+        self.field_names = [x['name'] for x in fields]
 
     def setupUi(self):
         self.resize(700, 800)
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        label = aqt.qt.QLabel()
-        label.setText('hello world')
-        vlayout.addWidget(label)
+        vlayout.addWidget(get_header_label('Add Translation'))
 
+        # setup to/from fields
+        hlayout = QtWidgets.QHBoxLayout()
+        from_label = aqt.qt.QLabel()
+        from_label.setText('From Field:')
+        hlayout.addWidget(from_label)
+
+        from_combobox = QtWidgets.QComboBox()
+        from_combobox.addItems(self.field_names)
+        hlayout.addWidget(from_combobox)
+
+        from_language = aqt.qt.QLabel()
+        from_language.setText('language')
+        hlayout.addWidget(from_language)
+
+        to_label = aqt.qt.QLabel()
+        to_label.setText('To Field:')
+        hlayout.addWidget(to_label)
+
+        to_combobox = QtWidgets.QComboBox()
+        to_combobox.addItems(self.field_names)
+        hlayout.addWidget(to_combobox)
+
+        to_language = aqt.qt.QLabel()
+        to_language.setText('language')
+        hlayout.addWidget(to_language)
+
+        vlayout.addLayout(hlayout)
 
 
 class LanguageMappingDeckWidgets(object):
@@ -82,14 +122,7 @@ class LanguageMappingDialog_UI(object):
         self.all_decks.setObjectName("all_decks")
 
         # add header
-        header = QtWidgets.QLabel()
-        header.setText(f'Language Mapping')
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)  
-        font.setPointSize(20)
-        header.setFont(font)
-        self.topLevel.addWidget(header)
+        self.topLevel.addWidget(get_header_label('Language Mapping'))
 
         # add auto-detection widgets
         hlayout = QtWidgets.QHBoxLayout()
@@ -353,7 +386,7 @@ def add_translation_dialog(languagetools, note_id_list):
         aqt.utils.showCritical(f'You must select notes from the same Deck / Note Type combination. You have selected {summary_str}', title=contants.ADDON_NAME)
         return
     
-    deck_note_type = list(deck_note_type_map.values())[0]
+    deck_note_type = list(deck_note_type_map.keys())[0]
 
     dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
