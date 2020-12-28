@@ -9,12 +9,20 @@ from . import constants
 
 
 class BatchConversionDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type):
+    def __init__(self, languagetools: LanguageTools, deck_note_type, note_id_list):
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
+        self.note_id_list = note_id_list
 
     def setupUi(self):
-        pass
+        self.resize(700, 800)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        label = aqt.qt.QLabel()
+        label.setText('hello world')
+        vlayout.addWidget(label)
 
 
 
@@ -345,8 +353,10 @@ def add_translation_dialog(languagetools, note_id_list):
         aqt.utils.showCritical(f'You must select notes from the same Deck / Note Type combination. You have selected {summary_str}', title=contants.ADDON_NAME)
         return
     
-    deck_note_type = deck_note_type_map.values()[0]
+    deck_note_type = list(deck_note_type_map.values())[0]
 
-
+    dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
+    dialog.setupUi()
+    dialog.exec_()
 
 
