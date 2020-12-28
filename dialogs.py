@@ -55,8 +55,19 @@ class LanguageMappingDialog_UI(object):
         self.all_decks.setContentsMargins(0, 0, 0, 0)
         self.all_decks.setObjectName("all_decks")
 
+        # add header
+        header = QtWidgets.QLabel()
+        header.setText(f'Language Mapping')
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)  
+        font.setPointSize(20)
+        header.setFont(font)
+        self.topLevel.addWidget(header)
+
         for deck_name, deck in deck_map.items():
             self.layoutDecks(deck_name, deck)
+
 
         self.scrollArea.setWidget(self.layoutWidget)
         self.topLevel.addWidget(self.scrollArea)
@@ -76,23 +87,34 @@ class LanguageMappingDialog_UI(object):
 
         deckWidgets.deck_info = QtWidgets.QHBoxLayout()
         deckWidgets.deck_info.setObjectName("deck_info")
+        
+        fontSize = 14
+
         deckWidgets.deck_label = QtWidgets.QLabel(self.layoutWidget)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        deckWidgets.deck_label.setFont(font)
+        font1 = QtGui.QFont()
+        font1.setBold(True)
+        font1.setPointSize(fontSize)
+        deckWidgets.deck_label.setFont(font1)
         deckWidgets.deck_label.setObjectName("deck_label")
         deckWidgets.deck_label.setText('Deck:')
         deckWidgets.deck_info.addWidget(deckWidgets.deck_label)
+
+        font2 = QtGui.QFont()
+        font2.setPointSize(fontSize)
         deckWidgets.deck_name = QtWidgets.QLabel(self.layoutWidget)
         deckWidgets.deck_name.setObjectName("deck_name")
         deckWidgets.deck_name.setText(deck_name)
+        deckWidgets.deck_name.setFont(font2)
+
         deckWidgets.deck_info.addWidget(deckWidgets.deck_name)
         self.all_decks.addLayout(deckWidgets.deck_info)
-
+        
         # iterate over note types 
         for note_type_name, dntf_list in deck.note_type_map.items():
             self.layoutNoteTypes(deck_name, note_type_name, dntf_list)
+
+        # add spacing at the end
+        self.all_decks.addSpacing(30)
                         
 
     def layoutNoteTypes(self, deck_name, note_type_name, dntf_list: List[DeckNoteTypeField]):
@@ -102,13 +124,26 @@ class LanguageMappingDialog_UI(object):
 
         noteTypeWidgets.note_type_info = QtWidgets.QHBoxLayout()
         noteTypeWidgets.note_type_info.setObjectName("note_type_info")
+
+        fontSize = 12
+
+        font1 = QtGui.QFont()
+        font1.setBold(True)
+        font1.setPointSize(fontSize)
+
         noteTypeWidgets.note_type_label = QtWidgets.QLabel(self.layoutWidget)
         noteTypeWidgets.note_type_label.setObjectName("note_type_label")
         noteTypeWidgets.note_type_label.setText('Note Type:')
+        noteTypeWidgets.note_type_label.setFont(font1)
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_label)
+
+        font2 = QtGui.QFont()
+        font2.setPointSize(fontSize)
+
         noteTypeWidgets.note_type_name = QtWidgets.QLabel(self.layoutWidget)
         noteTypeWidgets.note_type_name.setObjectName("note_type_name")
         noteTypeWidgets.note_type_name.setText(note_type_name)
+        noteTypeWidgets.note_type_name.setFont(font2)
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_name)
         self.all_decks.addLayout(noteTypeWidgets.note_type_info)
 
