@@ -356,9 +356,10 @@ class LanguageTools():
         self.config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name] = language
 
         # store the languages we're interested in
-        if constants.CONFIG_WANTED_LANGUAGES not in self.config:
-            self.config[constants.CONFIG_WANTED_LANGUAGES] = {}
-        self.config[constants.CONFIG_WANTED_LANGUAGES][language] = True
+        if language != None:
+            if constants.CONFIG_WANTED_LANGUAGES not in self.config:
+                self.config[constants.CONFIG_WANTED_LANGUAGES] = {}
+            self.config[constants.CONFIG_WANTED_LANGUAGES][language] = True
 
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
