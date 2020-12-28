@@ -180,6 +180,20 @@ class LanguageTools():
     def get_all_languages(self):
         return self.language_list
 
+    def get_all_language_arrays(self):
+        # return two arrays, one with the codes, one with the human descriptions
+        language_dict = self.get_all_languages()
+        language_list = []
+        for key, name in language_dict.items():
+            language_list.append({'key': key, 'name': name})
+        # sort by language name
+        language_list = sorted(language_list, key=lambda x: x['name'])
+        language_code_list = [x['key'] for x in language_list]
+        language_name_list = [x['name'] for x in language_list]
+        return {'language_name_list': language_name_list,
+                'language_code_list': language_code_list
+        }
+
     def perform_language_detection(self):
         # print('perform_language_detection')
         aqt.mw.progress.start(label='Language Detection')

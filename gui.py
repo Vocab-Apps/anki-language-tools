@@ -26,13 +26,10 @@ def init(languagetools):
             # perform detection
             current_language = languagetools.guess_language(deck_note_type_field)
 
-        language_dict = languagetools.get_all_languages()
-        language_list = []
-        for key, name in language_dict.items():
-            language_list.append({'key': key, 'name': name})
-        # sort by language name
-        language_list = sorted(language_list, key=lambda x: x['name'])
-        language_code_list = [x['key'] for x in language_list]
+        data = languagetools.get_all_language_arrays()
+        language_list = data['language_name_list']
+        language_code_list = data['language_code_list']
+
         # locate current language
         if current_language == None:
             current_row = 0

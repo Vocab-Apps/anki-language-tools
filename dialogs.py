@@ -2,7 +2,7 @@ from typing import List, Dict
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from .languagetools import DeckNoteType, Deck, DeckNoteTypeField
+from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
@@ -18,7 +18,15 @@ class LanguageMappingFieldWidgets(object):
 
 
 class LanguageMappingDialog_UI(object):
-    def __init__(self):
+    def __init__(self, languagetools: LanguageTools):
+        self.languagetools: LanguageTools = languagetools
+        
+        # do some processing on languages
+        data = languagetools.get_all_language_arrays()
+        self.language_name_list = data['language_name_list']
+        self.language_code_list = data['language_code_list']
+        self.language_name_list.append('Not Set')
+
         self.deckWidgetMap = {}
         self.deckNoteTypeWidgetMap = {}
         self.fieldWidgetMap = {}
@@ -114,13 +122,24 @@ class LanguageMappingDialog_UI(object):
         fieldWidgets = LanguageMappingFieldWidgets()
         self.fieldWidgetMap[deck_note_type_field.deck_note_type.deck_name][deck_note_type_field.deck_note_type.model_name][deck_note_type_field.field_name] = fieldWidgets
 
+        language_set = self.languagetools.get_language(deck_note_type_field)
+
         fieldWidgets.field_label = QtWidgets.QLabel(self.layoutWidget)
         fieldWidgets.field_label.setObjectName("field_label")
         fieldWidgets.field_label.setText(deck_note_type_field.field_name)
         gridLayout.addWidget(fieldWidgets.field_label, row, 0, 1, 1)
 
         fieldWidgets.field_language = QtWidgets.QComboBox(self.layoutWidget)
+        fieldWidgets.field_language.addItems(self.language_name_list)
+        fieldWidgets.field_language.setMaxVisibleItems(15)
+        fieldWidgets.field_language.setStyleSheet("combobox-popup: 0;")
         fieldWidgets.field_language.setObjectName("field_language")
+        if language_set != None:
+            # locate index of language
+            current_index = self.language_code_list.index(language_set)
+            fieldWidgets.field_language.setCurrentIndex(current_index)
+        else:
+            fieldWidgets.field_language.setCurrentIndex(len(self.language_name_list) - 1)
         gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
 
         fieldWidgets.field_samples_button = QtWidgets.QPushButton(self.layoutWidget)
@@ -132,6 +151,6 @@ def language_mapping_dialogue(languagetools):
     deck_map: Dict[str, Deck] = languagetools.get_populated_decks()
 
     mapping_dialog = aqt.qt.QDialog()
-    mapping_dialog.ui = LanguageMappingDialog_UI()
+    mapping_dialog.ui = LanguageMappingDialog_UI(languagetools)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
