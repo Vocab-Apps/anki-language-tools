@@ -36,6 +36,8 @@ class LanguageMappingDialog_UI(object):
 
         self.dntfComboxBoxMap = {}
 
+        self.greenStylesheet = "background-color: #69F0AE"
+
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 800)
@@ -78,7 +80,7 @@ class LanguageMappingDialog_UI(object):
         autodetect_button = QtWidgets.QPushButton()
         autodetect_button.setText('Run Auto Detection')
         autodetect_button.setFont(font2)
-        autodetect_button.setStyleSheet("background-color: #2ecc71")
+        autodetect_button.setStyleSheet(self.greenStylesheet)
         autodetect_button.pressed.connect(self.runLanguageDetection)
         hlayout.addWidget(autodetect_button)
 
@@ -207,11 +209,11 @@ class LanguageMappingDialog_UI(object):
         self.setFieldLanguageIndex(fieldWidgets.field_language, language_set)
 
         # listen to events
-        def get_currentIndexChangedLambda(deck_note_type_field: DeckNoteTypeField):
+        def get_currentIndexChangedLambda(comboBox, deck_note_type_field: DeckNoteTypeField):
             def callback(currentIndex):
-                self.fieldLanguageIndexChanged(deck_note_type_field, currentIndex)
+                self.fieldLanguageIndexChanged(comboBox, deck_note_type_field, currentIndex)
             return callback
-        fieldWidgets.field_language.currentIndexChanged.connect(get_currentIndexChangedLambda(deck_note_type_field)) 
+        fieldWidgets.field_language.currentIndexChanged.connect(get_currentIndexChangedLambda(fieldWidgets.field_language, deck_note_type_field)) 
 
         self.dntfComboxBoxMap[deck_note_type_field] = fieldWidgets.field_language
 
@@ -238,12 +240,14 @@ class LanguageMappingDialog_UI(object):
             # not set
             comboBox.setCurrentIndex(len(self.language_name_list) - 1)
 
-    def fieldLanguageIndexChanged(self, deck_note_type_field: DeckNoteTypeField, currentIndex):
+    def fieldLanguageIndexChanged(self, comboBox, deck_note_type_field: DeckNoteTypeField, currentIndex):
         # print(f'fieldLanguageIndexChanged: {deck_note_type_field}')
         language_code = None
         if currentIndex < len(self.language_code_list):
             language_code = self.language_code_list[currentIndex]
         self.language_mapping_changes[deck_note_type_field] = language_code
+        # change stylesheet of combobox
+        comboBox.setStyleSheet(self.greenStylesheet)
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
