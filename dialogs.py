@@ -105,8 +105,10 @@ class LanguageMappingDialog_UI(object):
         deckWidgets.deck_name.setObjectName("deck_name")
         deckWidgets.deck_name.setText(deck_name)
         deckWidgets.deck_name.setFont(font2)
-
         deckWidgets.deck_info.addWidget(deckWidgets.deck_name)
+
+        deckWidgets.deck_info.addStretch(1)
+
         self.all_decks.addLayout(deckWidgets.deck_info)
         
         # iterate over note types 
@@ -139,12 +141,14 @@ class LanguageMappingDialog_UI(object):
 
         font2 = QtGui.QFont()
         font2.setPointSize(fontSize)
-
         noteTypeWidgets.note_type_name = QtWidgets.QLabel(self.layoutWidget)
         noteTypeWidgets.note_type_name.setObjectName("note_type_name")
         noteTypeWidgets.note_type_name.setText(note_type_name)
         noteTypeWidgets.note_type_name.setFont(font2)
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_name)
+
+        noteTypeWidgets.note_type_info.addStretch(1)
+
         self.all_decks.addLayout(noteTypeWidgets.note_type_info)
 
         noteTypeWidgets.field_info = QtWidgets.QGridLayout()
