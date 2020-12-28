@@ -49,6 +49,11 @@ class LanguageMappingDialog_UI(object):
         self.scrollArea.setWidget(self.layoutWidget)
         self.topLevel.addWidget(self.scrollArea)
 
+        self.buttonBox = QtWidgets.QDialogButtonBox()
+        self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.topLevel.addWidget(self.buttonBox)
+
     def layoutDecks(self, deck_name, deck: Deck):
         deckWidgets = LanguageMappingDeckWidgets()
         self.deckWidgetMap[deck_name] = deckWidgets
@@ -77,8 +82,6 @@ class LanguageMappingDialog_UI(object):
                         
 
     def layoutNoteTypes(self, deck_name, note_type_name, dntf_list: List[DeckNoteTypeField]):
-        print(f'*** layoutNoteTypes {note_type_name}')
-
         noteTypeWidgets = LanguageMappingNoteTypeWidgets()
         self.deckNoteTypeWidgetMap[deck_name][note_type_name] = noteTypeWidgets
         self.fieldWidgetMap[deck_name][note_type_name] = {}
@@ -105,10 +108,8 @@ class LanguageMappingDialog_UI(object):
 
         self.all_decks.addLayout(noteTypeWidgets.field_info)
 
-        print(f'columnCount: {noteTypeWidgets.field_info.columnCount()} rowCount: {noteTypeWidgets.field_info.rowCount()}')
 
     def layoutField(self, row:int, deck_note_type_field: DeckNoteTypeField, gridLayout: QtWidgets.QGridLayout):
-        print(f'layoutField: {deck_note_type_field} row {row}')
 
         fieldWidgets = LanguageMappingFieldWidgets()
         self.fieldWidgetMap[deck_note_type_field.deck_note_type.deck_name][deck_note_type_field.deck_note_type.model_name][deck_note_type_field.field_name] = fieldWidgets
@@ -134,6 +135,3 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.ui = LanguageMappingDialog_UI()
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
-    # mapping_dialog = LanguageMappingDialog()
-    # mapping_dialog.layout()
-    # mapping_dialog.exec_()
