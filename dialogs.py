@@ -153,6 +153,10 @@ class LanguageMappingDialog_UI(object):
 
         noteTypeWidgets.field_info = QtWidgets.QGridLayout()
         noteTypeWidgets.field_info.setContentsMargins(20, 0, 0, 0)
+        # set stretch factors
+        noteTypeWidgets.field_info.setColumnStretch(0, 50)
+        noteTypeWidgets.field_info.setColumnStretch(1, 50)
+        noteTypeWidgets.field_info.setColumnStretch(2, 0)
         noteTypeWidgets.field_info.setObjectName("field_info")
 
         row = 0
