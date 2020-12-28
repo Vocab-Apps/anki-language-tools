@@ -26,6 +26,15 @@ class DeckNoteType():
     def __str__(self):
         return f'{self.model_name} / {self.deck_name}'
 
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.deck_id == other.deck_id and self.model_id == other.model_id
+        else:
+            return False    
+
+    def __hash__(self):
+        return hash((self.deck_id, self.model_id))
+
 class DeckNoteTypeField():
     def __init__(self, deck_note_type, field_name):
         self.deck_note_type = deck_note_type
@@ -39,6 +48,15 @@ class DeckNoteTypeField():
 
     def __str__(self):
         return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
+
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.deck_note_type == other.deck_note_type and self.field_name == other.field_name
+        else:
+            return False    
+
+    def __hash__(self):
+        return hash((self.deck_note_type, self.field_name))
 
 class Deck():
     def __init__(self):

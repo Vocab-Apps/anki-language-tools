@@ -27,6 +27,8 @@ class LanguageMappingDialog_UI(object):
         self.language_code_list = data['language_code_list']
         self.language_name_list.append('Not Set')
 
+        self.language_mapping_changes = {}
+
         self.deckWidgetMap = {}
         self.deckNoteTypeWidgetMap = {}
         self.fieldWidgetMap = {}
@@ -34,6 +36,8 @@ class LanguageMappingDialog_UI(object):
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(608, 900)
+
+        self.Dialog = Dialog
 
         self.topLevel = QtWidgets.QVBoxLayout(Dialog)
 
@@ -60,6 +64,8 @@ class LanguageMappingDialog_UI(object):
         self.buttonBox = QtWidgets.QDialogButtonBox()
         self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
         self.topLevel.addWidget(self.buttonBox)
 
     def layoutDecks(self, deck_name, deck: Deck):
@@ -140,11 +146,39 @@ class LanguageMappingDialog_UI(object):
             fieldWidgets.field_language.setCurrentIndex(current_index)
         else:
             fieldWidgets.field_language.setCurrentIndex(len(self.language_name_list) - 1)
+
+        # listen to events
+        def get_currentIndexChangedLambda(deck_note_type_field: DeckNoteTypeField):
+            def callback(currentIndex):
+                self.fieldLanguageIndexChanged(deck_note_type_field, currentIndex)
+            return callback
+        fieldWidgets.field_language.currentIndexChanged.connect(get_currentIndexChangedLambda(deck_note_type_field)) 
+
         gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
 
         fieldWidgets.field_samples_button = QtWidgets.QPushButton(self.layoutWidget)
         fieldWidgets.field_samples_button.setObjectName("field_samples_button")
+        fieldWidgets.field_samples_button.setText('Show Samples')
         gridLayout.addWidget(fieldWidgets.field_samples_button, row, 2, 1, 1)
+
+    def fieldLanguageIndexChanged(self, deck_note_type_field: DeckNoteTypeField, currentIndex):
+        # print(f'fieldLanguageIndexChanged: {deck_note_type_field}')
+        language_code = None
+        if currentIndex < len(self.language_code_list):
+            language_code = self.language_code_list[currentIndex]
+        self.language_mapping_changes[deck_note_type_field] = language_code
+
+    def accept(self):
+        self.saveLanguageMappingChanges()
+        self.Dialog.close()
+
+    def reject(self):
+        self.Dialog.close()
+
+    def saveLanguageMappingChanges(self):
+        for key, value in self.language_mapping_changes.items():
+            self.languagetools.store_language_detection_result(key, value)
+
 
 
 def language_mapping_dialogue(languagetools):
