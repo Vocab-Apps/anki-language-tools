@@ -98,7 +98,7 @@ def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeFie
 class LanguageTools():
 
     def __init__(self):
-        self.base_url = 'https://cloud-language-tools-6e7b3.ondigitalocean.app'
+        self.base_url = 'https://cloud-language-tools-prod.anki.study'
         if constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL in os.environ:
             self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
         self.config = aqt.mw.addonManager.getConfig(__name__)
