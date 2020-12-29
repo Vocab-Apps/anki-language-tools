@@ -17,6 +17,48 @@ def get_header_label(text):
         header.setFont(font)
         return header
 
+class NoteTableModel(QtCore.QAbstractTableModel):
+    def __init__(self):
+        QtCore.QAbstractTableModel.__init__(self, None)
+        self.from_field_data = []
+        self.from_field = 'From'
+        self.to_field = 'To'
+
+    def setFromField(self, field_name):
+        self.from_field = field_name
+    
+    def setToField(self, field_name):
+        self.to_field = field_name
+
+    def setFromFieldData(self, data):
+        self.from_field_data = data
+
+    def rowCount(self, parent):
+        return len(self.from_field_data)
+
+    def columnCount(self, parent):
+        return 2
+
+    def data(self, index, role):
+        if not index.isValid():
+            return QtCore.QVariant()
+        elif role != QtCore.Qt.DisplayRole:
+            return QtCore.QVariant()
+        if index.column() == 0:
+            # from field
+            return QtCore.QVariant(self.from_field_data[index.row()])
+        else:
+            # result field
+            # return QtCore.QVariant(self.data[index.row()][index.column()])
+            return QtCore.QVariant('')
+
+    def headerData(self, col, orientation, role):
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            if col == 0:
+                return QtCore.QVariant(self.from_field)
+            else:
+                return QtCore.QVariant(self.to_field)
+        return QtCore.QVariant()
 
 class BatchConversionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
@@ -34,6 +76,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.field_name_list = []
         self.deck_note_type_field_list = []
         self.field_language = []
+
+        self.noteTableModel = NoteTableModel()
 
         # retain fields which have a language set
         for field_name in field_names:
@@ -63,6 +107,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         from_combobox = QtWidgets.QComboBox()
         from_combobox.addItems(self.field_name_list)
         from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
+        self.from_field = self.field_name_list[0]        
         hlayout.addWidget(from_combobox)
 
         self.from_language_label = aqt.qt.QLabel()
@@ -77,6 +122,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         to_combobox = QtWidgets.QComboBox()
         to_combobox.addItems(self.field_name_list)
         to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
+        self.to_field = self.field_name_list[0]
         hlayout.addWidget(to_combobox)
 
         self.to_language_label = aqt.qt.QLabel()
@@ -99,29 +145,58 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         vlayout.addLayout(hlayout)
 
+        # setup preview table
+        # ===================
+
+        self.table_view = QtWidgets.QTableView()
+        self.table_view.setModel(self.noteTableModel)
+        vlayout.addWidget(self.table_view)
+
+
 
         self.updateTranslationOptions()
 
     def fromFieldIndexChanged(self, currentIndex):
+        self.from_field = self.field_name_list[currentIndex]
         language_code = self.field_language[currentIndex]
         self.from_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.from_language_label.setText(language_name)
         self.updateTranslationOptions()
+        self.updateSampleData()
 
 
     def toFieldIndexChanged(self, currentIndex):
+        self.to_field = self.field_name_list[currentIndex]
         language_code = self.field_language[currentIndex]
         self.to_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.to_language_label.setText(language_name)
         self.updateTranslationOptions()
+        self.updateSampleData()
 
     def updateTranslationOptions(self):
         self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
         self.translation_service_names = [x['service'] for x in self.translation_options]
         self.service_combobox.clear()
         self.service_combobox.addItems(self.translation_service_names)
+
+    def updateSampleData(self):
+        # self.from_field
+        self.noteTableModel.setFromField(self.from_field)
+        self.noteTableModel.setToField(self.to_field)
+        from_field_data = []
+        for note_id in self.note_id_list:
+            note = aqt.mw.col.getNote(note_id)
+            field_data = note[self.from_field]
+            from_field_data.append(field_data)
+        self.noteTableModel.setFromFieldData(from_field_data)
+        self.table_view.model().layoutChanged.emit()
+
+
+
+
+
 
 
 class LanguageMappingDeckWidgets(object):
