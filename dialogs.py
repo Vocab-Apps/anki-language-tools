@@ -46,13 +46,15 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
 
     def setupUi(self):
-        self.resize(700, 800)
+        self.resize(700, 500)
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
         vlayout.addWidget(get_header_label('Add Translation'))
 
         # setup to/from fields
+        # ====================
+
         hlayout = QtWidgets.QHBoxLayout()
         from_label = aqt.qt.QLabel()
         from_label.setText('From Field:')
@@ -64,7 +66,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         hlayout.addWidget(from_combobox)
 
         self.from_language_label = aqt.qt.QLabel()
-        self.from_language_label.setText(self.languagetools.get_language_name(self.field_language[0]))
+        self.from_language = self.field_language[0]
+        self.from_language_label.setText(self.languagetools.get_language_name(self.from_language))
         hlayout.addWidget(self.from_language_label)
 
         to_label = aqt.qt.QLabel()
@@ -77,21 +80,49 @@ class BatchConversionDialog(aqt.qt.QDialog):
         hlayout.addWidget(to_combobox)
 
         self.to_language_label = aqt.qt.QLabel()
-        self.to_language_label.setText(self.languagetools.get_language_name(self.field_language[0]))
+        self.to_language = self.field_language[0]
+        self.to_language_label.setText(self.languagetools.get_language_name(self.to_language))
         hlayout.addWidget(self.to_language_label)
 
         vlayout.addLayout(hlayout)
 
+        # setup translation service
+        # =========================
+
+        hlayout = QtWidgets.QHBoxLayout()
+        service_label = aqt.qt.QLabel()
+        service_label.setText('Service:')
+        hlayout.addWidget(service_label)
+
+        self.service_combobox = QtWidgets.QComboBox()
+        hlayout.addWidget(self.service_combobox)
+
+        vlayout.addLayout(hlayout)
+
+
+        self.updateTranslationOptions()
+
     def fromFieldIndexChanged(self, currentIndex):
         language_code = self.field_language[currentIndex]
+        self.from_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.from_language_label.setText(language_name)
+        self.updateTranslationOptions()
 
 
     def toFieldIndexChanged(self, currentIndex):
         language_code = self.field_language[currentIndex]
+        self.to_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.to_language_label.setText(language_name)
+        self.updateTranslationOptions()
+
+    def updateTranslationOptions(self):
+        self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
+        self.translation_service_names = [x['service'] for x in self.translation_options]
+        self.service_combobox.clear()
+        self.service_combobox.addItems(self.translation_service_names)
+
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
