@@ -176,6 +176,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.load_translations_button = QtWidgets.QPushButton()
         self.load_translations_button.setText('Load Translations')
+        self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET)
         gridlayout.addWidget(self.load_translations_button, 0, 3, 1, 2)
 
         gridlayout.setColumnStretch(0, 50)
@@ -293,7 +294,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
     def loadTranslationsTask(self):
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(None))
         aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(True))
+        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(None))
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
 
         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
@@ -317,7 +320,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET))
         aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
+        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET))        
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Load Translations'))
 
 
@@ -373,8 +378,6 @@ class LanguageMappingDialog_UI(object):
 
         self.dntfComboxBoxMap = {}
 
-        self.greenStylesheet = "background-color: #69F0AE;"
-
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 800)
@@ -410,7 +413,7 @@ class LanguageMappingDialog_UI(object):
         self.autodetect_button = QtWidgets.QPushButton()
         self.autodetect_button.setText('Run Auto Detection')
         self.autodetect_button.setFont(font2)
-        self.autodetect_button.setStyleSheet(self.greenStylesheet)
+        self.autodetect_button.setStyleSheet(constants.GREEN_STYLESHEET)
         self.autodetect_button.pressed.connect(self.runLanguageDetection)
         hlayout.addWidget(self.autodetect_button)
 
@@ -577,7 +580,7 @@ class LanguageMappingDialog_UI(object):
             language_code = self.language_code_list[currentIndex]
         self.language_mapping_changes[deck_note_type_field] = language_code
         # change stylesheet of combobox
-        comboBox.setStyleSheet(self.greenStylesheet + "combobox-popup: 0;")
+        comboBox.setStyleSheet(constants.GREEN_STYLESHEET + "combobox-popup: 0;")
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
