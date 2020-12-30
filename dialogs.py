@@ -109,33 +109,58 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # setup to/from fields
         # ====================
 
+        # overall to/from layout
         hlayout = QtWidgets.QHBoxLayout()
+        
+        hlayout.addStretch()
+
+        label_font_size = 13
+        font1 = QtGui.QFont()
+        font1.setBold(True)
+        font1.setPointSize(label_font_size)
+
         from_label = aqt.qt.QLabel()
         from_label.setText('From Field:')
+        from_label.setFont(font1)
         hlayout.addWidget(from_label)
 
+        vlayout_from = QtWidgets.QVBoxLayout()
         self.from_combobox = QtWidgets.QComboBox()
         self.from_combobox.addItems(self.field_name_list)
         self.from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
-        hlayout.addWidget(self.from_combobox)
+        vlayout_from.addWidget(self.from_combobox)
 
         self.from_language_label = aqt.qt.QLabel()
         self.from_language = self.field_language[0]
-        hlayout.addWidget(self.from_language_label)
+        vlayout_from.addWidget(self.from_language_label)
+
+        hlayout.addLayout(vlayout_from)
+
+        # middle
+        hlayout.addStretch()
+        
 
         to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
+        to_label.setFont(font1)
         hlayout.addWidget(to_label)
 
+        vlayout_to = QtWidgets.QVBoxLayout()
         self.to_combobox = QtWidgets.QComboBox()
         self.to_combobox.addItems(self.field_name_list)
         self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
-        hlayout.addWidget(self.to_combobox)
+        vlayout_to.addWidget(self.to_combobox)
 
         self.to_language_label = aqt.qt.QLabel()
         self.to_language = self.field_language[0]
         self.to_language_label.setText(self.languagetools.get_language_name(self.to_language))
-        hlayout.addWidget(self.to_language_label)
+        vlayout_to.addWidget(self.to_language_label)
+
+        hlayout.addLayout(vlayout_to)
+
+        hlayout.addStretch()
+
+        hlayout.setContentsMargins(0, 20, 0, 20)
 
         vlayout.addLayout(hlayout)
 
