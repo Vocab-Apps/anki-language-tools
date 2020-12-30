@@ -170,6 +170,18 @@ class BatchConversionDialog(aqt.qt.QDialog):
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         vlayout.addWidget(self.table_view)
 
+        # setup bottom buttons
+        # ====================
+
+        buttonBox = QtWidgets.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setEnabled(False)
+        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+        
+        vlayout.addWidget(buttonBox)
+
         self.pickDefaultFromToFields()
         self.updateTranslationOptions()
 
@@ -228,6 +240,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
     def loadTranslationsTask(self):
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
+        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(True))
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
 
         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
@@ -249,11 +262,18 @@ class BatchConversionDialog(aqt.qt.QDialog):
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
+        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Load Translations'))
 
 
     def loadTranslationDone(self, future_result):
         pass
+
+    def accept(self):
+        self.close()
+
+    def reject(self):
+        self.close()
 
 
 
