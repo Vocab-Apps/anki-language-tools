@@ -147,17 +147,18 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.service_combobox = QtWidgets.QComboBox()
         hlayout.addWidget(self.service_combobox)
 
+        self.load_translations_button = QtWidgets.QPushButton()
+        self.load_translations_button.setText('Load Translations')
+        self.load_translations_button.pressed.connect(self.loadTranslations)
+        hlayout.addWidget(self.load_translations_button)
+
         vlayout.addLayout(hlayout)
 
         # setup progress bar
         # ==================
 
-        hlayout = QtWidgets.QHBoxLayout()
-        self.progress_label = QtWidgets.QLabel()
-        hlayout.addWidget(self.progress_label)
         self.progress_bar = QtWidgets.QProgressBar()
-        hlayout.addWidget(self.progress_bar)
-        vlayout.addLayout(hlayout)
+        vlayout.addWidget(self.progress_bar)
 
         # setup preview table
         # ===================
@@ -217,13 +218,15 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.from_field_data = from_field_data
         self.noteTableModel.setFromFieldData(from_field_data)
         self.table_view.model().layoutChanged.emit()
-        self.loadTranslations()
+        #self.loadTranslations()
 
     def loadTranslations(self):
         aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
-        aqt.mw.taskman.run_on_main(lambda: self.progress_label.setText('Loading Translations...'))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
+
         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
 
@@ -242,7 +245,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
-        aqt.mw.taskman.run_on_main(lambda: self.progress_label.setText('Done.'))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Load Translations'))
 
 
     def loadTranslationDone(self, future_result):
