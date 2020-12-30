@@ -379,6 +379,8 @@ class LanguageTools():
         aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
         return error_text
 
+    def get_translation(self, source_text, translation_option):
+        return self.interpret_translation_response_async(self.get_translation_async(source_text, translation_option))
 
     def get_translation_all(self, source_text, from_language, to_language):
         if not self.check_api_key_valid():

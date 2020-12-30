@@ -21,6 +21,7 @@ class NoteTableModel(QtCore.QAbstractTableModel):
     def __init__(self):
         QtCore.QAbstractTableModel.__init__(self, None)
         self.from_field_data = []
+        self.to_field_data = []
         self.from_field = 'From'
         self.to_field = 'To'
 
@@ -32,6 +33,10 @@ class NoteTableModel(QtCore.QAbstractTableModel):
 
     def setFromFieldData(self, data):
         self.from_field_data = data
+        self.to_field_data = [''] * len(self.from_field_data)
+
+    def setToFieldData(self, row, to_field_result):
+        self.to_field_data[row] = to_field_result
 
     def rowCount(self, parent):
         return len(self.from_field_data)
@@ -49,7 +54,7 @@ class NoteTableModel(QtCore.QAbstractTableModel):
             return QtCore.QVariant(self.from_field_data[index.row()])
         else:
             # result field
-            # return QtCore.QVariant(self.data[index.row()][index.column()])
+            return QtCore.QVariant(self.to_field_data[index.row()])
             return QtCore.QVariant('')
 
     def headerData(self, col, orientation, role):
@@ -76,6 +81,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.field_name_list = []
         self.deck_note_type_field_list = []
         self.field_language = []
+
+        self.from_field_data = []
 
         self.noteTableModel = NoteTableModel()
 
@@ -190,12 +197,32 @@ class BatchConversionDialog(aqt.qt.QDialog):
             note = aqt.mw.col.getNote(note_id)
             field_data = note[self.from_field]
             from_field_data.append(field_data)
+        self.from_field_data = from_field_data
         self.noteTableModel.setFromFieldData(from_field_data)
         self.table_view.model().layoutChanged.emit()
+        self.loadTranslations()
+
+    def loadTranslations(self):
+        aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
+
+    def loadTranslationsTask(self):
+        # get service
+        service = self.translation_service_names[self.service_combobox.currentIndex()]
+        translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
+        translation_option_subset = [x for x in translation_options if x['service'] == service]
+        assert(len(translation_option_subset) == 1)
+        translation_option = translation_option_subset[0]
+
+        i = 0
+        for field_data in self.from_field_data:
+            translation_result = self.languagetools.get_translation(field_data, translation_option)
+            self.noteTableModel.setToFieldData(i, translation_result)
+            self.table_view.model().layoutChanged.emit()
+            i += 1
 
 
-
-
+    def loadTranslationDone(self, future_result):
+        pass
 
 
 
