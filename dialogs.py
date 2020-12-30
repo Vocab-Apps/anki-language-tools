@@ -100,6 +100,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
 
     def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
 
         vlayout = QtWidgets.QVBoxLayout(self)
@@ -163,19 +164,29 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # setup translation service
         # =========================
 
-        hlayout = QtWidgets.QHBoxLayout()
+        gridlayout = QtWidgets.QGridLayout()
         service_label = aqt.qt.QLabel()
+        service_label.setFont(font1)
         service_label.setText('Service:')
-        hlayout.addWidget(service_label)
+        gridlayout.addWidget(service_label, 0, 0, 1, 1)
 
         self.service_combobox = QtWidgets.QComboBox()
-        hlayout.addWidget(self.service_combobox)
+        gridlayout.addWidget(self.service_combobox, 0, 1, 1, 1)
+
 
         self.load_translations_button = QtWidgets.QPushButton()
         self.load_translations_button.setText('Load Translations')
-        hlayout.addWidget(self.load_translations_button)
+        gridlayout.addWidget(self.load_translations_button, 0, 3, 1, 2)
 
-        vlayout.addLayout(hlayout)
+        gridlayout.setColumnStretch(0, 50)
+        gridlayout.setColumnStretch(1, 50)
+        gridlayout.setColumnStretch(2, 30)
+        gridlayout.setColumnStretch(3, 50)
+        gridlayout.setColumnStretch(4, 50)
+
+        gridlayout.setContentsMargins(20, 0, 20, 10)
+
+        vlayout.addLayout(gridlayout)
 
         # setup progress bar
         # ==================
