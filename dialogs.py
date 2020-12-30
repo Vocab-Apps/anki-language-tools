@@ -165,6 +165,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.table_view = QtWidgets.QTableView()
         self.table_view.setModel(self.noteTableModel)
+        header = self.table_view.horizontalHeader()       
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         vlayout.addWidget(self.table_view)
 
         self.pickDefaultFromToFields()
