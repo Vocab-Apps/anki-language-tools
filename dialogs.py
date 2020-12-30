@@ -110,9 +110,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # ====================
 
         # overall to/from layout
-        hlayout = QtWidgets.QHBoxLayout()
-        
-        hlayout.addStretch()
+        gridlayout = QtWidgets.QGridLayout()
 
         label_font_size = 13
         font1 = QtGui.QFont()
@@ -122,47 +120,36 @@ class BatchConversionDialog(aqt.qt.QDialog):
         from_label = aqt.qt.QLabel()
         from_label.setText('From Field:')
         from_label.setFont(font1)
-        hlayout.addWidget(from_label)
+        gridlayout.addWidget(from_label, 0, 0, 1, 1)
 
-        vlayout_from = QtWidgets.QVBoxLayout()
         self.from_combobox = QtWidgets.QComboBox()
         self.from_combobox.addItems(self.field_name_list)
         self.from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
-        vlayout_from.addWidget(self.from_combobox)
+        gridlayout.addWidget(self.from_combobox, 0, 1, 1, 1)
+
+        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 0, 1, 1)
 
         self.from_language_label = aqt.qt.QLabel()
-        self.from_language = self.field_language[0]
-        vlayout_from.addWidget(self.from_language_label)
+        gridlayout.addWidget(self.from_language_label, 1, 1, 1, 1)
 
-        hlayout.addLayout(vlayout_from)
-
-        # middle
-        hlayout.addStretch()
-        
 
         to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
         to_label.setFont(font1)
-        hlayout.addWidget(to_label)
+        gridlayout.addWidget(to_label, 0, 2, 1, 1)
 
-        vlayout_to = QtWidgets.QVBoxLayout()
         self.to_combobox = QtWidgets.QComboBox()
         self.to_combobox.addItems(self.field_name_list)
         self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
-        vlayout_to.addWidget(self.to_combobox)
+        gridlayout.addWidget(self.to_combobox, 0, 3, 1, 1)
 
+        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 2, 1, 1)
         self.to_language_label = aqt.qt.QLabel()
-        self.to_language = self.field_language[0]
-        self.to_language_label.setText(self.languagetools.get_language_name(self.to_language))
-        vlayout_to.addWidget(self.to_language_label)
+        gridlayout.addWidget(self.to_language_label, 1, 3, 1, 1)
 
-        hlayout.addLayout(vlayout_to)
+        gridlayout.setContentsMargins(0, 20, 0, 20)
 
-        hlayout.addStretch()
-
-        hlayout.setContentsMargins(0, 20, 0, 20)
-
-        vlayout.addLayout(hlayout)
+        vlayout.addLayout(gridlayout)
 
         # setup translation service
         # =========================
@@ -217,31 +204,36 @@ class BatchConversionDialog(aqt.qt.QDialog):
         from_field_index = 0
         to_field_index = 1
 
-        self.from_field = self.field_name_list[from_field_index]
-        self.to_field = self.field_name_list[to_field_index]
+        # self.from_field = self.field_name_list[from_field_index]
+        # self.to_field = self.field_name_list[to_field_index]
 
         self.from_combobox.setCurrentIndex(from_field_index)
         self.to_combobox.setCurrentIndex(to_field_index)
         
+        self.fromFieldIndexChanged(from_field_index, initialization=True)
+        self.toFieldIndexChanged(to_field_index, initialization=True)
+        
 
-    def fromFieldIndexChanged(self, currentIndex):
+    def fromFieldIndexChanged(self, currentIndex, initialization=False):
         self.from_field = self.field_name_list[currentIndex]
         language_code = self.field_language[currentIndex]
         self.from_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.from_language_label.setText(language_name)
-        self.updateTranslationOptions()
-        self.updateSampleData()
+        # if initialization == False:
+        #     self.updateTranslationOptions()
+        #     self.updateSampleData()
 
 
-    def toFieldIndexChanged(self, currentIndex):
+    def toFieldIndexChanged(self, currentIndex, initialization=False):
         self.to_field = self.field_name_list[currentIndex]
         language_code = self.field_language[currentIndex]
         self.to_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.to_language_label.setText(language_name)
-        self.updateTranslationOptions()
-        self.updateSampleData()
+        # if initialization == False:
+        #     self.updateTranslationOptions()
+        #     self.updateSampleData()
 
     def updateTranslationOptions(self):
         self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
