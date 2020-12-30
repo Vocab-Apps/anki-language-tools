@@ -290,7 +290,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
             #print(f'note_id: {note_id} i: {i}')
             note = aqt.mw.col.getNote(note_id)
             note[self.to_field] = self.to_field_data[i]
-            print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
+            # print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
             note.flush()
         self.close()
 
@@ -621,6 +621,5 @@ def add_translation_dialog(languagetools, note_id_list):
     dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
     dialog.exec_()
-    print(f'*** done with add_translation_dialog')
 
 
