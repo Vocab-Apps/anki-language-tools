@@ -109,8 +109,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # setup to/from fields
         # ====================
 
-        # overall to/from layout
         gridlayout = QtWidgets.QGridLayout()
+
+        # "from" side
+        # -----------
 
         label_font_size = 13
         font1 = QtGui.QFont()
@@ -133,21 +135,30 @@ class BatchConversionDialog(aqt.qt.QDialog):
         gridlayout.addWidget(self.from_language_label, 1, 1, 1, 1)
 
 
+        # "to" side
+        # ---------
+
         to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
         to_label.setFont(font1)
-        gridlayout.addWidget(to_label, 0, 2, 1, 1)
+        gridlayout.addWidget(to_label, 0, 3, 1, 1)
 
         self.to_combobox = QtWidgets.QComboBox()
         self.to_combobox.addItems(self.field_name_list)
         self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
-        gridlayout.addWidget(self.to_combobox, 0, 3, 1, 1)
+        gridlayout.addWidget(self.to_combobox, 0, 4, 1, 1)
 
-        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 2, 1, 1)
+        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 3, 1, 1)
         self.to_language_label = aqt.qt.QLabel()
-        gridlayout.addWidget(self.to_language_label, 1, 3, 1, 1)
+        gridlayout.addWidget(self.to_language_label, 1, 4, 1, 1)
 
-        gridlayout.setContentsMargins(0, 20, 0, 20)
+        gridlayout.setColumnStretch(0, 50)
+        gridlayout.setColumnStretch(1, 50)
+        gridlayout.setColumnStretch(2, 30)
+        gridlayout.setColumnStretch(3, 50)
+        gridlayout.setColumnStretch(4, 50)
+
+        gridlayout.setContentsMargins(20, 30, 20, 30)
 
         vlayout.addLayout(gridlayout)
 
