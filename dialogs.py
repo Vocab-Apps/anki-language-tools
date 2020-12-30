@@ -111,26 +111,23 @@ class BatchConversionDialog(aqt.qt.QDialog):
         from_label.setText('From Field:')
         hlayout.addWidget(from_label)
 
-        from_combobox = QtWidgets.QComboBox()
-        from_combobox.addItems(self.field_name_list)
-        from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
-        self.from_field = self.field_name_list[0]        
-        hlayout.addWidget(from_combobox)
+        self.from_combobox = QtWidgets.QComboBox()
+        self.from_combobox.addItems(self.field_name_list)
+        self.from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
+        hlayout.addWidget(self.from_combobox)
 
         self.from_language_label = aqt.qt.QLabel()
         self.from_language = self.field_language[0]
-        self.from_language_label.setText(self.languagetools.get_language_name(self.from_language))
         hlayout.addWidget(self.from_language_label)
 
         to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
         hlayout.addWidget(to_label)
 
-        to_combobox = QtWidgets.QComboBox()
-        to_combobox.addItems(self.field_name_list)
-        to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
-        self.to_field = self.field_name_list[0]
-        hlayout.addWidget(to_combobox)
+        self.to_combobox = QtWidgets.QComboBox()
+        self.to_combobox.addItems(self.field_name_list)
+        self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
+        hlayout.addWidget(self.to_combobox)
 
         self.to_language_label = aqt.qt.QLabel()
         self.to_language = self.field_language[0]
@@ -169,8 +166,19 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.table_view.setModel(self.noteTableModel)
         vlayout.addWidget(self.table_view)
 
-
+        self.pickDefaultFromToFields()
         self.updateTranslationOptions()
+
+    def pickDefaultFromToFields(self):
+        from_field_index = 0
+        to_field_index = 1
+
+        self.from_field = self.field_name_list[from_field_index]
+        self.to_field = self.field_name_list[to_field_index]
+
+        self.from_combobox.setCurrentIndex(from_field_index)
+        self.to_combobox.setCurrentIndex(to_field_index)
+        
 
     def fromFieldIndexChanged(self, currentIndex):
         self.from_field = self.field_name_list[currentIndex]
@@ -542,7 +550,7 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.exec_()
 
 def add_translation_dialog(languagetools, note_id_list):
-    print(f'* add_translation_dialog {note_id_list}')
+    # print(f'* add_translation_dialog {note_id_list}')
 
     # ensure we only have one deck/notetype selected
     deck_note_type_map = {}
