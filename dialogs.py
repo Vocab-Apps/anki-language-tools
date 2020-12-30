@@ -212,6 +212,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton.setStyleSheet(constants.RED_STYLESHEET)
 
         
         vlayout.addWidget(buttonBox)

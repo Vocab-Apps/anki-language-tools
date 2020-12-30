@@ -7,4 +7,5 @@ MENU_PREFIX = ADDON_NAME + ':'
 DEFAULT_LANGUAGE = 'en' # always add this language, even if the user didn't add it themselves
 EDITOR_WEB_FIELD_ID_TRANSLATION = 'translation'
 
-GREEN_STYLESHEET = "background-color: #69F0AE;"
+GREEN_STYLESHEET = 'background-color: #69F0AE;'
+RED_STYLESHEET = 'background-color: #FFCDD2;'
