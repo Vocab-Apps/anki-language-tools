@@ -83,6 +83,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.field_language = []
 
         self.from_field_data = []
+        self.to_field_data = []
+
+        self.to_fields_empty = True
 
         self.noteTableModel = NoteTableModel()
 
@@ -226,10 +229,14 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.noteTableModel.setFromField(self.from_field)
         self.noteTableModel.setToField(self.to_field)
         from_field_data = []
+        self.to_fields_empty = True
         for note_id in self.note_id_list:
             note = aqt.mw.col.getNote(note_id)
             field_data = note[self.from_field]
             from_field_data.append(field_data)
+            # self.to_fields_empty = True
+            if len(note[self.to_field]) > 0:
+                self.to_fields_empty = False
         self.from_field_data = from_field_data
         self.noteTableModel.setFromFieldData(from_field_data)
         self.table_view.model().layoutChanged.emit()
@@ -254,8 +261,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
         translation_option = translation_option_subset[0]
 
         i = 0
+        self.to_field_data = []
         for field_data in self.from_field_data:
             translation_result = self.languagetools.get_translation(field_data, translation_option)
+            self.to_field_data.append(translation_result)
             self.noteTableModel.setToFieldData(i, translation_result)
             self.table_view.model().layoutChanged.emit()
             i += 1
@@ -270,9 +279,19 @@ class BatchConversionDialog(aqt.qt.QDialog):
         pass
 
     def accept(self):
-        self.close()
-
-    def reject(self):
+        if self.to_fields_empty == False:
+            proceed = aqt.utils.askUser(f'Overwrite existing data in field {self.to_field} ?')
+            if proceed == False:
+                return
+        # set field on notes
+        action_str = f'Translate from {self.languagetools.get_language_name(self.from_language)} to {self.languagetools.get_language_name(self.to_language)}'
+        aqt.mw.checkpoint(action_str)
+        for (note_id, i) in zip(self.note_id_list, range(len(self.note_id_list))):
+            #print(f'note_id: {note_id} i: {i}')
+            note = aqt.mw.col.getNote(note_id)
+            note[self.to_field] = self.to_field_data[i]
+            print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
+            note.flush()
         self.close()
 
 
@@ -602,5 +621,6 @@ def add_translation_dialog(languagetools, note_id_list):
     dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
     dialog.exec_()
+    print(f'*** done with add_translation_dialog')
 
 
