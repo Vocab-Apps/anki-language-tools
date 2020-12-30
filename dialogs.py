@@ -152,13 +152,22 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         vlayout.addLayout(hlayout)
 
+        # setup progress bar
+        # ==================
+
+        hlayout = QtWidgets.QHBoxLayout()
+        self.progress_label = QtWidgets.QLabel()
+        hlayout.addWidget(self.progress_label)
+        self.progress_bar = QtWidgets.QProgressBar()
+        hlayout.addWidget(self.progress_bar)
+        vlayout.addLayout(hlayout)
+
         # setup preview table
         # ===================
 
         self.table_view = QtWidgets.QTableView()
         self.table_view.setModel(self.noteTableModel)
         vlayout.addWidget(self.table_view)
-
 
 
         self.updateTranslationOptions()
@@ -206,6 +215,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
+        aqt.mw.taskman.run_on_main(lambda: self.progress_label.setText('Loading Translations...'))
+        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
+        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
+
         # get service
         service = self.translation_service_names[self.service_combobox.currentIndex()]
         translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
@@ -219,6 +232,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
             self.noteTableModel.setToFieldData(i, translation_result)
             self.table_view.model().layoutChanged.emit()
             i += 1
+            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
+
+        aqt.mw.taskman.run_on_main(lambda: self.progress_label.setText('Done.'))
 
 
     def loadTranslationDone(self, future_result):
