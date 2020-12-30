@@ -126,7 +126,6 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.from_combobox = QtWidgets.QComboBox()
         self.from_combobox.addItems(self.field_name_list)
-        self.from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
         gridlayout.addWidget(self.from_combobox, 0, 1, 1, 1)
 
         gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 0, 1, 1)
@@ -145,7 +144,6 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.to_combobox = QtWidgets.QComboBox()
         self.to_combobox.addItems(self.field_name_list)
-        self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
         gridlayout.addWidget(self.to_combobox, 0, 4, 1, 1)
 
         gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 3, 1, 1)
@@ -175,7 +173,6 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.load_translations_button = QtWidgets.QPushButton()
         self.load_translations_button.setText('Load Translations')
-        self.load_translations_button.pressed.connect(self.loadTranslations)
         hlayout.addWidget(self.load_translations_button)
 
         vlayout.addLayout(hlayout)
@@ -203,20 +200,32 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
+
         
         vlayout.addWidget(buttonBox)
 
         self.pickDefaultFromToFields()
         self.updateTranslationOptions()
 
+        # wire events
+        # ===========
+        self.from_combobox.currentIndexChanged.connect(self.fromFieldIndexChanged)
+        self.to_combobox.currentIndexChanged.connect(self.toFieldIndexChanged)
+        self.load_translations_button.pressed.connect(self.loadTranslations)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
     def pickDefaultFromToFields(self):
         from_field_index = 0
         to_field_index = 1
 
-        # self.from_field = self.field_name_list[from_field_index]
-        # self.to_field = self.field_name_list[to_field_index]
+        # set some defaults
+        self.from_field = self.field_name_list[from_field_index]
+        self.to_field = self.field_name_list[to_field_index]
+
+        # set languages
+        self.from_language = self.field_language[from_field_index]
+        self.to_language = self.field_language[to_field_index]
 
         self.from_combobox.setCurrentIndex(from_field_index)
         self.to_combobox.setCurrentIndex(to_field_index)
@@ -231,9 +240,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.from_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.from_language_label.setText(language_name)
-        # if initialization == False:
-        #     self.updateTranslationOptions()
-        #     self.updateSampleData()
+        self.updateTranslationOptions()
+        self.updateSampleData()
 
 
     def toFieldIndexChanged(self, currentIndex, initialization=False):
@@ -242,9 +250,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.to_language = language_code
         language_name = self.languagetools.get_language_name(language_code)
         self.to_language_label.setText(language_name)
-        # if initialization == False:
-        #     self.updateTranslationOptions()
-        #     self.updateSampleData()
+        self.updateTranslationOptions()
+        self.updateSampleData()
 
     def updateTranslationOptions(self):
         self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
