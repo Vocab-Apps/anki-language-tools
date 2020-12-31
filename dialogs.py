@@ -286,6 +286,16 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.translation_service_names = [x['service'] for x in self.translation_options]
         self.service_combobox.clear()
         self.service_combobox.addItems(self.translation_service_names)
+        # do we have a user preference ?
+        batch_translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+        if len(batch_translation_settings) >= 1:
+            # pick the first one
+            setting_key = list(batch_translation_settings.keys())[0]
+            setting = batch_translation_settings[setting_key]
+            service = setting['translation_option']['service']
+            if service in self.translation_service_names:
+                service_index = self.translation_service_names.index(service)
+                self.service_combobox.setCurrentIndex(service_index)
 
     def updateSampleData(self):
         # self.from_field
