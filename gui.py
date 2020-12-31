@@ -201,10 +201,6 @@ def init(languagetools):
 
             menu.addMenu(submenu)
 
-        else:
-            # give user an option to run language detection
-            menu_text = f'{constants.MENU_PREFIX} Run Language Detection'
-            menu.addAction(menu_text, languagetools.run_language_detection)
 
     # add menu items to anki deck picker / main screen
     # ================================================
