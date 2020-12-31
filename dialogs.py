@@ -410,6 +410,8 @@ class LanguageMappingDialog_UI(object):
 
         self.dntfComboxBoxMap = {}
 
+        self.autodetect_in_progress = False
+
     def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 800)
@@ -461,7 +463,7 @@ class LanguageMappingDialog_UI(object):
 
         self.buttonBox = QtWidgets.QDialogButtonBox()
         self.applyButton = self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
-        self.applyButton.setDisabled(True)
+        self.disableApplyButton()
         cancelButton = self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
         cancelButton.setStyleSheet(constants.RED_STYLESHEET)
         self.buttonBox.accepted.connect(self.accept)
@@ -616,8 +618,8 @@ class LanguageMappingDialog_UI(object):
         # change stylesheet of combobox
         comboBox.setStyleSheet(constants.GREEN_STYLESHEET + "combobox-popup: 0;")
         # enable apply button
-        self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
-        self.applyButton.setDisabled(False)
+        if not self.autodetect_in_progress:
+            self.enableApplyButton()
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
@@ -643,7 +645,9 @@ class LanguageMappingDialog_UI(object):
         aqt.mw.taskman.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
 
     def runLanguageDetectionBackground(self):
+        self.autodetect_in_progress = True
         self.autodetect_button.setEnabled(False)
+        self.disableApplyButton()
 
         dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
         progress_max = len(dtnf_list)
@@ -670,7 +674,18 @@ class LanguageMappingDialog_UI(object):
         aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
 
     def runLanguageDetectionDone(self, future_result):
+        self.autodetect_in_progress = False
         self.autodetect_button.setEnabled(True)
+        self.enableApplyButton()
+
+
+    def disableApplyButton(self):
+        self.applyButton.setStyleSheet(None)
+        self.applyButton.setDisabled(True)
+
+    def enableApplyButton(self):
+        self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
+        self.applyButton.setDisabled(False)
 
 
 def language_mapping_dialogue(languagetools):
