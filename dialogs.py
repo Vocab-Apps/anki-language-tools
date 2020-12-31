@@ -429,8 +429,10 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(self.scrollArea)
 
         self.buttonBox = QtWidgets.QDialogButtonBox()
-        self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.applyButton = self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setDisabled(True)
+        cancelButton = self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        cancelButton.setStyleSheet(constants.RED_STYLESHEET)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
         self.topLevel.addWidget(self.buttonBox)
@@ -582,6 +584,9 @@ class LanguageMappingDialog_UI(object):
         self.language_mapping_changes[deck_note_type_field] = language_code
         # change stylesheet of combobox
         comboBox.setStyleSheet(constants.GREEN_STYLESHEET + "combobox-popup: 0;")
+        # enable apply button
+        self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
+        self.applyButton.setDisabled(False)
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
