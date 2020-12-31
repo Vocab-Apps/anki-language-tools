@@ -320,7 +320,12 @@ class LanguageTools():
         }
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    
+    def get_batch_translation_settings(self, deck_note_type: DeckNoteType):
+        model_name = deck_note_type.model_name
+        deck_name = deck_note_type.deck_name
+
+        return self.config.get(constants.CONFIG_BATCH_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
+
     def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, translation_option, target_language: str):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()

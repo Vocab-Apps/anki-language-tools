@@ -229,8 +229,23 @@ class BatchConversionDialog(aqt.qt.QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def pickDefaultFromToFields(self):
+        # defaults in case nothing is set
         from_field_index = 0
         to_field_index = 1
+
+        # do we have a batch translation setting set ?
+        batch_translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+        if len(batch_translation_settings) >= 1:
+            # pick the first one
+            setting_key = list(batch_translation_settings.keys())[0]
+            setting = batch_translation_settings[setting_key]
+            from_field = setting['from_field']
+            to_field = setting_key
+            # service = setting['translation_option']['service']
+            if from_field in self.field_name_list:
+                from_field_index = self.field_name_list.index(from_field)
+            if to_field in self.field_name_list:
+                to_field_index = self.field_name_list.index(to_field)
 
         # set some defaults
         self.from_field = self.field_name_list[from_field_index]
