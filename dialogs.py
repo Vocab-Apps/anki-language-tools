@@ -27,16 +27,24 @@ class NoteTableModel(QtCore.QAbstractTableModel):
 
     def setFromField(self, field_name):
         self.from_field = field_name
+        self.headerDataChanged.emit(QtCore.Qt.Horizontal, 0, 1)
     
     def setToField(self, field_name):
         self.to_field = field_name
+        self.headerDataChanged.emit(QtCore.Qt.Horizontal, 0, 1)
 
     def setFromFieldData(self, data):
         self.from_field_data = data
         self.to_field_data = [''] * len(self.from_field_data)
+        start_index = self.createIndex(0, 0)
+        end_index = self.createIndex(len(self.from_field_data)-1, 0)
+        self.dataChanged.emit(start_index, end_index)
 
     def setToFieldData(self, row, to_field_result):
         self.to_field_data[row] = to_field_result
+        start_index = self.createIndex(row, 1)
+        end_index = self.createIndex(row, 1)
+        self.dataChanged.emit(start_index, end_index)
 
     def rowCount(self, parent):
         return len(self.from_field_data)
@@ -312,8 +320,6 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 self.to_fields_empty = False
         self.from_field_data = from_field_data
         self.noteTableModel.setFromFieldData(from_field_data)
-        self.table_view.model().layoutChanged.emit()
-        #self.loadTranslations()
 
     def loadTranslations(self):
         if self.languagetools.check_api_key_valid() == False:
