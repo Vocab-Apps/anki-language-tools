@@ -10,6 +10,8 @@ git tag -a ${GIT_TAG} -m "version ${GIT_TAG}"
 git push origin ${GIT_TAG}
 
 # create .addon file
+# remove meta.json, which contains private key
+rm meta.json
 ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION_NUMBER}.ankiaddon
 zip -r ${ADDON_FILENAME} *
 
