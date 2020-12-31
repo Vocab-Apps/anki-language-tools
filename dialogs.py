@@ -36,11 +36,13 @@ class NoteTableModel(QtCore.QAbstractTableModel):
     def setFromFieldData(self, data):
         self.from_field_data = data
         self.to_field_data = [''] * len(self.from_field_data)
+        print(f'**** len(self.to_field_data): {len(self.to_field_data)}')
         start_index = self.createIndex(0, 0)
         end_index = self.createIndex(len(self.from_field_data)-1, 0)
         self.dataChanged.emit(start_index, end_index)
 
     def setToFieldData(self, row, to_field_result):
+        print(f'**** setToFieldData:, row: {row}')
         self.to_field_data[row] = to_field_result
         start_index = self.createIndex(row, 1)
         end_index = self.createIndex(row, 1)
@@ -343,13 +345,17 @@ class BatchConversionDialog(aqt.qt.QDialog):
         assert(len(translation_option_subset) == 1)
         self.translation_option = translation_option_subset[0]
 
+        def get_set_to_field_lambda(i, translation_result):
+            def set_to_field():
+                self.noteTableModel.setToFieldData(i, translation_result)
+            return set_to_field
+
         i = 0
         self.to_field_data = []
         for field_data in self.from_field_data:
             translation_result = self.languagetools.get_translation(field_data, self.translation_option)
             self.to_field_data.append(translation_result)
-            self.noteTableModel.setToFieldData(i, translation_result)
-            self.table_view.model().layoutChanged.emit()
+            aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
