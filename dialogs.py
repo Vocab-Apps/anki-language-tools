@@ -684,6 +684,11 @@ def language_mapping_dialogue(languagetools):
 def add_translation_dialog(languagetools, note_id_list):
     # print(f'* add_translation_dialog {note_id_list}')
 
+    # did the user perform language mapping ? 
+    if not languagetools.language_detection_done():
+        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
+        return
+
     # ensure we only have one deck/notetype selected
     deck_note_type_map = {}
 
