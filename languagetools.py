@@ -302,7 +302,25 @@ class LanguageTools():
 
         if tooltip:
             aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
+ 
+    def store_batch_translation_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str, translation_option):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
 
+        if constants.CONFIG_BATCH_TRANSLATION not in self.config:
+            self.config[constants.CONFIG_BATCH_TRANSLATION] = {}
+        if model_name not in self.config[constants.CONFIG_BATCH_TRANSLATION]:
+            self.config[constants.CONFIG_BATCH_TRANSLATION][model_name] = {}
+        if deck_name not in self.config[constants.CONFIG_BATCH_TRANSLATION][model_name]:
+            self.config[constants.CONFIG_BATCH_TRANSLATION][model_name][deck_name] = {}
+        self.config[constants.CONFIG_BATCH_TRANSLATION][model_name][deck_name][field_name] = {
+            'from_field': source_field,
+            'translation_option': translation_option
+        }
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+    
     def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, translation_option, target_language: str):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()

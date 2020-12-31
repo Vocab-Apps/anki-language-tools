@@ -291,6 +291,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         #self.loadTranslations()
 
     def loadTranslations(self):
+        if self.languagetools.check_api_key_valid() == False:
+            return
         aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
@@ -308,12 +310,12 @@ class BatchConversionDialog(aqt.qt.QDialog):
         translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
         translation_option_subset = [x for x in translation_options if x['service'] == service]
         assert(len(translation_option_subset) == 1)
-        translation_option = translation_option_subset[0]
+        self.translation_option = translation_option_subset[0]
 
         i = 0
         self.to_field_data = []
         for field_data in self.from_field_data:
-            translation_result = self.languagetools.get_translation(field_data, translation_option)
+            translation_result = self.languagetools.get_translation(field_data, self.translation_option)
             self.to_field_data.append(translation_result)
             self.noteTableModel.setToFieldData(i, translation_result)
             self.table_view.model().layoutChanged.emit()
@@ -345,6 +347,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
             # print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
             note.flush()
         self.close()
+        # memorize this setting
+        deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
+        self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
+        aqt.utils.tooltip(f'Wrote translations into field {self.to_field}')
 
 
 
