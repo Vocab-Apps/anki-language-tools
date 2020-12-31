@@ -4,5 +4,6 @@
     "wanted_languages": {
         "en": true
     },
-    "inline_translations": {}
+    "inline_translations": {},
+    "batch_translations": {},
 }
