@@ -657,33 +657,41 @@ class LanguageMappingDialog_UI(object):
         aqt.mw.taskman.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
 
     def runLanguageDetectionBackground(self):
-        self.autodetect_in_progress = True
-        self.autodetect_button.setEnabled(False)
-        self.disableApplyButton()
+        try:
+            self.autodetect_in_progress = True
+            self.autodetect_button.setEnabled(False)
+            self.disableApplyButton()
 
-        dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
-        progress_max = len(dtnf_list)
-        self.setProgressBarMax(progress_max)
+            dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
+            progress_max = len(dtnf_list)
+            self.setProgressBarMax(progress_max)
 
-        progress = 0
-        for dntf in dtnf_list:
-            language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
-            #self.language_mapping_changes[deck_note_type_field] = language
-            # need to set combo box correctly.
-            comboBox = self.dntfComboxBoxMap[dntf]
-            self.setFieldLanguageIndex(comboBox, language)
+            progress = 0
+            for dntf in dtnf_list:
+                language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
+                #self.language_mapping_changes[deck_note_type_field] = language
+                # need to set combo box correctly.
+                comboBox = self.dntfComboxBoxMap[dntf]
+                self.setFieldLanguageIndex(comboBox, language)
 
-            # progress bar
-            self.setProgressValue(progress)
-            progress += 1
-        
-        self.setProgressValue(progress_max)
+                # progress bar
+                self.setProgressValue(progress)
+                progress += 1
+            
+            self.setProgressValue(progress_max)
+        except:
+            error_message = str(sys.exc_info())
+            self.displayErrorMessage(error_message)
+
 
     def setProgressBarMax(self, progress_max):
         aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setMaximum(progress_max))
 
     def setProgressValue(self, progress):
         aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
+
+    def displayErrorMessage(self, message):
+        aqt.mw.taskman.run_on_main(lambda: aqt.utils.showCritical(f"Could not run language detection: {message}", title=constants.ADDON_NAME))
 
     def runLanguageDetectionDone(self, future_result):
         self.autodetect_in_progress = False

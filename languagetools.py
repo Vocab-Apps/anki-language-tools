@@ -246,7 +246,15 @@ class LanguageTools():
     def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
         
-        all_field_values = [aqt.mw.col.getNote(x)[deck_note_type_field.field_name] for x in notes]
+        def process_field_value(note_id, field_name):
+            original_field_value = aqt.mw.col.getNote(note_id)[field_name]
+            field_value = original_field_value
+            max_len = 200 # restrict to 200 characters
+            if len(original_field_value) > max_len:
+                field_value = original_field_value[:max_len]
+            return field_value
+
+        all_field_values = [process_field_value(x, deck_note_type_field.field_name) for x in notes]
         non_empty_fields = [x for x in all_field_values if len(x) > 0]
 
         if len(non_empty_fields) < sample_size:
@@ -260,7 +268,7 @@ class LanguageTools():
     def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
         # get a random sample of data within this field
 
-        sample_size = 100
+        sample_size = 100 # max supported by azure
         field_sample = self.get_field_samples(deck_note_type_field, sample_size)
         if len(field_sample) == 0:
             return None
@@ -268,10 +276,14 @@ class LanguageTools():
         response = requests.post(self.base_url + '/detect', json={
                 'text_list': field_sample
         }, headers={'api_key': self.config['api_key']})
-        data = json.loads(response.content)
-        detected_language = data['detected_language']
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            detected_language = data['detected_language']
 
-        return detected_language
+            return detected_language
+        else:
+            # error occured, return none
+            return None
 
     def guess_language(self, deck_note_type_field: DeckNoteTypeField):
         # retrieve notes
