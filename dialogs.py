@@ -708,7 +708,7 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
 
-def add_translation_dialog(languagetools, note_id_list):
+def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     # print(f'* add_translation_dialog {note_id_list}')
 
     # did the user perform language mapping ? 
@@ -739,5 +739,8 @@ def add_translation_dialog(languagetools, note_id_list):
     dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
     dialog.exec_()
+
+    # force browser to reload notes
+    browser.model.reset()
 
 

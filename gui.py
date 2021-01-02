@@ -239,7 +239,7 @@ def init(languagetools):
         browser.form.menubar.addMenu(menu)
 
         action = aqt.qt.QAction(f'Add Translation To Selected Notes...', browser)
-        action.triggered.connect(lambda: dialogs.add_translation_dialog(languagetools, browser.selectedNotes()))
+        action.triggered.connect(lambda: dialogs.add_translation_dialog(languagetools, browser, browser.selectedNotes()))
         menu.addAction(action)
 
     # browser menus
