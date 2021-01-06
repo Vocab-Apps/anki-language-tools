@@ -186,6 +186,8 @@ class LanguageTools():
         aqt.utils.showInfo(text, title=constants.ADDON_NAME)
 
     def get_language_name(self, language):
+        if language == None:
+            return 'Not set'
         if language == constants.SpecialLanguage.transliteration.name:
             return 'Transliteration'
         if language == constants.SpecialLanguage.sound.name:
