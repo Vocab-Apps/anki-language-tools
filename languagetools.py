@@ -186,7 +186,20 @@ class LanguageTools():
         aqt.utils.showInfo(text, title=constants.ADDON_NAME)
 
     def get_language_name(self, language):
+        if language == constants.SpecialLanguage.transliteration.name:
+            return 'Transliteration'
+        if language == constants.SpecialLanguage.sound.name:
+            return 'Sound'
         return self.language_list[language]
+
+    def language_available_for_translation(self, language):
+        if language == None:
+            return False
+        if language == constants.SpecialLanguage.transliteration.name:
+            return False
+        if language == constants.SpecialLanguage.sound.name:
+            return False
+        return True
 
     def get_all_languages(self):
         return self.language_list
@@ -201,6 +214,13 @@ class LanguageTools():
         language_list = sorted(language_list, key=lambda x: x['name'])
         language_code_list = [x['key'] for x in language_list]
         language_name_list = [x['name'] for x in language_list]
+
+        # add the special languages
+        language_name_list.append('Transliteration')
+        language_code_list.append(constants.SpecialLanguage.transliteration.name)
+        language_name_list.append('Sound')
+        language_code_list.append(constants.SpecialLanguage.sound.name)
+
         return {'language_name_list': language_name_list,
                 'language_code_list': language_code_list
         }
@@ -332,11 +352,34 @@ class LanguageTools():
         }
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
+    def store_batch_transliteration_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str, transliteration_option):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
+
+        if constants.CONFIG_BATCH_TRANSLITERATION not in self.config:
+            self.config[constants.CONFIG_BATCH_TRANSLITERATION] = {}
+        if model_name not in self.config[constants.CONFIG_BATCH_TRANSLITERATION]:
+            self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name] = {}
+        if deck_name not in self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name]:
+            self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name][deck_name] = {}
+        self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name][deck_name][field_name] = {
+            'from_field': source_field,
+            'transliteration_option': transliteration_option
+        }
+        aqt.mw.addonManager.writeConfig(__name__, self.config)        
+
     def get_batch_translation_settings(self, deck_note_type: DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
+
+    def get_batch_transliteration_settings(self, deck_note_type: DeckNoteType):
+        model_name = deck_note_type.model_name
+        deck_name = deck_note_type.deck_name
+
+        return self.config.get(constants.CONFIG_BATCH_TRANSLITERATION, {}).get(model_name, {}).get(deck_name, {})
 
     def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, translation_option, target_language: str):
         model_name = deck_note_type_field.get_model_name()

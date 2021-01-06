@@ -104,10 +104,15 @@ class BatchConversionDialog(aqt.qt.QDialog):
         for field_name in field_names:
             deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
             language = self.languagetools.get_language(deck_note_type_field)
-            if language != None:
+            if self.transformation_type == constants.TransformationType.Translation:
+                if self.languagetools.language_available_for_translation(language):
+                    self.field_name_list.append(field_name)
+                    self.deck_note_type_field_list.append(deck_note_type_field)
+                    self.field_language.append(language)
+            elif self.transformation_type == constants.TransformationType.Transliteration:
                 self.field_name_list.append(field_name)
                 self.deck_note_type_field_list.append(deck_note_type_field)
-                self.field_language.append(language)
+                self.field_language.append(language)                
 
 
     def setupUi(self):
@@ -191,11 +196,11 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
 
         self.load_translations_button = QtWidgets.QPushButton()
-        load_text_map = {
+        self.load_button_text_map = {
             constants.TransformationType.Translation: 'Load Translations',
             constants.TransformationType.Transliteration: 'Load Transliterations'
         }        
-        self.load_translations_button.setText(load_text_map[self.transformation_type])
+        self.load_translations_button.setText(self.load_button_text_map[self.transformation_type])
         self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET)
         gridlayout.addWidget(self.load_translations_button, 0, 3, 1, 2)
 
@@ -395,7 +400,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET))
         aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
         aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET))        
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Load Translations'))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText(self.load_button_text_map[self.transformation_type]))
 
 
     def loadTranslationDone(self, future_result):
@@ -420,6 +425,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
         if self.transformation_type == constants.TransformationType.Translation:
             self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
+        elif self.transformation_type == constants.TransformationType.Transliteration:
+            self.languagetools.store_batch_transliteration_setting(deck_note_type_field, self.from_field, self.transliteration_option)
         aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
 
