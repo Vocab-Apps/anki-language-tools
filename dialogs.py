@@ -307,6 +307,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.fromFieldIndexChanged(from_field_index, initialization=True)
         self.toFieldIndexChanged(to_field_index, initialization=True)
         
+    
 
     def fromFieldIndexChanged(self, currentIndex, initialization=False):
         self.from_field = self.field_name_list[currentIndex]
@@ -348,6 +349,17 @@ class BatchConversionDialog(aqt.qt.QDialog):
             self.transliteration_service_names = [x['transliteration_name'] for x in self.transliteration_options]
             self.service_combobox.clear()
             self.service_combobox.addItems(self.transliteration_service_names)
+            # do we have a user preference ?
+            batch_transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
+            if len(batch_transliteration_settings) >= 1:
+                # pick the first one
+                setting_key = list(batch_transliteration_settings.keys())[0]
+                setting = batch_transliteration_settings[setting_key]
+                # find the index of the service we want
+                transliteration_name = setting['transliteration_option']['transliteration_name']
+                if transliteration_name in self.transliteration_service_names:
+                    service_index = self.transliteration_service_names.index(transliteration_name)
+                    self.service_combobox.setCurrentIndex(service_index)
 
     def updateSampleData(self):
         # self.from_field
