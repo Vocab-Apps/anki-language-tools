@@ -325,7 +325,7 @@ class LanguageTools():
         self.config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name] = language
 
         # store the languages we're interested in
-        if language != None:
+        if self.language_available_for_translation(language):
             if constants.CONFIG_WANTED_LANGUAGES not in self.config:
                 self.config[constants.CONFIG_WANTED_LANGUAGES] = {}
             self.config[constants.CONFIG_WANTED_LANGUAGES][language] = True
@@ -367,7 +367,10 @@ class LanguageTools():
             'from_field': source_field,
             'transliteration_option': transliteration_option
         }
-        aqt.mw.addonManager.writeConfig(__name__, self.config)        
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+        # the language for the target field should be set to transliteration
+        self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.transliteration.name)
 
     def get_batch_translation_settings(self, deck_note_type: DeckNoteType):
         model_name = deck_note_type.model_name
