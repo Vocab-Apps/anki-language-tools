@@ -242,5 +242,9 @@ def init(languagetools):
         action.triggered.connect(lambda: dialogs.add_translation_dialog(languagetools, browser, browser.selectedNotes()))
         menu.addAction(action)
 
+        action = aqt.qt.QAction(f'Add Transliteration To Selected Notes...', browser)
+        action.triggered.connect(lambda: dialogs.add_transliteration_dialog(languagetools, browser, browser.selectedNotes()))
+        menu.addAction(action)        
+
     # browser menus
     aqt.gui_hooks.browser_menus_did_init.append(browerMenusInit)

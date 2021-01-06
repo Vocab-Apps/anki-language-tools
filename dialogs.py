@@ -76,11 +76,12 @@ class NoteTableModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
 class BatchConversionDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list, transformation_type):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
         self.note_id_list = note_id_list
+        self.transformation_type = transformation_type
 
         # get field list
         model = aqt.mw.col.models.get(deck_note_type.model_id)
@@ -115,7 +116,12 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label('Add Translation'))
+        header_label_text_map = {
+            constants.TransformationType.Translation: 'Add Translation',
+            constants.TransformationType.Transliteration: 'Add Transliteration'
+        }
+
+        vlayout.addWidget(get_header_label(header_label_text_map[self.transformation_type]))
 
         # setup to/from fields
         # ====================
@@ -185,15 +191,27 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
 
         self.load_translations_button = QtWidgets.QPushButton()
-        self.load_translations_button.setText('Load Translations')
+        load_text_map = {
+            constants.TransformationType.Translation: 'Load Translations',
+            constants.TransformationType.Transliteration: 'Load Transliterations'
+        }        
+        self.load_translations_button.setText(load_text_map[self.transformation_type])
         self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET)
         gridlayout.addWidget(self.load_translations_button, 0, 3, 1, 2)
 
-        gridlayout.setColumnStretch(0, 50)
-        gridlayout.setColumnStretch(1, 50)
-        gridlayout.setColumnStretch(2, 30)
-        gridlayout.setColumnStretch(3, 50)
-        gridlayout.setColumnStretch(4, 50)
+        if self.transformation_type == constants.TransformationType.Translation:
+            gridlayout.setColumnStretch(0, 50)
+            gridlayout.setColumnStretch(1, 50)
+            gridlayout.setColumnStretch(2, 30)
+            gridlayout.setColumnStretch(3, 50)
+            gridlayout.setColumnStretch(4, 50)
+        elif self.transformation_type == constants.TransformationType.Transliteration:
+            # need to provide more space for the services combobox
+            gridlayout.setColumnStretch(0, 20)
+            gridlayout.setColumnStretch(1, 120)
+            gridlayout.setColumnStretch(2, 0)
+            gridlayout.setColumnStretch(3, 20)
+            gridlayout.setColumnStretch(4, 20)            
 
         gridlayout.setContentsMargins(20, 0, 20, 10)
 
@@ -292,20 +310,26 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.updateSampleData()
 
     def updateTranslationOptions(self):
-        self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
-        self.translation_service_names = [x['service'] for x in self.translation_options]
-        self.service_combobox.clear()
-        self.service_combobox.addItems(self.translation_service_names)
-        # do we have a user preference ?
-        batch_translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
-        if len(batch_translation_settings) >= 1:
-            # pick the first one
-            setting_key = list(batch_translation_settings.keys())[0]
-            setting = batch_translation_settings[setting_key]
-            service = setting['translation_option']['service']
-            if service in self.translation_service_names:
-                service_index = self.translation_service_names.index(service)
-                self.service_combobox.setCurrentIndex(service_index)
+        if self.transformation_type == constants.TransformationType.Translation:
+            self.translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
+            self.translation_service_names = [x['service'] for x in self.translation_options]
+            self.service_combobox.clear()
+            self.service_combobox.addItems(self.translation_service_names)
+            # do we have a user preference ?
+            batch_translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+            if len(batch_translation_settings) >= 1:
+                # pick the first one
+                setting_key = list(batch_translation_settings.keys())[0]
+                setting = batch_translation_settings[setting_key]
+                service = setting['translation_option']['service']
+                if service in self.translation_service_names:
+                    service_index = self.translation_service_names.index(service)
+                    self.service_combobox.setCurrentIndex(service_index)
+        if self.transformation_type == constants.TransformationType.Transliteration:
+            self.transliteration_options = self.languagetools.get_transliteration_options(self.from_language)
+            self.transliteration_service_names = [x['transliteration_name'] for x in self.transliteration_options]
+            self.service_combobox.clear()
+            self.service_combobox.addItems(self.transliteration_service_names)
 
     def updateSampleData(self):
         # self.from_field
@@ -339,11 +363,14 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
 
         # get service
-        service = self.translation_service_names[self.service_combobox.currentIndex()]
-        translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
-        translation_option_subset = [x for x in translation_options if x['service'] == service]
-        assert(len(translation_option_subset) == 1)
-        self.translation_option = translation_option_subset[0]
+        if self.transformation_type == constants.TransformationType.Translation:
+            service = self.translation_service_names[self.service_combobox.currentIndex()]
+            translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
+            translation_option_subset = [x for x in translation_options if x['service'] == service]
+            assert(len(translation_option_subset) == 1)
+            self.translation_option = translation_option_subset[0]
+        elif self.transformation_type == constants.TransformationType.Transliteration:
+            self.transliteration_option = self.transliteration_options[self.service_combobox.currentIndex()]
 
         def get_set_to_field_lambda(i, translation_result):
             def set_to_field():
@@ -353,7 +380,12 @@ class BatchConversionDialog(aqt.qt.QDialog):
         i = 0
         self.to_field_data = []
         for field_data in self.from_field_data:
-            translation_result = self.languagetools.get_translation(field_data, self.translation_option)
+            if self.transformation_type == constants.TransformationType.Translation:
+                translation_result = self.languagetools.get_translation(field_data, self.translation_option)
+            elif self.transformation_type == constants.TransformationType.Transliteration:
+                translation_result = self.languagetools.get_transliteration(field_data, 
+                                                                            self.transliteration_option['service'],
+                                                                            self.transliteration_option['transliteration_key'])
             self.to_field_data.append(translation_result)
             aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
             i += 1
@@ -386,8 +418,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.close()
         # memorize this setting
         deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
-        self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
-        aqt.utils.tooltip(f'Wrote translations into field {self.to_field}')
+        if self.transformation_type == constants.TransformationType.Translation:
+            self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
+        aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
 
 
@@ -716,7 +749,7 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
 
-def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list, transformation_type):
     # print(f'* add_translation_dialog {note_id_list}')
 
     # did the user perform language mapping ? 
@@ -744,11 +777,17 @@ def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_
     
     deck_note_type = list(deck_note_type_map.keys())[0]
 
-    dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list)
+    dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list, transformation_type)
     dialog.setupUi()
     dialog.exec_()
 
     # force browser to reload notes
     browser.model.reset()
+
+def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Translation)
+
+def add_transliteration_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Transliteration)
 
 
