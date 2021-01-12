@@ -3,6 +3,7 @@ import os
 import random
 import requests
 import json
+import tempfile
 from typing import List, Dict
 
 # anki imports
@@ -488,6 +489,20 @@ class LanguageTools():
         }, headers={'api_key': self.config['api_key']})
         data = json.loads(response.content)
         return data['transliterated_text']
+
+    def get_tts_audio(self, source_text, service, voice_key, options):
+        response = requests.post(self.base_url + '/audio', json={
+            'text': source_text,
+            'service': service,
+            'voice_key': voice_key,
+            'options': options
+        }, headers={'api_key': self.config['api_key']})
+
+        output_temp_file = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
+        with open(output_temp_file.name, 'wb') as f:
+            f.write(response.content)
+        f.close()
+        return output_temp_file
 
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]

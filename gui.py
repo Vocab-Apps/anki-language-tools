@@ -3,6 +3,8 @@
 import aqt.qt
 import aqt.editor
 import aqt.gui_hooks
+import aqt.sound
+import anki.sound
 import anki.hooks
 
 # addon imports
@@ -18,6 +20,21 @@ def init(languagetools):
 
     def show_language_mapping():
         dialogs.language_mapping_dialogue(languagetools)
+
+    def show_voice_selection():
+        # request audio
+        source_text = 'Je ne suis pas intéressé.'
+        voice_key = {
+            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
+        }
+
+        audio_temp_file = languagetools.get_tts_audio(source_text, 'Azure', voice_key, {})
+        # anki.sound.play(audio_temp_file.name)
+        print(f'got filename: {audio_temp_file.name}')
+        aqt.sound.av_player.play_file(audio_temp_file.name)
+        # aqt.sound.av_player._enqueued.append(anki.sound.SoundOrVideoTag(filename=audio_temp_file.name))
+        # aqt.sound.av_player._play_next_if_idle()
+        
 
     def show_change_language(deck_note_type_field: DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
@@ -207,6 +224,10 @@ def init(languagetools):
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Language Mapping", aqt.mw)
     action.triggered.connect(show_language_mapping)
+    aqt.mw.form.menuTools.addAction(action)
+
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Voice Selection", aqt.mw)
+    action.triggered.connect(show_voice_selection)
     aqt.mw.form.menuTools.addAction(action)
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key", aqt.mw)
