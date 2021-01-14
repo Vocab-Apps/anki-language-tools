@@ -569,7 +569,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
             voice_index = self.voice_combobox.currentIndex()
             voice = self.available_voices[voice_index]
 
-            self.sample_play_buttons[i].setText('Playing...')
+            self.sample_play_buttons[i].setText('Loading...')
             self.sample_play_buttons[i].setDisabled(True)
 
             aqt.mw.taskman.run_in_background(lambda: self.play_audio(source_text, voice), lambda x: self.play_audio_done(x, i))
