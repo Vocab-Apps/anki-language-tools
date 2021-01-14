@@ -516,13 +516,17 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.language_index_changed(0)
 
     def language_index_changed(self, current_index):
-        language_code = self.language_code_list[current_index]
+        self.language_code = self.language_code_list[current_index]
         # filter voices that match this language
-        self.available_voices = [x for x in self.voice_list if x['language_code'] == language_code]
-        self.available_voices = sorted(self.available_voices, key=lambda x: x['voice_description'])
+        available_voices = [x for x in self.voice_list if x['language_code'] == self.language_code]
+        self.available_voices = sorted(available_voices, key=lambda x: x['voice_description'])
         available_voice_names = [x['voice_description'] for x in self.available_voices]
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
+
+        # get sample
+        field_samples = self.languagetools.get_field_samples_for_language(self.language_code, 10)
+        print(field_samples)
         
 
 
@@ -854,6 +858,11 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.exec_()
 
 def voice_selection_dialog(languagetools):
+    # did the user perform language mapping ? 
+    if not languagetools.language_detection_done():
+        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
+        return
+
     voice_list = languagetools.get_tts_voice_list()
 
     voice_selection_dialog = dialog = VoiceSelectionDialog(languagetools, voice_list)

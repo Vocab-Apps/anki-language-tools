@@ -95,6 +95,16 @@ def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeFie
     deck_note_type = build_deck_note_type(deck_id, model_id)
     return DeckNoteTypeField(deck_note_type, field_name)
 
+def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> DeckNoteTypeField:
+    # get the deck_id from the deck_name
+    # get the model_id from the model_name
+
+    model_id = aqt.mw.col.models.id_for_name(model_name)
+    deck_id = aqt.mw.col.decks.id_for_name(deck_name)
+
+    deck_note_type = build_deck_note_type(deck_id, model_id)
+    return DeckNoteTypeField(deck_note_type, field_name)
+
 
 class LanguageTools():
 
@@ -302,6 +312,28 @@ class LanguageTools():
             field_sample = random.sample(non_empty_fields, sample_size)
 
         return field_sample
+
+    def get_field_samples_for_language(self, language_code, sample_size):
+        # self.config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][field_name] = language
+
+        dntf_list = []
+        for model_name, model_data in self.config[constants.CONFIG_DECK_LANGUAGES].items():
+            for deck_name, deck_data in model_data.items():
+                for field_name, field_language_code in deck_data.items():
+                    if field_language_code == language_code:
+                        # found the language we need
+                        deck_note_type_field = build_deck_note_type_field_from_names(deck_name, model_name, field_name)
+                        dntf_list.append(deck_note_type_field)
+
+        all_field_samples = []
+        for dntf in dntf_list:
+            field_samples = self.get_field_samples(dntf, sample_size)
+            all_field_samples.extend(field_samples)
+        
+        # pick random sample
+        result = random.sample(all_field_samples, sample_size)
+        
+        return result
 
 
     def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
