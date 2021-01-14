@@ -22,18 +22,18 @@ def init(languagetools):
         dialogs.language_mapping_dialogue(languagetools)
 
     def show_voice_selection():
-        # request audio
-        source_text = 'Je ne suis pas intéressé.'
-        voice_key = {
-            "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
-        }
+        dialogs.voice_selection_dialog(languagetools)
 
-        audio_temp_file = languagetools.get_tts_audio(source_text, 'Azure', voice_key, {})
-        # anki.sound.play(audio_temp_file.name)
-        print(f'got filename: {audio_temp_file.name}')
-        aqt.sound.av_player.play_file(audio_temp_file.name)
-        # aqt.sound.av_player._enqueued.append(anki.sound.SoundOrVideoTag(filename=audio_temp_file.name))
-        # aqt.sound.av_player._play_next_if_idle()
+        # # request audio
+        # source_text = 'Je ne suis pas intéressé.'
+        # voice_key = {
+        #     "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
+        # }
+
+        # audio_temp_file = languagetools.get_tts_audio(source_text, 'Azure', voice_key, {})
+        # print(f'got filename: {audio_temp_file.name}')
+        # aqt.sound.av_player.play_file(audio_temp_file.name)
+
         
 
     def show_change_language(deck_note_type_field: DeckNoteTypeField):

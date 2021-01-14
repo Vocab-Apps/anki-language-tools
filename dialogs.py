@@ -455,6 +455,74 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
 
+class VoiceSelectionDialog(aqt.qt.QDialog):
+    def __init__(self, languagetools: LanguageTools, voice_list):
+        super(aqt.qt.QDialog, self).__init__()
+        self.languagetools = languagetools
+        
+        # get list of languages
+        self.voice_list = voice_list
+        wanted_language_arrays = languagetools.get_wanted_language_arrays()
+        self.language_name_list = wanted_language_arrays['language_name_list']
+        self.language_code_list = wanted_language_arrays['language_code_list']
+
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 500)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label('Audio Voice Selection'))
+
+        #  setup grid
+        gridlayout = QtWidgets.QGridLayout()
+
+        label_font_size = 13
+        font1 = QtGui.QFont()
+        font1.setBold(True)
+        font1.setPointSize(label_font_size)
+
+        # language
+
+        language_label = aqt.qt.QLabel()
+        language_label.setText('Language:')
+        language_label.setFont(font1)
+        gridlayout.addWidget(language_label, 0, 0, 1, 1)
+
+        language_combobox = QtWidgets.QComboBox()
+        language_combobox.addItems(self.language_name_list)
+        gridlayout.addWidget(language_combobox, 0, 1, 1, 1)
+
+        # voices
+
+        voice_label = aqt.qt.QLabel()
+        voice_label.setText('Voice:')
+        voice_label.setFont(font1)
+        gridlayout.addWidget(voice_label, 1, 0, 1, 1)
+
+        self.voice_combobox = QtWidgets.QComboBox()
+        # self.voice_combobox.addItems(self.language_name_list)
+        gridlayout.addWidget(self.voice_combobox, 1, 1, 1, 1)
+
+        vlayout.addLayout(gridlayout)
+
+
+        # wire events
+        # ===========
+
+        language_combobox.currentIndexChanged.connect(self.language_index_changed)
+
+    def language_index_changed(self, current_index):
+        language_code = self.language_code_list[current_index]
+        # filter voices that match this language
+        self.available_voices = [x for x in self.voice_list if x['language_code'] == language_code]
+        available_voice_names = [x['voice_description'] for x in self.available_voices]
+        self.voice_combobox.clear()
+        self.voice_combobox.addItems(available_voice_names)
+        
+
+
+
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
@@ -780,6 +848,14 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog.ui = LanguageMappingDialog_UI(languagetools)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
+
+def voice_selection_dialog(languagetools):
+    voice_list = languagetools.get_tts_voice_list()
+
+    voice_selection_dialog = dialog = VoiceSelectionDialog(languagetools, voice_list)
+    voice_selection_dialog.setupUi()
+    voice_selection_dialog.exec_()
+
 
 def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list, transformation_type):
     # print(f'* add_translation_dialog {note_id_list}')

@@ -228,6 +228,22 @@ class LanguageTools():
                 'language_code_list': language_code_list
         }
 
+    def get_wanted_language_arrays(self):
+        wanted_languages = self.get_wanted_languages()
+        language_dict = self.get_all_languages()
+
+        language_list = []
+        for key in wanted_languages:
+            language_list.append({'key': key, 'name': language_dict[key]})
+        # sort by language name
+        language_list = sorted(language_list, key=lambda x: x['name'])
+        language_code_list = [x['key'] for x in language_list]
+        language_name_list = [x['name'] for x in language_list]
+
+        return {'language_name_list': language_name_list,
+                'language_code_list': language_code_list
+        }        
+
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
         deck_list = aqt.mw.col.decks.all_names_and_ids()
         note_types = aqt.mw.col.models.all_names_and_ids()
@@ -503,6 +519,11 @@ class LanguageTools():
             f.write(response.content)
         f.close()
         return output_temp_file
+
+    def get_tts_voice_list(self):
+        response = requests.get(self.base_url + '/voice_list')
+        data = json.loads(response.content)
+        return data
 
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]
