@@ -521,7 +521,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
             sample_label.setText('sample')
             self.sample_labels.append(sample_label)
             sample_button = QtWidgets.QPushButton()
-            sample_button.setText('play')
+            sample_button.setText('Play Audio')
             def get_play_lambda(i):
                 def play():
                     self.play_sample(i)
@@ -568,13 +568,24 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
             # get index of voice
             voice_index = self.voice_combobox.currentIndex()
             voice = self.available_voices[voice_index]
-            voice_key = voice['voice_key']
-            service = voice['service']
 
-            audio_temp_file = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-            print(f'got filename: {audio_temp_file.name}')
-            aqt.sound.av_player.play_file(audio_temp_file.name)
+            self.sample_play_buttons[i].setText('Playing...')
+            self.sample_play_buttons[i].setDisabled(True)
 
+            aqt.mw.taskman.run_in_background(lambda: self.play_audio(source_text, voice), lambda x: self.play_audio_done(x, i))
+
+
+    def play_audio(self, source_text, voice):
+        voice_key = voice['voice_key']
+        service = voice['service']
+
+        audio_temp_file = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
+        # print(f'got filename: {audio_temp_file.name}')
+        aqt.sound.av_player.play_file(audio_temp_file.name)
+
+    def play_audio_done(self, future_result, i):
+        self.sample_play_buttons[i].setText('Play Audio')
+        self.sample_play_buttons[i].setDisabled(False)
 
 
 class LanguageMappingDeckWidgets(object):
