@@ -501,7 +501,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         gridlayout.addWidget(voice_label, 1, 0, 1, 1)
 
         self.voice_combobox = QtWidgets.QComboBox()
-        # self.voice_combobox.addItems(self.language_name_list)
+        self.voice_combobox.setMaxVisibleItems(15)
+        self.voice_combobox.setStyleSheet("combobox-popup: 0;")        
         gridlayout.addWidget(self.voice_combobox, 1, 1, 1, 1)
 
         vlayout.addLayout(gridlayout)
@@ -511,11 +512,14 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         # ===========
 
         language_combobox.currentIndexChanged.connect(self.language_index_changed)
+        # run once
+        self.language_index_changed(0)
 
     def language_index_changed(self, current_index):
         language_code = self.language_code_list[current_index]
         # filter voices that match this language
         self.available_voices = [x for x in self.voice_list if x['language_code'] == language_code]
+        self.available_voices = sorted(self.available_voices, key=lambda x: x['voice_description'])
         available_voice_names = [x['voice_description'] for x in self.available_voices]
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
