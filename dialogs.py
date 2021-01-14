@@ -466,6 +466,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.language_name_list = wanted_language_arrays['language_name_list']
         self.language_code_list = wanted_language_arrays['language_code_list']
 
+        self.sample_size = 10
+
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
@@ -507,6 +509,29 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
         vlayout.addLayout(gridlayout)
 
+        # button to refresh samples
+        # todo
+
+        # samples, 
+        self.samples_gridlayout = QtWidgets.QGridLayout()
+        self.sample_labels = []
+        self.sample_play_buttons = []
+        for i in range(self.sample_size):
+            sample_label = aqt.qt.QLabel()
+            sample_label.setText('sample')
+            self.sample_labels.append(sample_label)
+            sample_button = QtWidgets.QPushButton()
+            sample_button.setText('play')
+            def get_play_lambda(i):
+                def play():
+                    self.play_sample(i)
+                return play
+            sample_button.pressed.connect(get_play_lambda(i))
+            self.sample_play_buttons.append(sample_button)
+            self.samples_gridlayout.addWidget(sample_label, i, 0, 1, 1)
+            self.samples_gridlayout.addWidget(sample_button, i, 1, 1, 1)
+        vlayout.addLayout(self.samples_gridlayout)
+
 
         # wire events
         # ===========
@@ -524,11 +549,31 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
 
-        # get sample
-        field_samples = self.languagetools.get_field_samples_for_language(self.language_code, 10)
-        print(field_samples)
-        
+        self.load_field_samples()        
 
+    def load_field_samples(self):
+        # get sample
+        self.field_samples = self.languagetools.get_field_samples_for_language(self.language_code, self.sample_size)
+        print(self.field_samples)
+        for i in range(self.sample_size):
+            if i < len(self.field_samples):
+                # populate label
+                self.sample_labels[i].setText(self.field_samples[i])
+            else:
+                self.sample_labels[i].setText('empty')
+
+    def play_sample(self, i):
+        if i < len(self.field_samples):
+            source_text = self.field_samples[i]
+            # get index of voice
+            voice_index = self.voice_combobox.currentIndex()
+            voice = self.available_voices[voice_index]
+            voice_key = voice['voice_key']
+            service = voice['service']
+
+            audio_temp_file = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
+            print(f'got filename: {audio_temp_file.name}')
+            aqt.sound.av_player.play_file(audio_temp_file.name)
 
 
 
