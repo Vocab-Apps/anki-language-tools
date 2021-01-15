@@ -472,6 +472,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
         self.voice_mapping_changes = {} # indexed by language code
 
+        self.voice_select_callback_enabled = True
+
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
@@ -570,33 +572,47 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def language_index_changed(self, current_index):
+        self.voice_select_callback_enabled = False
         self.language_code = self.language_code_list[current_index]
         # filter voices that match this language
         available_voices = [x for x in self.voice_list if x['language_code'] == self.language_code]
         self.available_voices = sorted(available_voices, key=lambda x: x['voice_description'])
+        available_voice_mappings = [{'service': x['service'], 'voice_key': x['voice_key']} for x in self.available_voices]
         available_voice_names = [x['voice_description'] for x in self.available_voices]
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
+        # do we have a required change for this language already ?
+        voice_index = 0
+        if self.language_code in self.voice_mapping_changes:
+            voice_index = available_voice_mappings.index(self.voice_mapping_changes[self.language_code])
+            print(f'found language_code {self.language_code} in voice_mapping_changes: {voice_index}')
+        elif self.language_code in self.voice_selection_settings:
+            voice_index = available_voice_mappings.index(self.voice_selection_settings[self.language_code])
+            print(f'found language_code {self.language_code} in voice_selection_settings: {voice_index}')
+        self.voice_combobox.setCurrentIndex(voice_index)
 
         self.load_field_samples()
 
-    def voice_index_changed(self, current_index):
-        voice = self.available_voices[current_index]
-        voice_mapping = {
-            'service': voice['service'],
-            'voice_key': voice['voice_key']
-        }
-        change_required = False
-        if self.language_code not in self.voice_selection_settings:
-            change_required = True
-        elif self.voice_selection_settings[self.language_code] != voice_mapping:
-            change_required = True
+        self.voice_select_callback_enabled = True
 
-        if change_required:
-            self.voice_mapping_changes[self.language_code] = voice_mapping
-            print(f'voice_mapping_changes: {self.voice_mapping_changes}')
-            self.applyButton.setEnabled(True)
-            self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
+    def voice_index_changed(self, current_index):
+        if self.voice_select_callback_enabled:
+            voice = self.available_voices[current_index]
+            voice_mapping = {
+                'service': voice['service'],
+                'voice_key': voice['voice_key']
+            }
+            change_required = False
+            if self.language_code not in self.voice_selection_settings:
+                change_required = True
+            elif self.voice_selection_settings[self.language_code] != voice_mapping:
+                change_required = True
+
+            if change_required:
+                self.voice_mapping_changes[self.language_code] = voice_mapping
+                print(f'voice_mapping_changes: {self.voice_mapping_changes}')
+                self.applyButton.setEnabled(True)
+                self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
 
     def load_field_samples(self):
         # get sample
