@@ -510,14 +510,14 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         vlayout.addLayout(gridlayout)
 
         # button to refresh samples
-        hlayout = QtWidgets.QVBoxLayout()
         samples_label = aqt.qt.QLabel()
-        samples_label.setText('Random Samples')
-        hlayout.addWidget(samples_label)
+        samples_label.setText('Random Samples:')
+        samples_label.setFont(font1)
+        gridlayout.addWidget(samples_label, 2, 0, 1, 1)
+
         samples_reload_button = QtWidgets.QPushButton()
         samples_reload_button.setText('Reload Random Samples')
-        hlayout.addWidget(samples_reload_button)
-        vlayout.addLayout(hlayout)
+        gridlayout.addWidget(samples_reload_button, 2, 1, 1, 1)
 
         # samples, 
         self.samples_gridlayout = QtWidgets.QGridLayout()
@@ -537,6 +537,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
             self.sample_play_buttons.append(sample_button)
             self.samples_gridlayout.addWidget(sample_label, i, 0, 1, 1)
             self.samples_gridlayout.addWidget(sample_button, i, 1, 1, 1)
+        self.samples_gridlayout.setContentsMargins(20, 20, 20, 20)
         vlayout.addLayout(self.samples_gridlayout)
 
 
