@@ -17,6 +17,16 @@ def get_header_label(text):
         header.setFont(font)
         return header
 
+def get_medium_label(text):
+        label = QtWidgets.QLabel()
+        label.setText(text)
+        font = QtGui.QFont()
+        label_font_size = 13
+        font.setBold(True)
+        font.setPointSize(label_font_size)
+        label.setFont(font)
+        return label
+
 class NoteTableModel(QtCore.QAbstractTableModel):
     def __init__(self):
         QtCore.QAbstractTableModel.__init__(self, None)
@@ -458,28 +468,59 @@ class AddAudioDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
+        self.deck_note_type = deck_note_type
+        self.note_id_list = note_id_list
+
         
-        # get list of languages
-        self.voice_list = voice_list
-        wanted_language_arrays = languagetools.get_wanted_language_arrays()
-        self.language_name_list = wanted_language_arrays['language_name_list']
-        self.language_code_list = wanted_language_arrays['language_code_list']
-
-        self.sample_size = 10
-
-        self.voice_selection_settings = self.languagetools.get_voice_selection_settings()
-
-        self.voice_mapping_changes = {} # indexed by language code
-
-        self.voice_select_callback_enabled = True
-
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 500)
+        self.resize(700, 200)
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label('Audio Voice Selection'))
+        vlayout.addWidget(get_header_label('Add Audio'))
+
+        # from/ to field
+        gridlayout = QtWidgets.QGridLayout()
+
+        # from
+        gridlayout.addWidget(get_medium_label('From Field:'), 0, 0, 1, 1)
+        self.from_field_combobox = QtWidgets.QComboBox()
+        gridlayout.addWidget(self.from_field_combobox, 0, 1, 1, 1)
+        # to
+        gridlayout.addWidget(get_medium_label('To Field:'), 0, 3, 1, 1)
+        self.to_field_combobox = QtWidgets.QComboBox()
+        gridlayout.addWidget(self.to_field_combobox, 0, 4, 1, 1)
+
+        # voice
+        gridlayout.addWidget(get_medium_label('Voice:'), 1, 0, 1, 2)
+        self.voice_label = aqt.qt.QLabel()
+        self.voice_label.setText('undefined')
+        self.voice = QtWidgets.QComboBox()
+        gridlayout.addWidget(self.voice_label, 1, 1, 1, 4)
+
+        vlayout.addLayout(gridlayout)
+
+        self.progress_bar = QtWidgets.QProgressBar()
+        vlayout.addWidget(self.progress_bar)        
+
+        vlayout.addStretch()
+
+        buttonBox = QtWidgets.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setEnabled(False)
+        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton.setStyleSheet(constants.RED_STYLESHEET)
+
+        vlayout.addWidget(buttonBox)
+
+        # wire events
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+    
+
+
 
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
@@ -1075,3 +1116,6 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     if deck_note_type == None:
         return
 
+    dialog = AddAudioDialog(languagetools, deck_note_type, note_id_list)
+    dialog.setupUi()
+    dialog.exec_()
