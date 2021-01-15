@@ -454,6 +454,33 @@ class BatchConversionDialog(aqt.qt.QDialog):
             self.languagetools.store_batch_transliteration_setting(deck_note_type_field, self.from_field, self.transliteration_option)
         aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
+class AddAudioDialog(aqt.qt.QDialog):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
+        super(aqt.qt.QDialog, self).__init__()
+        self.languagetools = languagetools
+        
+        # get list of languages
+        self.voice_list = voice_list
+        wanted_language_arrays = languagetools.get_wanted_language_arrays()
+        self.language_name_list = wanted_language_arrays['language_name_list']
+        self.language_code_list = wanted_language_arrays['language_code_list']
+
+        self.sample_size = 10
+
+        self.voice_selection_settings = self.languagetools.get_voice_selection_settings()
+
+        self.voice_mapping_changes = {} # indexed by language code
+
+        self.voice_select_callback_enabled = True
+
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 500)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label('Audio Voice Selection'))
+
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
@@ -995,15 +1022,7 @@ def voice_selection_dialog(languagetools):
     voice_selection_dialog.setupUi()
     voice_selection_dialog.exec_()
 
-
-def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list, transformation_type):
-    # print(f'* add_translation_dialog {note_id_list}')
-
-    # did the user perform language mapping ? 
-    if not languagetools.language_detection_done():
-        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
-        return
-
+def verify_deck_note_type_consistent(note_id_list):
     # ensure we only have one deck/notetype selected
     deck_note_type_map = {}
 
@@ -1018,11 +1037,25 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
 
     if len(deck_note_type_map) > 1:
         # too many deck / model combinations
-        summary_str = ', '.join([f'{numCards} note from {key}' for key, numCards in deck_note_type_map.items()])
-        aqt.utils.showCritical(f'You must select notes from the same Deck / Note Type combination. You have selected {summary_str}', title=contants.ADDON_NAME)
-        return
+        summary_str = ', '.join([f'{numCards} notes from {key}' for key, numCards in deck_note_type_map.items()])
+        aqt.utils.showCritical(f'You must select notes from the same Deck / Note Type combination. You have selected {summary_str}', title=constants.ADDON_NAME)
+        return None
     
     deck_note_type = list(deck_note_type_map.keys())[0]
+
+    return deck_note_type
+
+def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list, transformation_type):
+    # print(f'* add_translation_dialog {note_id_list}')
+
+    # did the user perform language mapping ? 
+    if not languagetools.language_detection_done():
+        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
+        return
+
+    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    if deck_note_type == None:
+        return
 
     dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list, transformation_type)
     dialog.setupUi()
@@ -1037,4 +1070,8 @@ def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_
 def add_transliteration_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Transliteration)
 
+def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    if deck_note_type == None:
+        return
 
