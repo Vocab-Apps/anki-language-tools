@@ -471,6 +471,35 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.deck_note_type = deck_note_type
         self.note_id_list = note_id_list
 
+        # get field list
+        model = aqt.mw.col.models.get(deck_note_type.model_id)
+        fields = model['flds']
+        field_names = [x['name'] for x in fields]
+
+        self.voice_selection_settings = languagetools.get_voice_selection_settings()
+
+        # these are the available fields
+        # build separate lists for to and from
+        self.from_field_name_list = []
+        self.from_deck_note_type_field_list = []
+        self.from_field_language = []
+
+        self.to_field_name_list = []
+        self.to_deck_note_type_field_list = []
+
+        # retain fields which have a language set
+        for field_name in field_names:
+            deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+            language = self.languagetools.get_language(deck_note_type_field)
+
+            if self.languagetools.language_available_for_translation(language):
+                self.from_field_name_list.append(field_name)
+                self.from_deck_note_type_field_list.append(deck_note_type_field)
+                self.from_field_language.append(language)
+
+            self.to_field_name_list.append(field_name)
+            self.to_deck_note_type_field_list.append(deck_note_type_field)
+
         
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
@@ -486,10 +515,12 @@ class AddAudioDialog(aqt.qt.QDialog):
         # from
         gridlayout.addWidget(get_medium_label('From Field:'), 0, 0, 1, 1)
         self.from_field_combobox = QtWidgets.QComboBox()
+        self.from_field_combobox.addItems(self.from_field_name_list)
         gridlayout.addWidget(self.from_field_combobox, 0, 1, 1, 1)
         # to
         gridlayout.addWidget(get_medium_label('To Field:'), 0, 3, 1, 1)
         self.to_field_combobox = QtWidgets.QComboBox()
+        self.to_field_combobox.addItems(self.to_field_name_list)
         gridlayout.addWidget(self.to_field_combobox, 0, 4, 1, 1)
 
         # voice
@@ -515,11 +546,58 @@ class AddAudioDialog(aqt.qt.QDialog):
         vlayout.addWidget(buttonBox)
 
         # wire events
+        self.pick_default_fields()
+        self.from_field_combobox.currentIndexChanged.connect(self.from_field_index_changed)
+        self.to_field_combobox.currentIndexChanged.connect(self.to_field_index_changed)
+
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
 
-    
+    def pick_default_fields(self):
+        self.from_field_index = 0
+        self.from_field_index_changed(self.from_field_index)
+        self.from_field_combobox.setCurrentIndex(self.from_field_index)
 
+        self.to_field_index = 0
+        self.to_field_combobox.setCurrentIndex(self.to_field_index)
+
+    def from_field_index_changed(self, field_index):
+        self.from_field_index = field_index
+        from_language = self.from_field_language[field_index]
+        # do we have a voice setup for this language ?
+
+        if from_language in self.voice_selection_settings:
+            voice = self.voice_selection_settings[from_language]
+            voice_description = voice['voice_description']
+            self.voice_label.setText('<b>' + voice_description + '</b>')
+            self.applyButton.setEnabled(True)
+            self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
+        else:
+            language_name = self.languagetools.get_language_name(from_language)
+            self.voice_label.setText(f'No Voice setup for <b>{language_name}</b>. Please go to Anki main window, ' +
+            '<b>Tools -> Language Tools: Voice Selection </b>')
+            self.applyButton.setEnabled(False)
+            self.applyButton.setStyleSheet(None)
+
+    def to_field_index_changed(self, field_index):
+        self.to_field_index = field_index
+
+    def accept(self):
+        from_field = self.from_field_name_list[self.from_field_index]
+        # do the target fields contain any data ?
+        to_field = self.to_field_name_list[self.to_field_index]
+        to_fields_empty = True
+        for note_id in self.note_id_list:
+            note = aqt.mw.col.getNote(note_id)
+            if len(note[to_field]) > 0:
+                to_fields_empty = False
+        if to_fields_empty == False:
+            proceed = aqt.utils.askUser(f'Overwrite existing data in field {to_field} ?')
+            if proceed == False:
+                # don't continue
+                return
+
+        
 
 
 
@@ -668,18 +746,14 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
     def voice_index_changed(self, current_index):
         if self.voice_select_callback_enabled:
             voice = self.available_voices[current_index]
-            voice_mapping = {
-                'service': voice['service'],
-                'voice_key': voice['voice_key']
-            }
             change_required = False
             if self.language_code not in self.voice_selection_settings:
                 change_required = True
-            elif self.voice_selection_settings[self.language_code] != voice_mapping:
+            elif self.voice_selection_settings[self.language_code] != voice:
                 change_required = True
 
             if change_required:
-                self.voice_mapping_changes[self.language_code] = voice_mapping
+                self.voice_mapping_changes[self.language_code] = voice
                 # print(f'voice_mapping_changes: {self.voice_mapping_changes}')
                 self.applyButton.setEnabled(True)
                 self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
@@ -1112,6 +1186,11 @@ def add_transliteration_dialog(languagetools, browser: aqt.browser.Browser, note
     add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Transliteration)
 
 def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    # did the user perform language mapping ? 
+    if not languagetools.language_detection_done():
+        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
+        return
+
     deck_note_type = verify_deck_note_type_consistent(note_id_list)
     if deck_note_type == None:
         return
