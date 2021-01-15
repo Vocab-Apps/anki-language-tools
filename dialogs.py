@@ -551,6 +551,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.samples_gridlayout.setContentsMargins(20, 20, 20, 20)
         vlayout.addLayout(self.samples_gridlayout)
 
+        vlayout.addStretch()
+
         # buttom buttons
         buttonBox = QtWidgets.QDialogButtonBox()
         self.applyButton = buttonBox.addButton("Save Voice Selection", QtWidgets.QDialogButtonBox.AcceptRole)
@@ -585,10 +587,10 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         voice_index = 0
         if self.language_code in self.voice_mapping_changes:
             voice_index = available_voice_mappings.index(self.voice_mapping_changes[self.language_code])
-            print(f'found language_code {self.language_code} in voice_mapping_changes: {voice_index}')
+            # print(f'found language_code {self.language_code} in voice_mapping_changes: {voice_index}')
         elif self.language_code in self.voice_selection_settings:
             voice_index = available_voice_mappings.index(self.voice_selection_settings[self.language_code])
-            print(f'found language_code {self.language_code} in voice_selection_settings: {voice_index}')
+            # print(f'found language_code {self.language_code} in voice_selection_settings: {voice_index}')
         self.voice_combobox.setCurrentIndex(voice_index)
 
         self.load_field_samples()
@@ -610,7 +612,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
             if change_required:
                 self.voice_mapping_changes[self.language_code] = voice_mapping
-                print(f'voice_mapping_changes: {self.voice_mapping_changes}')
+                # print(f'voice_mapping_changes: {self.voice_mapping_changes}')
                 self.applyButton.setEnabled(True)
                 self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
 
@@ -653,6 +655,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
     def accept(self):
         for language_code, voice_mapping in self.voice_mapping_changes.items():
             self.languagetools.store_voice_selection(language_code, voice_mapping)
+        aqt.utils.tooltip(f'Saved Voice Selections')
+        self.close()
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):
