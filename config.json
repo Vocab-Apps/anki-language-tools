@@ -6,5 +6,6 @@
     },
     "inline_translations": {},
     "batch_translations": {},
-    "batch_transliterations": {}
+    "batch_transliterations": {},
+    "voice_selection": {}
 }

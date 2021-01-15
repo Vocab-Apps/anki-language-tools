@@ -468,6 +468,10 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
         self.sample_size = 10
 
+        self.voice_selection_settings = self.languagetools.get_voice_selection_settings()
+
+        self.voice_mapping_changes = {} # indexed by language code
+
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
@@ -559,6 +563,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         language_combobox.currentIndexChanged.connect(self.language_index_changed)
         # run once
         self.language_index_changed(0)
+        self.voice_combobox.currentIndexChanged.connect(self.voice_index_changed)
 
         samples_reload_button.pressed.connect(self.load_field_samples)
         buttonBox.accepted.connect(self.accept)
@@ -573,7 +578,25 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
 
-        self.load_field_samples()        
+        self.load_field_samples()
+
+    def voice_index_changed(self, current_index):
+        voice = self.available_voices[current_index]
+        voice_mapping = {
+            'service': voice['service'],
+            'voice_key': voice['voice_key']
+        }
+        change_required = False
+        if self.language_code not in self.voice_selection_settings:
+            change_required = True
+        elif self.voice_selection_settings[self.language_code] != voice_mapping:
+            change_required = True
+
+        if change_required:
+            self.voice_mapping_changes[self.language_code] = voice_mapping
+            print(f'voice_mapping_changes: {self.voice_mapping_changes}')
+            self.applyButton.setEnabled(True)
+            self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
 
     def load_field_samples(self):
         # get sample
@@ -612,7 +635,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.sample_play_buttons[i].setDisabled(False)
 
     def accept(self):
-        pass
+        for language_code, voice_mapping in self.voice_mapping_changes.items():
+            self.languagetools.store_voice_selection(language_code, voice_mapping)
 
 class LanguageMappingDeckWidgets(object):
     def __init__(self):

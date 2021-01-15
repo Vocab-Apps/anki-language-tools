@@ -435,6 +435,13 @@ class LanguageTools():
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLITERATION, {}).get(model_name, {}).get(deck_name, {})
 
+    def store_voice_selection(self, language_code, voice_mapping):
+        self.config[constants.CONFIG_VOICE_SELECTION][language_code] = voice_mapping
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+    def get_voice_selection_settings(self):
+        return self.config.get(constants.CONFIG_VOICE_SELECTION, {})
+
     def add_inline_translation(self, deck_note_type_field: DeckNoteTypeField, translation_option, target_language: str):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()

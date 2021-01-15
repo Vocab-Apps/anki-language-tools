@@ -6,6 +6,7 @@ CONFIG_WANTED_LANGUAGES = 'wanted_languages'
 CONFIG_INLINE_TRANSLATION = 'inline_translations'
 CONFIG_BATCH_TRANSLATION = 'batch_translations'
 CONFIG_BATCH_TRANSLITERATION = 'batch_transliterations'
+CONFIG_VOICE_SELECTION = 'voice_selection'
 ADDON_NAME = 'Language Tools'
 MENU_PREFIX = ADDON_NAME + ':'
 DEFAULT_LANGUAGE = 'en' # always add this language, even if the user didn't add it themselves
