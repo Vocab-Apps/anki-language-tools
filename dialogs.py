@@ -510,7 +510,14 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         vlayout.addLayout(gridlayout)
 
         # button to refresh samples
-        # todo
+        hlayout = QtWidgets.QVBoxLayout()
+        samples_label = aqt.qt.QLabel()
+        samples_label.setText('Random Samples')
+        hlayout.addWidget(samples_label)
+        samples_reload_button = QtWidgets.QPushButton()
+        samples_reload_button.setText('Reload Random Samples')
+        hlayout.addWidget(samples_reload_button)
+        vlayout.addLayout(hlayout)
 
         # samples, 
         self.samples_gridlayout = QtWidgets.QGridLayout()
@@ -540,6 +547,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         # run once
         self.language_index_changed(0)
 
+        samples_reload_button.pressed.connect(self.load_field_samples)
+
     def language_index_changed(self, current_index):
         self.language_code = self.language_code_list[current_index]
         # filter voices that match this language
@@ -554,7 +563,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
     def load_field_samples(self):
         # get sample
         self.field_samples = self.languagetools.get_field_samples_for_language(self.language_code, self.sample_size)
-        print(self.field_samples)
+        # print(self.field_samples)
         for i in range(self.sample_size):
             if i < len(self.field_samples):
                 # populate label
