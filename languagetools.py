@@ -5,6 +5,7 @@ import requests
 import json
 import tempfile
 from typing import List, Dict
+import hashlib
 
 # anki imports
 import aqt
@@ -545,19 +546,50 @@ class LanguageTools():
         data = json.loads(response.content)
         return data['transliterated_text']
 
+    def generate_audio_for_field(self, note_id, from_field, to_field, voice):
+        note = aqt.mw.col.getNote(note_id)
+        source_text = note[from_field]
+        if len(source_text) == 0:
+            return
+        
+        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
+        # add to collection
+        collection_filename = os.path.basename(aqt.mw.col.media.addFile(generated_filename))
+
+        # write to note
+        sound_tag = f'[sound:{collection_filename}]'
+        note[to_field] = sound_tag
+        note.flush()
+
+
+    def get_hash_for_request(self, url_path, data):
+        combined_data = {
+            'url': url_path,
+            'data': data
+        }
+        return hashlib.sha224(str(combined_data).encode('utf-8')).hexdigest()
+
+    def get_audio_collection_filename(self, url_path, data):
+        return f'languagetools-{self.get_hash_for_request(url_path, data)}'
+
     def get_tts_audio(self, source_text, service, voice_key, options):
-        response = requests.post(self.base_url + '/audio', json={
+        url_path = '/audio'
+        data = {
             'text': source_text,
             'service': service,
             'voice_key': voice_key,
             'options': options
-        }, headers={'api_key': self.config['api_key']})
+        }
+        file_name = self.get_audio_collection_filename(url_path, data)
 
-        output_temp_file = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
+        response = requests.post(self.base_url + url_path, json=data, headers={'api_key': self.config['api_key']})
+
+        output_temp_file = tempfile.NamedTemporaryFile(prefix=file_name, suffix='.mp3', delete=False)
         with open(output_temp_file.name, 'wb') as f:
             f.write(response.content)
         f.close()
-        return output_temp_file
+        return output_temp_file.name
+
 
     def get_tts_voice_list(self):
         response = requests.get(self.base_url + '/voice_list')

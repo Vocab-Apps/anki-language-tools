@@ -1,5 +1,6 @@
 from typing import List, Dict
 import sys
+import traceback
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
@@ -567,8 +568,8 @@ class AddAudioDialog(aqt.qt.QDialog):
         # do we have a voice setup for this language ?
 
         if from_language in self.voice_selection_settings:
-            voice = self.voice_selection_settings[from_language]
-            voice_description = voice['voice_description']
+            self.voice = self.voice_selection_settings[from_language]
+            voice_description = self.voice['voice_description']
             self.voice_label.setText('<b>' + voice_description + '</b>')
             self.applyButton.setEnabled(True)
             self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
@@ -597,7 +598,11 @@ class AddAudioDialog(aqt.qt.QDialog):
                 # don't continue
                 return
 
-        
+        action_str = f'Add Audio to {to_field}'
+        aqt.mw.checkpoint(action_str)
+
+        for note_id in self.note_id_list:
+            self.languagetools.generate_audio_for_field(note_id, from_field, to_field, self.voice)
 
 
 
@@ -725,17 +730,23 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         # filter voices that match this language
         available_voices = [x for x in self.voice_list if x['language_code'] == self.language_code]
         self.available_voices = sorted(available_voices, key=lambda x: x['voice_description'])
-        available_voice_mappings = [{'service': x['service'], 'voice_key': x['voice_key']} for x in self.available_voices]
+        available_voice_mappings = self.available_voices
         available_voice_names = [x['voice_description'] for x in self.available_voices]
         self.voice_combobox.clear()
         self.voice_combobox.addItems(available_voice_names)
         # do we have a required change for this language already ?
         voice_index = 0
         if self.language_code in self.voice_mapping_changes:
-            voice_index = available_voice_mappings.index(self.voice_mapping_changes[self.language_code])
+            try:
+                voice_index = available_voice_mappings.index(self.voice_mapping_changes[self.language_code])
+            except ValueError:
+                pass
             # print(f'found language_code {self.language_code} in voice_mapping_changes: {voice_index}')
         elif self.language_code in self.voice_selection_settings:
-            voice_index = available_voice_mappings.index(self.voice_selection_settings[self.language_code])
+            try:
+                voice_index = available_voice_mappings.index(self.voice_selection_settings[self.language_code])
+            except ValueError:
+                pass                
             # print(f'found language_code {self.language_code} in voice_selection_settings: {voice_index}')
         self.voice_combobox.setCurrentIndex(voice_index)
 
@@ -778,7 +789,6 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
             self.sample_play_buttons[i].setText('Loading...')
             self.sample_play_buttons[i].setDisabled(True)
-
             aqt.mw.taskman.run_in_background(lambda: self.play_audio(source_text, voice), lambda x: self.play_audio_done(x, i))
 
 
@@ -786,9 +796,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         voice_key = voice['voice_key']
         service = voice['service']
 
-        audio_temp_file = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-        # print(f'got filename: {audio_temp_file.name}')
-        aqt.sound.av_player.play_file(audio_temp_file.name)
+        audio_temp_filename = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
+        aqt.sound.av_player.play_file(audio_temp_filename)
 
     def play_audio_done(self, future_result, i):
         self.sample_play_buttons[i].setText('Play Audio')
@@ -1198,3 +1207,6 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     dialog = AddAudioDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
     dialog.exec_()
+
+    # force browser to reload notes
+    browser.model.reset()    
