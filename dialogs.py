@@ -621,6 +621,8 @@ class AddAudioDialog(aqt.qt.QDialog):
         deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
         self.languagetools.store_batch_audio_setting(deck_note_type_field, self.from_field)
 
+        self.success_count = 0
+
         action_str = f'Add Audio to {self.to_field}'
         aqt.mw.checkpoint(action_str)
 
@@ -629,12 +631,14 @@ class AddAudioDialog(aqt.qt.QDialog):
     def add_audio_task(self):
         i = 0
         for note_id in self.note_id_list:
-            self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
+            result = self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
+            if result == True:
+                self.success_count += 1
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
     def add_audio_task_done(self, future_result):
-        completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>"
+        completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>. Success: <b>{self.success_count}</b> out of <b>{len(self.note_id_list)}</b>."
         self.close()
         aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
 

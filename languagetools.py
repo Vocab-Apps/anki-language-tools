@@ -577,13 +577,17 @@ class LanguageTools():
             return
         
         generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
-        # add to collection
-        collection_filename = os.path.basename(aqt.mw.col.media.addFile(generated_filename))
+        if generated_filename != None:
+            # add to collection
+            collection_filename = os.path.basename(aqt.mw.col.media.addFile(generated_filename))
 
-        # write to note
-        sound_tag = f'[sound:{collection_filename}]'
-        note[to_field] = sound_tag
-        note.flush()
+            # write to note
+            sound_tag = f'[sound:{collection_filename}]'
+            note[to_field] = sound_tag
+            note.flush()
+            return True
+
+        return False # failure
 
 
     def get_hash_for_request(self, url_path, data):
@@ -605,15 +609,16 @@ class LanguageTools():
             'options': options
         }
         file_name = self.get_audio_collection_filename(url_path, data)
-
         response = requests.post(self.base_url + url_path, json=data, headers={'api_key': self.config['api_key']})
 
-        output_temp_file = tempfile.NamedTemporaryFile(prefix=file_name, suffix='.mp3', delete=False)
-        with open(output_temp_file.name, 'wb') as f:
-            f.write(response.content)
-        f.close()
-        return output_temp_file.name
-
+        if response.status_code == 200:
+            output_temp_file = tempfile.NamedTemporaryFile(prefix=file_name, suffix='.mp3', delete=False)
+            with open(output_temp_file.name, 'wb') as f:
+                f.write(response.content)
+            f.close()
+            return output_temp_file.name
+        else:
+            return None
 
     def get_tts_voice_list(self):
         response = requests.get(self.base_url + '/voice_list')
