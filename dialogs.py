@@ -564,6 +564,7 @@ class AddAudioDialog(aqt.qt.QDialog):
 
     def from_field_index_changed(self, field_index):
         self.from_field_index = field_index
+        self.from_field = self.from_field_name_list[self.from_field_index]
         from_language = self.from_field_language[field_index]
         # do we have a voice setup for this language ?
 
@@ -582,28 +583,41 @@ class AddAudioDialog(aqt.qt.QDialog):
 
     def to_field_index_changed(self, field_index):
         self.to_field_index = field_index
+        self.to_field = self.to_field_name_list[self.to_field_index]
 
     def accept(self):
-        from_field = self.from_field_name_list[self.from_field_index]
-        # do the target fields contain any data ?
-        to_field = self.to_field_name_list[self.to_field_index]
         to_fields_empty = True
         for note_id in self.note_id_list:
             note = aqt.mw.col.getNote(note_id)
-            if len(note[to_field]) > 0:
+            if len(note[self.to_field]) > 0:
                 to_fields_empty = False
         if to_fields_empty == False:
-            proceed = aqt.utils.askUser(f'Overwrite existing data in field {to_field} ?')
+            proceed = aqt.utils.askUser(f'Overwrite existing data in field {self.to_field} ?')
             if proceed == False:
                 # don't continue
                 return
 
-        action_str = f'Add Audio to {to_field}'
+        self.applyButton.setText('Adding Audio...')
+        self.applyButton.setEnabled(False)
+
+        self.progress_bar.setMaximum(len(self.note_id_list))
+
+        action_str = f'Add Audio to {self.to_field}'
         aqt.mw.checkpoint(action_str)
 
-        for note_id in self.note_id_list:
-            self.languagetools.generate_audio_for_field(note_id, from_field, to_field, self.voice)
+        aqt.mw.taskman.run_in_background(self.add_audio_task, self.add_audio_task_done)
 
+    def add_audio_task(self):
+        i = 0
+        for note_id in self.note_id_list:
+            self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
+            i += 1
+            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
+
+    def add_audio_task_done(self, future_result):
+        completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>"
+        self.close()
+        aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
 
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
