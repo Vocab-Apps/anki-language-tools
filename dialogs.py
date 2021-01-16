@@ -599,6 +599,7 @@ class AddAudioDialog(aqt.qt.QDialog):
 
         self.applyButton.setText('Adding Audio...')
         self.applyButton.setEnabled(False)
+        self.applyButton.setStyleSheet(None)
 
         self.progress_bar.setMaximum(len(self.note_id_list))
 
