@@ -478,6 +478,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         field_names = [x['name'] for x in fields]
 
         self.voice_selection_settings = languagetools.get_voice_selection_settings()
+        self.batch_audio_settings = languagetools.get_batch_audio_settings(self.deck_note_type)
 
         # these are the available fields
         # build separate lists for to and from
@@ -555,11 +556,25 @@ class AddAudioDialog(aqt.qt.QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def pick_default_fields(self):
+        #self.batch_audio_settings
         self.from_field_index = 0
+        self.to_field_index = 0
+
+        if len(self.batch_audio_settings) > 0:
+            to_field = list(self.batch_audio_settings.keys())[0]
+            from_field = self.batch_audio_settings[to_field]
+            try:
+                self.from_field_index = self.from_field_name_list.index(from_field)
+                self.to_field_index = self.to_field_name_list.index(to_field)
+            except ValueError:
+                pass
+
+        self.from_field = self.from_field_name_list[self.from_field_index]
+        self.to_field = self.to_field_name_list[self.to_field_index]
+
         self.from_field_index_changed(self.from_field_index)
         self.from_field_combobox.setCurrentIndex(self.from_field_index)
 
-        self.to_field_index = 0
         self.to_field_combobox.setCurrentIndex(self.to_field_index)
 
     def from_field_index_changed(self, field_index):
@@ -602,6 +617,9 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.applyButton.setStyleSheet(None)
 
         self.progress_bar.setMaximum(len(self.note_id_list))
+
+        deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
+        self.languagetools.store_batch_audio_setting(deck_note_type_field, self.from_field)
 
         action_str = f'Add Audio to {self.to_field}'
         aqt.mw.checkpoint(action_str)

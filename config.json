@@ -7,5 +7,6 @@
     "inline_translations": {},
     "batch_translations": {},
     "batch_transliterations": {},
+    "batch_audio": {},
     "voice_selection": {}
 }

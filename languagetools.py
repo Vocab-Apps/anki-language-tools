@@ -436,6 +436,30 @@ class LanguageTools():
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLITERATION, {}).get(model_name, {}).get(deck_name, {})
 
+    def store_batch_audio_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name
+
+        if constants.CONFIG_BATCH_AUDIO not in self.config:
+            self.config[constants.CONFIG_BATCH_AUDIO] = {}
+        if model_name not in self.config[constants.CONFIG_BATCH_AUDIO]:
+            self.config[constants.CONFIG_BATCH_AUDIO][model_name] = {}
+        if deck_name not in self.config[constants.CONFIG_BATCH_AUDIO][model_name]:
+            self.config[constants.CONFIG_BATCH_AUDIO][model_name][deck_name] = {}
+        self.config[constants.CONFIG_BATCH_AUDIO][model_name][deck_name][field_name] = source_field
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
+        # the language for the target field should be set to sound
+        self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.sound.name)
+
+
+    def get_batch_audio_settings(self, deck_note_type: DeckNoteType):
+        model_name = deck_note_type.model_name
+        deck_name = deck_note_type.deck_name
+
+        return self.config.get(constants.CONFIG_BATCH_AUDIO, {}).get(model_name, {}).get(deck_name, {})
+
     def store_voice_selection(self, language_code, voice_mapping):
         self.config[constants.CONFIG_VOICE_SELECTION][language_code] = voice_mapping
         aqt.mw.addonManager.writeConfig(__name__, self.config)
