@@ -834,7 +834,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         service = voice['service']
 
         audio_temp_filename = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-        aqt.sound.av_player.play_file(audio_temp_filename)
+        if audio_temp_filename != None:
+            aqt.sound.av_player.play_file(audio_temp_filename)
 
     def play_audio_done(self, future_result, i):
         self.sample_play_buttons[i].setText('Play Audio')
