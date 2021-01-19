@@ -72,6 +72,9 @@ def init(languagetools):
         web_content.js.insert(0,  javascript_path)
 
     def loadNote(editor: aqt.editor.Editor):
+        print(editor)
+        print(editor.parentWindow)
+
         note = editor.note
         # can we get the card from the editor ?
         if editor.card != None:
