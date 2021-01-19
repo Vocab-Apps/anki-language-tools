@@ -564,8 +564,14 @@ class AddAudioDialog(aqt.qt.QDialog):
             to_field = list(self.batch_audio_settings.keys())[0]
             from_field = self.batch_audio_settings[to_field]
             try:
-                self.from_field_index = self.from_field_name_list.index(from_field)
-                self.to_field_index = self.to_field_name_list.index(to_field)
+                from_field_index = self.from_field_name_list.index(from_field)
+                to_field_index = self.to_field_name_list.index(to_field)
+
+                if from_field_index < len(self.from_field_name_list):
+                    self.from_field_index = from_field_index
+                if to_field_index < len(self.to_field_name_list):
+                    self.to_field_index = to_field_index
+                
             except ValueError:
                 pass
 
