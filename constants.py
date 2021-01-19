@@ -16,6 +16,8 @@ EDITOR_WEB_FIELD_ID_TRANSLATION = 'translation'
 GREEN_STYLESHEET = 'background-color: #69F0AE;'
 RED_STYLESHEET = 'background-color: #FFCDD2;'
 
+DOCUMENTATION_ENSURE_LANGUAGE_MAPPING = 'Please ensure Language Mapping is correct (Tools -> Language Tools: Language Mapping)'
+
 class TransformationType(enum.Enum):
     Translation = enum.auto()
     Transliteration = enum.auto()
