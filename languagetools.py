@@ -332,7 +332,10 @@ class LanguageTools():
             all_field_samples.extend(field_samples)
         
         # pick random sample
-        result = random.sample(all_field_samples, sample_size)
+        if len(all_field_samples) < sample_size:
+            result = all_field_samples
+        else:
+            result = random.sample(all_field_samples, sample_size)
         
         return result
 
