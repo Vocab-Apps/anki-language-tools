@@ -86,6 +86,9 @@ class NoteTableModel(QtCore.QAbstractTableModel):
                 return QtCore.QVariant(self.to_field)
         return QtCore.QVariant()
 
+class NoFieldsAvailable(Exception):
+    pass
+
 class BatchConversionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list, transformation_type):
         super(aqt.qt.QDialog, self).__init__()
@@ -124,6 +127,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 self.field_name_list.append(field_name)
                 self.deck_note_type_field_list.append(deck_note_type_field)
                 self.field_language.append(language)                
+
+        if len(self.field_name_list) == 0:
+            # no fields were found, could be that no fields have a language set
+            raise NoFieldsAvailable(f'No fields available for {self.transformation_type.name} in  {self.deck_note_type}. {constants.DOCUMENTATION_ENSURE_LANGUAGE_MAPPING}')
 
 
     def setupUi(self):
@@ -1225,12 +1232,16 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
     if deck_note_type == None:
         return
 
-    dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list, transformation_type)
-    dialog.setupUi()
-    dialog.exec_()
+    try:
+        dialog = BatchConversionDialog(languagetools, deck_note_type, note_id_list, transformation_type)
+        dialog.setupUi()
+        dialog.exec_()
 
-    # force browser to reload notes
-    browser.model.reset()
+        # force browser to reload notes
+        browser.model.reset()
+    except NoFieldsAvailable as exception:
+        aqt.utils.showCritical(str(exception), title=constants.ADDON_NAME)
+
 
 def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Translation)

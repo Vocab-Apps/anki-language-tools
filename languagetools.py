@@ -18,6 +18,8 @@ from . import version
 
 # util functions
 
+class AnkiItemNotFoundError(Exception):
+    pass
 
 class DeckNoteType():
     def __init__(self, deck_id, deck_name, model_id, model_name):
@@ -86,8 +88,12 @@ def build_deck_note_type_from_note(note: anki.notes.Note) -> DeckNoteType:
 
 def build_deck_note_type(deck_id, model_id) -> DeckNoteType:
     model = aqt.mw.col.models.get(model_id)
+    if model == None:
+        raise AnkiItemNotFoundError(f'Note Type id {model_id} not found')
     model_name = model['name']
     deck = aqt.mw.col.decks.get(deck_id)
+    if deck == None:
+        raise AnkiItemNotFoundError(f'Deck id {deck_id} not found')
     deck_name = deck['name']
     deck_note_type = DeckNoteType(deck_id, deck_name, model_id, model_name)
     return deck_note_type
@@ -102,6 +108,11 @@ def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> 
 
     model_id = aqt.mw.col.models.id_for_name(model_name)
     deck_id = aqt.mw.col.decks.id_for_name(deck_name)
+
+    if model_id == None:
+        raise AnkiItemNotFoundError(f'Note Type {model_name} not found')
+    if deck_id == None:
+        raise AnkiItemNotFoundError(f'Deck {deck_name} not found')
 
     deck_note_type = build_deck_note_type(deck_id, model_id)
     return DeckNoteTypeField(deck_note_type, field_name)
@@ -297,7 +308,11 @@ class LanguageTools():
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
         
         def process_field_value(note_id, field_name):
-            original_field_value = aqt.mw.col.getNote(note_id)[field_name]
+            note = aqt.mw.col.getNote(note_id)
+            if field_name not in note:
+                # field was removed
+                raise AnkiItemNotFoundError(f'field {field_name} not found')
+            original_field_value = note[field_name]
             field_value = original_field_value
             max_len = 200 # restrict to 200 characters
             if len(original_field_value) > max_len:
@@ -322,14 +337,22 @@ class LanguageTools():
             for deck_name, deck_data in model_data.items():
                 for field_name, field_language_code in deck_data.items():
                     if field_language_code == language_code:
-                        # found the language we need
-                        deck_note_type_field = build_deck_note_type_field_from_names(deck_name, model_name, field_name)
-                        dntf_list.append(deck_note_type_field)
+                        try:
+                            # found the language we need
+                            deck_note_type_field = build_deck_note_type_field_from_names(deck_name, model_name, field_name)
+                            dntf_list.append(deck_note_type_field)
+                        except AnkiItemNotFoundError as error:
+                            # this deck probably got deleted
+                            pass
 
         all_field_samples = []
         for dntf in dntf_list:
-            field_samples = self.get_field_samples(dntf, sample_size)
-            all_field_samples.extend(field_samples)
+            try:
+                field_samples = self.get_field_samples(dntf, sample_size)
+                all_field_samples.extend(field_samples)
+            except AnkiItemNotFoundError as error:
+                # might be a field missing
+                pass                
         
         # pick random sample
         if len(all_field_samples) < sample_size:
