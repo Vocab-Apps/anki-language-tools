@@ -308,7 +308,11 @@ class LanguageTools():
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
         
         def process_field_value(note_id, field_name):
-            original_field_value = aqt.mw.col.getNote(note_id)[field_name]
+            note = aqt.mw.col.getNote(note_id)
+            if field_name not in note:
+                # field was removed
+                raise AnkiItemNotFoundError(f'field {field_name} not found')
+            original_field_value = note[field_name]
             field_value = original_field_value
             max_len = 200 # restrict to 200 characters
             if len(original_field_value) > max_len:
@@ -343,8 +347,12 @@ class LanguageTools():
 
         all_field_samples = []
         for dntf in dntf_list:
-            field_samples = self.get_field_samples(dntf, sample_size)
-            all_field_samples.extend(field_samples)
+            try:
+                field_samples = self.get_field_samples(dntf, sample_size)
+                all_field_samples.extend(field_samples)
+            except AnkiItemNotFoundError as error:
+                # might be a field missing
+                pass                
         
         # pick random sample
         if len(all_field_samples) < sample_size:
