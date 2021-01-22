@@ -673,6 +673,9 @@ class NoteSettingsDialog(aqt.qt.QDialog):
 
         vlayout.addWidget(get_header_label(f'Settings for {self.deck_note_type}'))
 
+        font_bold = QtGui.QFont()
+        font_bold.setBold(True)
+
         # do we have translation rules for this deck_note_type
         translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
         if len(translation_settings) > 0:
@@ -685,11 +688,18 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 to_language_name = self.languagetools.get_language_name(self.languagetools.get_language(to_dntf))
+
+                from_field_label = QtWidgets.QLabel(f'{from_field}')
+                from_field_label.setFont(font_bold)
+
+                to_field_label = QtWidgets.QLabel(f'{to_field}')
+                to_field_label.setFont(font_bold)
+
                 gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'{from_field}'), i, 1, 1, 1)
+                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'{to_field}'), i, 4, 1, 1)
+                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, 5, 1, 1)
                 
                 delete_button = QtWidgets.QPushButton()
@@ -710,11 +720,18 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 transliteration_name = setting['transliteration_option']['transliteration_name']
+
+                from_field_label = QtWidgets.QLabel(f'{from_field}')
+                from_field_label.setFont(font_bold)
+
+                to_field_label = QtWidgets.QLabel(f'{to_field}')
+                to_field_label.setFont(font_bold)
+
                 gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'{from_field}'), i, 1, 1, 1)
+                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'{to_field}'), i, 4, 1, 1)
+                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({transliteration_name})'), i, 5, 1, 1)
                 
                 delete_button = QtWidgets.QPushButton()
