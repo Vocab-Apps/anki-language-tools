@@ -80,6 +80,9 @@ def load_translation(languagetools, editor: aqt.editor.Editor, field_value: str,
         def apply_translation(future_result):
             translation_response = future_result.result()
             translated_text = languagetools.interpret_translation_response_async(translation_response)
+            # set the field value on the note
+            editor.note.fields[field_index] = translated_text
+            # update the webview
             js_command = f"""set_field_value({field_index}, "{translated_text}")"""
             editor.web.eval(js_command)
         return apply_translation
@@ -144,11 +147,6 @@ def init(languagetools):
                     deck_note_type = build_deck_note_type_from_note(note)
 
                 from_deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
-                # check whether we have inline translations on this deck_note_type
-                # inline_translations = languagetools.get_inline_translations(deck_note_type)
-                # if deck_note_type_field.field_name in inline_translations:
-                #     # found inline translation, we should update it
-                #     load_inline_translation(languagetools, editor, field_value, deck_note_type_field, inline_translations[deck_note_type_field.field_name])
 
                 # do we have translation rules for this deck_note_type
                 translation_settings = languagetools.get_batch_translation_settings(deck_note_type)
@@ -156,8 +154,6 @@ def init(languagetools):
                 for to_field, value in relevant_settings.items():
                     to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
                     load_translation(languagetools, editor, field_value, to_deck_note_type_field, value['translation_option'])
-                #if deck_note_type_field.field_name in translation_settings:
-                 #   load_translation(languagetools, editor, field_value, deck_note_type_field, translation_settings[deck_note_type_field.field_name]['translation_option'])
 
 
         return handled
