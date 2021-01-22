@@ -437,6 +437,13 @@ class LanguageTools():
         }
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
+    def remove_translation_setting(self, deck_note_type_field: DeckNoteTypeField):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name        
+        del self.config[constants.CONFIG_BATCH_TRANSLATION][model_name][deck_name][field_name]
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
     def store_batch_transliteration_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str, transliteration_option):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
@@ -456,6 +463,13 @@ class LanguageTools():
 
         # the language for the target field should be set to transliteration
         self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.transliteration.name)
+
+    def remove_transliteration_setting(self, deck_note_type_field: DeckNoteTypeField):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name        
+        del self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name][deck_name][field_name]
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
 
     def get_batch_translation_settings(self, deck_note_type: DeckNoteType):
         model_name = deck_note_type.model_name
@@ -486,6 +500,12 @@ class LanguageTools():
         # the language for the target field should be set to sound
         self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.sound.name)
 
+    def remove_audio_setting(self, deck_note_type_field: DeckNoteTypeField):
+        model_name = deck_note_type_field.get_model_name()
+        deck_name = deck_note_type_field.get_deck_name()
+        field_name = deck_note_type_field.field_name        
+        del self.config[constants.CONFIG_BATCH_AUDIO][model_name][deck_name][field_name]
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
 
     def get_batch_audio_settings(self, deck_note_type: DeckNoteType):
         model_name = deck_note_type.model_name

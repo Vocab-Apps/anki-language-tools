@@ -707,6 +707,11 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 
                 delete_button = QtWidgets.QPushButton()
                 delete_button.setText('Remove')
+                def get_remove_lambda(to_dntf):
+                    def remove():
+                        self.remove_translation(to_dntf)
+                    return remove
+                delete_button.pressed.connect(get_remove_lambda(to_dntf))
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
@@ -823,6 +828,19 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)        
 
+    def remove_translation(self, deck_note_type_field):
+        print(f'remove_translation, dntf: {deck_note_type_field}')
+        self.remove_translation_map[deck_note_type_field] = True
+        self.enable_apply_button()
+
+    def remove_transliteration(self, deck_note_type_field):
+        self.remove_transliteration_map[deck_note_type_field] = True
+        self.enable_apply_button()
+
+    def remove_audio(self, deck_note_type_field):
+        self.remove_audio_map[deck_note_type_field] = True
+        self.enable_apply_button()
+
     def apply_updates_state_changed(self, state):
         self.apply_updates_setting_changed = True
         self.apply_updates_value = self.checkbox.isChecked()
@@ -836,6 +854,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
     def accept(self):
         if self.apply_updates_setting_changed:
             self.languagetools.set_apply_updates_automatically(self.apply_updates_value)
+
+        for dntf in self.remove_translation_map.keys():
+            self.languagetools.remove_translation_setting(dntf)
+        for dntf in self.remove_transliteration_map.keys():
+            self.languagetools.remove_transliteration_setting(dntf)
+        for dntf in self.remove_audio_map.keys():
+            self.languagetools.remove_audio_setting(dntf)
         
         self.close()
         aqt.utils.tooltip(f'Saved Settings')
