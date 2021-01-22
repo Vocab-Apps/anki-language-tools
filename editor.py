@@ -66,7 +66,7 @@ def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_valu
 def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
     field_index = get_field_id(to_deck_note_type_field)
 
-    print(f'load_translation, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {translation_option}')
+    # print(f'load_translation, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {translation_option}')
 
     # now, we need to do the translation, asynchronously
     # prepare lambdas
@@ -95,7 +95,37 @@ def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id,
     aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
                                      get_apply_translation_lambda(languagetools, editor, field_index, original_note_id))
 
+def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, transliteration_option: Dict):
+    field_index = get_field_id(to_deck_note_type_field)
 
+    print(f'load_transliteration, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {transliteration_option}')
+
+    # now, we need to do the translation, asynchronously
+    # prepare lambdas
+    #     
+    def get_request_transliteration_lambda(languagetools, field_value, transliteration_option):
+        def request_transliteration():
+            return languagetools.get_transliteration_async(field_value, transliteration_option)
+        return request_transliteration
+
+    def get_apply_transliteration_lambda(languagetools, editor, field_index, original_note_id):
+        def apply_transliteration(future_result):
+            if original_note_id != 0:
+                if editor.note.id != original_note_id:
+                    # user switched to a different note, ignore
+                    return
+
+            translation_response = future_result.result()
+            translated_text = languagetools.interpret_transliteration_response_async(translation_response)
+            # set the field value on the note
+            editor.note.fields[field_index] = translated_text
+            # update the webview
+            js_command = f"""set_field_value({field_index}, "{translated_text}")"""
+            editor.web.eval(js_command)
+        return apply_transliteration
+
+    aqt.mw.taskman.run_in_background(get_request_transliteration_lambda(languagetools, field_value, transliteration_option), 
+                                     get_apply_transliteration_lambda(languagetools, editor, field_index, original_note_id))
 
 
 
@@ -155,6 +185,13 @@ def init(languagetools):
                 for to_field, value in relevant_settings.items():
                     to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
                     load_translation(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['translation_option'])
+
+                # do we have transliteration rules for this deck_note_type
+                transliteration_settings = languagetools.get_batch_transliteration_settings(deck_note_type)
+                relevant_settings = {to_field:value for (to_field,value) in transliteration_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
+                for to_field, value in relevant_settings.items():
+                    to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
+                    load_transliteration(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
 
 
         return handled

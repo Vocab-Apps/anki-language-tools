@@ -550,6 +550,30 @@ class LanguageTools():
         data = json.loads(response.content)        
         return data
     
+    def get_transliteration_async(self, source_text, transliteration_option):
+        response = requests.post(self.base_url + '/transliterate', json={
+                'text': source_text,
+                'service': transliteration_option['service'],
+                'transliteration_key': transliteration_option['transliteration_key']
+        }, headers={'api_key': self.config['api_key']})        
+        return response
+
+    def interpret_transliteration_response_async(self, response):
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            return data['transliterated_text'] 
+        if response.status_code == 400:
+            data = json.loads(response.content)
+            error_text = f"Could not load transliteration: {data['error']}"
+            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
+            return error_text
+        if response.status_code == 401:
+            data = json.loads(response.content)
+            return data['error'] # API key invalid
+        error_text = f"Could not load transliteration: {response.text}"
+        aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
+        return error_text    
+
     def get_transliteration(self, source_text, service, transliteration_key):
         if not self.check_api_key_valid():
             return
