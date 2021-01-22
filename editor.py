@@ -110,8 +110,7 @@ def init(languagetools):
         web_content.js.insert(0,  javascript_path)
 
     def loadNote(editor: aqt.editor.Editor):
-        #print(f'editor type: {type(editor)}')
-        #print(f'parentWindow type: {type(editor.parentWindow)}')
+        return # disable for now, and inline translations should be retired
 
         note = editor.note
         # can we get the card from the editor ?

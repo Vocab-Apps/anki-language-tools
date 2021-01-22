@@ -167,31 +167,8 @@ def init(languagetools):
                     menu.addMenu(submenu)
 
             # these options don't require text to be selected
-
-            # add inline translation options
-            # ==============================
-            menu_text = f'{constants.MENU_PREFIX} Add Inline Translation'
-            submenu = aqt.qt.QMenu(menu_text, menu)
-            wanted_languages = languagetools.get_wanted_languages()
-            for wanted_language in wanted_languages:
-                if wanted_language != language:
-                    menu_text = f'To {languagetools.get_language_name(wanted_language)}'
-                    def get_add_inline_translation_lambda(editor, source_language, target_language, deck_note_type_field):
-                        def add_inline_translation_fn():
-                            add_inline_translation(editor, source_language, target_language, deck_note_type_field)
-                        return add_inline_translation_fn
-                    submenu.addAction(menu_text, get_add_inline_translation_lambda(editor, language, wanted_language, deck_note_type_field))
-            # do we need to add a disable action ?
-            if len(languagetools.get_inline_translations(deck_note_type_field.deck_note_type)) > 0:
-                submenu.addSeparator()
-                menu_text = 'Disable'
-                def get_disable_inline_translation_lambda(editor, deck_note_type_field):
-                    def disable_inline_translation_fn():
-                        disable_inline_translation(editor, deck_note_type_field)
-                    return disable_inline_translation_fn
-                submenu.addAction(menu_text, get_disable_inline_translation_lambda(editor, deck_note_type_field))
-
-            
+            # nothing for now
+           
             menu.addMenu(submenu)
 
         # was language detection run ?
