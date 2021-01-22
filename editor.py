@@ -202,6 +202,10 @@ def init(languagetools):
         if not isinstance(editor, aqt.editor.Editor):
             return handled
 
+        if languagetools.get_apply_updates_automatically() == False:
+            # user doesn't want updates as they type
+            return handled
+
         if str.startswith("key:"):
             components = str.split(':')
             if len(components) == 4:
