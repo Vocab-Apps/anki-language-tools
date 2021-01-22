@@ -713,6 +713,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
             gridlayout.setColumnStretch(6, 10) # remove button
+            gridlayout.setContentsMargins(10, 0, 10, 0)
             vlayout.addLayout(gridlayout)
 
         # do we have transliteration rules for this deck_note_type
@@ -751,7 +752,8 @@ class NoteSettingsDialog(aqt.qt.QDialog):
             gridlayout.setColumnStretch(3, 10) # to:
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
-            gridlayout.setColumnStretch(6, 10) # remove button                
+            gridlayout.setColumnStretch(6, 10) # remove button          
+            gridlayout.setContentsMargins(10, 0, 10, 0)      
             vlayout.addLayout(gridlayout)            
 
         # do we have any audio rules for this deck_note_type
@@ -793,8 +795,14 @@ class NoteSettingsDialog(aqt.qt.QDialog):
             gridlayout.setColumnStretch(3, 10) # to:
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
-            gridlayout.setColumnStretch(6, 10) # remove button                
+            gridlayout.setColumnStretch(6, 10) # remove button            
+            gridlayout.setContentsMargins(10, 0, 10, 0)    
             vlayout.addLayout(gridlayout)                        
+
+        vlayout.addWidget(get_medium_label(f'Apply Changes While Typing'))
+        checkbox = QtWidgets.QCheckBox("Update related fields while typing")
+        checkbox.setContentsMargins(10, 0, 10, 0)
+        vlayout.addWidget(checkbox)
 
         vlayout.addStretch()
 
