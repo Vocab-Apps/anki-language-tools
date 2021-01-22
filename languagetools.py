@@ -10,6 +10,7 @@ import hashlib
 # anki imports
 import aqt
 import aqt.progress
+import aqt.addcards
 import anki.notes
 import anki.cards
 
@@ -77,6 +78,12 @@ def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.
     deck_id = card.did
     deck_note_type = build_deck_note_type(deck_id, model_id)
     return deck_note_type
+
+def build_deck_note_type_from_addcard(note: anki.notes.Note, add_cards: aqt.addcards.AddCards) -> DeckNoteType:
+    model_id = note.mid
+    deck_id = add_cards.deckChooser.selectedId()
+    deck_note_type = build_deck_note_type(deck_id, model_id)
+    return deck_note_type    
 
 def build_deck_note_type_from_note(note: anki.notes.Note) -> DeckNoteType:
     model_id = note.mid

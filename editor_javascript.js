@@ -22,3 +22,11 @@ function set_inline_field_value(field_type, field_id, value) {
     $element = $("#" + element_id);
     $element.html(decoded_value);
 }
+
+function set_field_value(field_id, value) {
+    var decoded_value = decodeURI(value);
+    // console.log('decoded_value: ', decoded_value);
+    var element_id = 'f' + field_id;
+    $element = $("#" + element_id);
+    $element.html(decoded_value);
+}
