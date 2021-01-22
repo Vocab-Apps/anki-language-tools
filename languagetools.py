@@ -590,21 +590,25 @@ class LanguageTools():
         note = aqt.mw.col.getNote(note_id)
         source_text = note[from_field]
         if len(source_text) == 0:
-            return
+            return False
         
-        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
-        if generated_filename != None:
-            # add to collection
-            collection_filename = os.path.basename(aqt.mw.col.media.addFile(generated_filename))
-
+        sound_tag, full_filename = self.generate_audio_tag_collection(source_text, voice)
+        if sound_tag != None:
             # write to note
-            sound_tag = f'[sound:{collection_filename}]'
             note[to_field] = sound_tag
             note.flush()
             return True
 
         return False # failure
 
+    def generate_audio_tag_collection(self, source_text, voice):
+        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
+        if generated_filename != None:
+            full_filename = aqt.mw.col.media.addFile(generated_filename)
+            collection_filename = os.path.basename(full_filename)
+            sound_tag = f'[sound:{collection_filename}]'
+            return sound_tag, full_filename
+        return None, None
 
     def get_hash_for_request(self, url_path, data):
         combined_data = {

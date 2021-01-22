@@ -127,6 +127,46 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
     aqt.mw.taskman.run_in_background(get_request_transliteration_lambda(languagetools, field_value, transliteration_option), 
                                      get_apply_transliteration_lambda(languagetools, editor, field_index, original_note_id))
 
+def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, voice: Dict):
+    field_index = get_field_id(to_deck_note_type_field)
+
+    print(f'load_audio, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} voice: {voice}')
+
+    # now, we need to do the translation, asynchronously
+    # prepare lambdas
+    #     
+    def get_request_audio_lambda(languagetools, field_value, voice):
+        def request_audio():
+            return languagetools.generate_audio_tag_collection(field_value, voice)
+        return request_audio
+
+    def get_apply_audio_lambda(languagetools, editor, field_index, original_note_id):
+        def apply_audio(future_result):
+            if original_note_id != 0:
+                if editor.note.id != original_note_id:
+                    # user switched to a different note, ignore
+                    return
+
+            sound_tag, full_filename = future_result.result()
+            if sound_tag == None:
+                sound_tag = ''
+                editor.note.fields[field_index] = sound_tag
+                js_command = f"""set_field_value({field_index}, "")"""
+                editor.web.eval(js_command)                
+            else:
+                # set sound tag, and play sound
+                editor.note.fields[field_index] = sound_tag
+                js_command = f"""set_field_value({field_index}, "{sound_tag}")"""
+                editor.web.eval(js_command)
+                # play sound
+                aqt.sound.av_player.play_file(full_filename)
+
+        return apply_audio
+
+    aqt.mw.taskman.run_in_background(get_request_audio_lambda(languagetools, field_value, voice), 
+                                     get_apply_audio_lambda(languagetools, editor, field_index, original_note_id))
+
+
 
 
 def init(languagetools):
@@ -192,6 +232,21 @@ def init(languagetools):
                 for to_field, value in relevant_settings.items():
                     to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
                     load_transliteration(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
+
+                # do we have any audio rules for this deck_note_type
+                audio_settings = languagetools.get_batch_audio_settings(deck_note_type)
+                relevant_settings = {to_field:from_field for (to_field,from_field) in audio_settings.items() if from_field == from_deck_note_type_field.field_name}
+                for to_field, from_field in relevant_settings.items():
+                    to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
+                    # get the from language
+                    from_language = languagetools.get_language(from_deck_note_type_field)
+                    if from_language != None:
+                        # get voice for this language
+                        voice_settings = languagetools.get_voice_selection_settings()
+                        if from_language in voice_settings:
+                            voice = voice_settings[from_language]
+                            load_audio(languagetools, editor, note_id, field_value, to_deck_note_type_field, voice)
+
 
 
         return handled
