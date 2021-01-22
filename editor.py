@@ -63,7 +63,7 @@ def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_valu
                                      get_apply_translation_lambda(languagetools, editor, field_index))
 
 
-def load_translation(languagetools, editor: aqt.editor.Editor, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
+def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
     field_index = get_field_id(to_deck_note_type_field)
 
     print(f'load_translation, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {translation_option}')
@@ -76,8 +76,13 @@ def load_translation(languagetools, editor: aqt.editor.Editor, field_value: str,
             return languagetools.get_translation_async(field_value, translation_option)
         return request_translation
 
-    def get_apply_translation_lambda(languagetools, editor, field_index):
+    def get_apply_translation_lambda(languagetools, editor, field_index, original_note_id):
         def apply_translation(future_result):
+            if original_note_id != 0:
+                if editor.note.id != original_note_id:
+                    # user switched to a different note, ignore
+                    return
+
             translation_response = future_result.result()
             translated_text = languagetools.interpret_translation_response_async(translation_response)
             # set the field value on the note
@@ -88,7 +93,7 @@ def load_translation(languagetools, editor: aqt.editor.Editor, field_value: str,
         return apply_translation
 
     aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
-                                     get_apply_translation_lambda(languagetools, editor, field_index))
+                                     get_apply_translation_lambda(languagetools, editor, field_index, original_note_id))
 
 
 
@@ -135,11 +140,8 @@ def init(languagetools):
                 field_index = int(field_index_str)
                 note_id = int(note_id_str)
                 note = editor.note
+                note_id = note.id
 
-                # print(f'editor type: {type(editor)}')
-                # print(f'parentWindow type: {type(editor.parentWindow)}')
-
-                #if isinstance(editor.parentWindow, aqt.addcards.AddCards):
                 if editor.addMode:
                     deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
                     print(f'deck_note_type: {deck_note_type}')
@@ -153,7 +155,7 @@ def init(languagetools):
                 relevant_settings = {to_field:value for (to_field,value) in translation_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
                 for to_field, value in relevant_settings.items():
                     to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
-                    load_translation(languagetools, editor, field_value, to_deck_note_type_field, value['translation_option'])
+                    load_translation(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['translation_option'])
 
 
         return handled
