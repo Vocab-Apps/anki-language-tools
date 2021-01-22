@@ -669,6 +669,40 @@ class NoteSettingsDialog(aqt.qt.QDialog):
 
         vlayout.addWidget(get_header_label(f'Settings for {self.deck_note_type}'))
 
+        # do we have translation rules for this deck_note_type
+        translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+        if len(translation_settings) > 0:
+            vlayout.addWidget(get_medium_label(f'Translation Settings'))
+            gridlayout = QtWidgets.QGridLayout()
+            i = 0
+            for to_field, setting in translation_settings.items():
+                from_field = setting['from_field']
+                from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
+                to_language_name = self.languagetools.get_language_name(self.languagetools.get_language(to_dntf))
+                # label = QtWidgets.QLabel()
+                # label.setText(f'To Field: {to_field} To Language: {to_language_name}')
+                # vlayout.addWidget(label)
+                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'{from_field}'), i, 1, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'{to_field}'), i, 4, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, 5, 1, 1)
+                i += 1
+            vlayout.addLayout(gridlayout)
+
+        # do we have transliteration rules for this deck_note_type
+        transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
+        if len(transliteration_settings) > 0:
+            vlayout.addWidget(get_medium_label(f'Transliteration Settings'))        
+
+        # do we have any audio rules for this deck_note_type
+        audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
+        if len(audio_settings) > 0:
+            vlayout.addWidget(get_medium_label(f'Audio Settings'))
+
         vlayout.addStretch()
 
         # buttom buttons
