@@ -500,6 +500,13 @@ class LanguageTools():
     def get_voice_selection_settings(self):
         return self.config.get(constants.CONFIG_VOICE_SELECTION, {})
 
+    def get_apply_updates_automatically(self):
+        return self.config.get(constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY, True)
+
+    def set_apply_updates_automatically(self, value):
+        self.config[constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY] = value
+        aqt.mw.addonManager.writeConfig(__name__, self.config)
+
     def get_language(self, deck_note_type_field: DeckNoteTypeField):
         """will return None if no language is associated with this field"""
         model_name = deck_note_type_field.get_model_name()

@@ -3,11 +3,11 @@ import enum
 ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL = 'ANKI_LANGUAGE_TOOLS_BASE_URL'
 CONFIG_DECK_LANGUAGES = 'deck_languages'
 CONFIG_WANTED_LANGUAGES = 'wanted_languages'
-CONFIG_INLINE_TRANSLATION = 'inline_translations'
 CONFIG_BATCH_TRANSLATION = 'batch_translations'
 CONFIG_BATCH_TRANSLITERATION = 'batch_transliterations'
 CONFIG_BATCH_AUDIO = 'batch_audio'
 CONFIG_VOICE_SELECTION = 'voice_selection'
+CONFIG_APPLY_UPDATES_AUTOMATICALLY = 'apply_updates_automatically'
 ADDON_NAME = 'Language Tools'
 MENU_PREFIX = ADDON_NAME + ':'
 DEFAULT_LANGUAGE = 'en' # always add this language, even if the user didn't add it themselves

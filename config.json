@@ -4,9 +4,9 @@
     "wanted_languages": {
         "en": true
     },
-    "inline_translations": {},
     "batch_translations": {},
     "batch_transliterations": {},
     "batch_audio": {},
-    "voice_selection": {}
+    "voice_selection": {},
+    "apply_updates_automatically": true
 }

@@ -665,6 +665,9 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         self.remove_transliteration_map = {}
         self.remove_audio_map = {}
 
+        self.apply_updates_setting_changed = False
+        self.apply_updates_value = True
+
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
@@ -800,9 +803,10 @@ class NoteSettingsDialog(aqt.qt.QDialog):
             vlayout.addLayout(gridlayout)                        
 
         vlayout.addWidget(get_medium_label(f'Apply Changes While Typing'))
-        checkbox = QtWidgets.QCheckBox("Update related fields while typing")
-        checkbox.setContentsMargins(10, 0, 10, 0)
-        vlayout.addWidget(checkbox)
+        self.checkbox = QtWidgets.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
+        self.checkbox.setChecked(self.languagetools.get_apply_updates_automatically())
+        self.checkbox.setContentsMargins(10, 0, 10, 0)
+        vlayout.addWidget(self.checkbox)
 
         vlayout.addStretch()
 
@@ -814,6 +818,27 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         self.cancelButton.setStyleSheet(constants.RED_STYLESHEET)
         vlayout.addWidget(buttonBox)
   
+        # wire events
+        self.checkbox.stateChanged.connect(self.apply_updates_state_changed)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)        
+
+    def apply_updates_state_changed(self, state):
+        self.apply_updates_setting_changed = True
+        self.apply_updates_value = self.checkbox.isChecked()
+        self.enable_apply_button()
+    
+    def enable_apply_button(self):
+        self.applyButton.setEnabled(True)
+        self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET)
+
+
+    def accept(self):
+        if self.apply_updates_setting_changed:
+            self.languagetools.set_apply_updates_automatically(self.apply_updates_value)
+        
+        self.close()
+        aqt.utils.tooltip(f'Saved Settings')
 
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
