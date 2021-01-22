@@ -744,6 +744,36 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
         if len(audio_settings) > 0:
             vlayout.addWidget(get_medium_label(f'Audio Settings'))
+            gridlayout = QtWidgets.QGridLayout()
+            i = 0
+            for to_field, from_field in audio_settings.items():
+                from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                from_language_code = self.languagetools.get_language(from_dntf)
+                from_language_name = self.languagetools.get_language_name(from_language_code)
+                # get the assigned voice for this langugae
+                voice_selection_settings = self.languagetools.get_voice_selection_settings()
+                voice_description = 'No Voice Selected'
+                if from_language_code in voice_selection_settings:
+                    voice_description = voice_selection_settings[from_language_code]['voice_description']
+
+                from_field_label = QtWidgets.QLabel(f'{from_field}')
+                from_field_label.setFont(font_bold)
+
+                to_field_label = QtWidgets.QLabel(f'{to_field}')
+                to_field_label.setFont(font_bold)
+
+                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
+                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
+                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({voice_description})'), i, 5, 1, 1)
+                
+                delete_button = QtWidgets.QPushButton()
+                delete_button.setText('Remove')
+                gridlayout.addWidget(delete_button, i, 6, 1, 1)
+                i += 1
+            vlayout.addLayout(gridlayout)                        
 
         vlayout.addStretch()
 
