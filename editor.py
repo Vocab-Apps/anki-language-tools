@@ -219,7 +219,8 @@ def init(languagetools):
                     deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
                     #print(f'deck_note_type: {deck_note_type}')
                 else:
-                    deck_note_type = build_deck_note_type_from_note(note)
+                    deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
+                    # print(f'deck_note_type: {deck_note_type}')
 
                 from_deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
 
