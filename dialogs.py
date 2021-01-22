@@ -846,17 +846,17 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         buttonBox.rejected.connect(self.reject)        
 
     def remove_translation(self, deck_note_type_field):
-        print(f'remove_translation, dntf: {deck_note_type_field}')
+        # print(f'remove_translation, dntf: {deck_note_type_field}')
         self.remove_translation_map[deck_note_type_field] = True
         self.enable_apply_button()
 
     def remove_transliteration(self, deck_note_type_field):
-        print(f'remove_transliteration, dntf: {deck_note_type_field}')
+        # print(f'remove_transliteration, dntf: {deck_note_type_field}')
         self.remove_transliteration_map[deck_note_type_field] = True
         self.enable_apply_button()
 
     def remove_audio(self, deck_note_type_field):
-        print(f'remove_audio, dntf: {deck_note_type_field}')
+        # print(f'remove_audio, dntf: {deck_note_type_field}')
         self.remove_audio_map[deck_note_type_field] = True
         self.enable_apply_button()
 
