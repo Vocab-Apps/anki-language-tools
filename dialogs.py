@@ -655,6 +655,31 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.close()
         aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
 
+class NoteSettingsDialog(aqt.qt.QDialog):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+        super(aqt.qt.QDialog, self).__init__()
+        self.languagetools = languagetools
+        self.deck_note_type = deck_note_type
+
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 500)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label(f'Settings for {self.deck_note_type}'))
+
+        vlayout.addStretch()
+
+        # buttom buttons
+        buttonBox = QtWidgets.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Save Settings", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setEnabled(False)
+        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton.setStyleSheet(constants.RED_STYLESHEET)
+        vlayout.addWidget(buttonBox)
+  
+
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
@@ -1265,3 +1290,12 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
 
     # force browser to reload notes
     browser.model.reset()    
+
+def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    if deck_note_type == None:
+        return
+
+    dialog = NoteSettingsDialog(languagetools, deck_note_type)
+    dialog.setupUi()
+    dialog.exec_()

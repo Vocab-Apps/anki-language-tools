@@ -213,7 +213,7 @@ def init(languagetools):
 
                 if editor.addMode:
                     deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
-                    print(f'deck_note_type: {deck_note_type}')
+                    #print(f'deck_note_type: {deck_note_type}')
                 else:
                     deck_note_type = build_deck_note_type_from_note(note)
 

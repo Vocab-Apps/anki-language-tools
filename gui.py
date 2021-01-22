@@ -248,5 +248,9 @@ def init(languagetools):
         action.triggered.connect(lambda: dialogs.add_audio_dialog(languagetools, browser, browser.selectedNotes()))
         menu.addAction(action)        
 
+        action = aqt.qt.QAction(f'Show Settings for Selected Notes...', browser)
+        action.triggered.connect(lambda: dialogs.show_settings_dialog(languagetools, browser, browser.selectedNotes()))
+        menu.addAction(action)                
+
     # browser menus
     aqt.gui_hooks.browser_menus_did_init.append(browerMenusInit)
