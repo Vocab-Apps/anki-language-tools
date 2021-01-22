@@ -98,7 +98,7 @@ def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id,
 def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, transliteration_option: Dict):
     field_index = get_field_id(to_deck_note_type_field)
 
-    print(f'load_transliteration, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {transliteration_option}')
+    # print(f'load_transliteration, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {transliteration_option}')
 
     # now, we need to do the translation, asynchronously
     # prepare lambdas
