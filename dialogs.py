@@ -707,11 +707,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 
                 delete_button = QtWidgets.QPushButton()
                 delete_button.setText('Remove')
-                def get_remove_lambda(to_dntf):
+                def get_remove_lambda(to_dntf, button):
                     def remove():
+                        button.setEnabled(False)
+                        button.setText('Removed')
                         self.remove_translation(to_dntf)
                     return remove
-                delete_button.pressed.connect(get_remove_lambda(to_dntf))
+                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
@@ -752,6 +754,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 
                 delete_button = QtWidgets.QPushButton()
                 delete_button.setText('Remove')
+                def get_remove_lambda(to_dntf, button):
+                    def remove():
+                        button.setEnabled(False)
+                        button.setText('Removed')                        
+                        self.remove_transliteration(to_dntf)
+                    return remove
+                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
@@ -772,6 +781,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
             i = 0
             for to_field, from_field in audio_settings.items():
                 from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
                 from_language_code = self.languagetools.get_language(from_dntf)
                 from_language_name = self.languagetools.get_language_name(from_language_code)
                 # get the assigned voice for this langugae
@@ -795,6 +805,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 
                 delete_button = QtWidgets.QPushButton()
                 delete_button.setText('Remove')
+                def get_remove_lambda(to_dntf, button):
+                    def remove():
+                        button.setEnabled(False)
+                        button.setText('Removed')                        
+                        self.remove_audio(to_dntf)
+                    return remove
+                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))                
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
@@ -834,10 +851,12 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         self.enable_apply_button()
 
     def remove_transliteration(self, deck_note_type_field):
+        print(f'remove_transliteration, dntf: {deck_note_type_field}')
         self.remove_transliteration_map[deck_note_type_field] = True
         self.enable_apply_button()
 
     def remove_audio(self, deck_note_type_field):
+        print(f'remove_audio, dntf: {deck_note_type_field}')
         self.remove_audio_map[deck_note_type_field] = True
         self.enable_apply_button()
 
