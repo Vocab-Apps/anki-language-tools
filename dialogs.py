@@ -706,6 +706,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 delete_button.setText('Remove')
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
+            gridlayout.setColumnStretch(0, 10) # from:
+            gridlayout.setColumnStretch(1, 20) # from field label
+            gridlayout.setColumnStretch(2, 30) # from language name
+            gridlayout.setColumnStretch(3, 10) # to:
+            gridlayout.setColumnStretch(4, 20) # to field label
+            gridlayout.setColumnStretch(5, 30) # to language name
+            gridlayout.setColumnStretch(6, 10) # remove button
             vlayout.addLayout(gridlayout)
 
         # do we have transliteration rules for this deck_note_type
@@ -738,6 +745,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 delete_button.setText('Remove')
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
+            gridlayout.setColumnStretch(0, 10) # from:
+            gridlayout.setColumnStretch(1, 20) # from field label
+            gridlayout.setColumnStretch(2, 30) # from language name
+            gridlayout.setColumnStretch(3, 10) # to:
+            gridlayout.setColumnStretch(4, 20) # to field label
+            gridlayout.setColumnStretch(5, 30) # to language name
+            gridlayout.setColumnStretch(6, 10) # remove button                
             vlayout.addLayout(gridlayout)            
 
         # do we have any audio rules for this deck_note_type
@@ -773,6 +787,13 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 delete_button.setText('Remove')
                 gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
+            gridlayout.setColumnStretch(0, 10) # from:
+            gridlayout.setColumnStretch(1, 20) # from field label
+            gridlayout.setColumnStretch(2, 30) # from language name
+            gridlayout.setColumnStretch(3, 10) # to:
+            gridlayout.setColumnStretch(4, 20) # to field label
+            gridlayout.setColumnStretch(5, 30) # to language name
+            gridlayout.setColumnStretch(6, 10) # remove button                
             vlayout.addLayout(gridlayout)                        
 
         vlayout.addStretch()
