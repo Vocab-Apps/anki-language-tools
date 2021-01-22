@@ -130,7 +130,7 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
 def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, voice: Dict):
     field_index = get_field_id(to_deck_note_type_field)
 
-    print(f'load_audio, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} voice: {voice}')
+    # print(f'load_audio, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} voice: {voice}')
 
     # now, we need to do the translation, asynchronously
     # prepare lambdas
