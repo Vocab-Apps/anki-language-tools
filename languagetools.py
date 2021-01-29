@@ -274,34 +274,26 @@ class LanguageTools():
         }        
 
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
+        populated_set = aqt.mw.col.db.all("select did, mid from notes inner join cards on notes.id = cards.nid group by mid, did")
+        #print(populated_set)
+        
         deck_list = aqt.mw.col.decks.all_names_and_ids()
         note_types = aqt.mw.col.models.all_names_and_ids()
 
         result: List[DeckNoteTypeField] = []
 
-        print(f'len(deck_list): {len(deck_list)}')
-        print(f'len(note_types): {len(note_types)}')
-        print(f'product: {len(deck_list) * len(note_types)}')
-        i=0
-        for deck_entry in deck_list:
-            print(f'deck_entry: {deck_entry}')
-            print(f'i: {i}')
-            for note_type_entry in note_types:
-                i += 1
-                # print(f'i: {i}')
-                deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
-                notes = self.get_notes_for_deck_note_type(deck_note_type)
-                if len(notes) > 0:
-                    # get field list
-                    model = aqt.mw.col.models.get(deck_note_type.model_id)
-                    fields = model['flds']
-                    for field in fields:
-                        field_name = field['name']
-                        deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
-                        deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
-                        result.append(deck_note_type_field)
+        for entry in populated_set:
+            deck_id = entry[0]
+            model_id = entry[1]
+            deck_note_type = build_deck_note_type(deck_id, model_id)
+            model = aqt.mw.col.models.get(model_id)
+            fields = model['flds']
+            for field in fields:
+                field_name = field['name']
+                deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+                result.append(deck_note_type_field)
 
-        return result        
+        return result
 
 
     def get_populated_decks(self) -> Dict[str, Deck]:
