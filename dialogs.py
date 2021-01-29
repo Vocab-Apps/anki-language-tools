@@ -1427,6 +1427,10 @@ def voice_selection_dialog(languagetools):
     voice_selection_dialog.exec_()
 
 def verify_deck_note_type_consistent(note_id_list):
+    if len(note_id_list) == 0:
+        aqt.utils.showCritical(f'You must select notes before opening this dialog.', title=constants.ADDON_NAME)
+        return None
+
     # ensure we only have one deck/notetype selected
     deck_note_type_map = {}
 
