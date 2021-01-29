@@ -279,8 +279,16 @@ class LanguageTools():
 
         result: List[DeckNoteTypeField] = []
 
+        print(f'len(deck_list): {len(deck_list)}')
+        print(f'len(note_types): {len(note_types)}')
+        print(f'product: {len(deck_list) * len(note_types)}')
+        i=0
         for deck_entry in deck_list:
+            print(f'deck_entry: {deck_entry}')
+            print(f'i: {i}')
             for note_type_entry in note_types:
+                i += 1
+                # print(f'i: {i}')
                 deck_note_type = DeckNoteType(deck_entry.id, deck_entry.name, note_type_entry.id, note_type_entry.name)
                 notes = self.get_notes_for_deck_note_type(deck_note_type)
                 if len(notes) > 0:
