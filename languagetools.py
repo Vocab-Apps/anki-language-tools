@@ -22,6 +22,9 @@ from . import version
 class AnkiItemNotFoundError(Exception):
     pass
 
+class LanguageToolsRequestError(Exception):
+    pass
+
 class DeckNoteType():
     def __init__(self, deck_id, deck_name, model_id, model_name):
         self.deck_id = deck_id
@@ -547,20 +550,19 @@ class LanguageTools():
         return response
 
     def interpret_translation_response_async(self, response):
+        print(response.status_code)
         if response.status_code == 200:
             data = json.loads(response.content)
             return data['translated_text'] 
         if response.status_code == 400:
             data = json.loads(response.content)
             error_text = f"Could not load translation: {data['error']}"
-            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
-            return error_text
+            raise LanguageToolsRequestError(error_text)
         if response.status_code == 401:
             data = json.loads(response.content)
-            return data['error'] # API key invalid
+            raise LanguageToolsRequestError(data['error'])
         error_text = f"Could not load translation: {response.text}"
-        aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
-        return error_text
+        raise LanguageToolsRequestError(error_text)
 
     def get_translation(self, source_text, translation_option):
         return self.interpret_translation_response_async(self.get_translation_async(source_text, translation_option))

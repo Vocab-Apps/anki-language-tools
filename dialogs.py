@@ -4,7 +4,7 @@ import traceback
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card
+from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
 from . import constants
 
 
@@ -425,29 +425,37 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 self.noteTableModel.setToFieldData(i, translation_result)
             return set_to_field
 
-        i = 0
-        self.to_field_data = []
-        for field_data in self.from_field_data:
-            if self.transformation_type == constants.TransformationType.Translation:
-                translation_result = self.languagetools.get_translation(field_data, self.translation_option)
-            elif self.transformation_type == constants.TransformationType.Transliteration:
-                translation_result = self.languagetools.get_transliteration(field_data, 
-                                                                            self.transliteration_option['service'],
-                                                                            self.transliteration_option['transliteration_key'])
-            self.to_field_data.append(translation_result)
-            aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
-            i += 1
-            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
+        try:
+            self.load_errors = []
+            i = 0
+            self.to_field_data = []
+            for field_data in self.from_field_data:
+                if self.transformation_type == constants.TransformationType.Translation:
+                    translation_result = self.languagetools.get_translation(field_data, self.translation_option)
+                elif self.transformation_type == constants.TransformationType.Transliteration:
+                    translation_result = self.languagetools.get_transliteration(field_data, 
+                                                                                self.transliteration_option['service'],
+                                                                                self.transliteration_option['transliteration_key'])
+                self.to_field_data.append(translation_result)
+                aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
+                i += 1
+                aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
+            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
+            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET))
+        except LanguageToolsRequestError as e:
+            self.to_field_data.append('')
+            self.load_errors.append(e)
 
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(constants.GREEN_STYLESHEET))
-        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
-        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(constants.GREEN_STYLESHEET))        
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText(self.load_button_text_map[self.transformation_type]))
 
 
     def loadTranslationDone(self, future_result):
-        pass
+        if len(self.load_errors) > 0:
+            first_error = self.load_errors[0]
+            error_message = f'{str(first_error)}'
+            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_message}", title=constants.ADDON_NAME)
 
     def accept(self):
         if self.to_fields_empty == False:
