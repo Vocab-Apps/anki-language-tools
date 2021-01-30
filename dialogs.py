@@ -1341,9 +1341,12 @@ class LanguageMappingDialog_UI(object):
 
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
-        joined_text = ', '.join(field_samples)
-        text = f'<b>Samples</b>: {joined_text}'
-        aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
+        if len(field_samples) == 0:
+            aqt.utils.showInfo('No usable field data found', title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
+        else:
+            joined_text = ', '.join(field_samples)
+            text = f'<b>Samples</b>: {joined_text}'
+            aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
 
     def accept(self):
         self.saveLanguageMappingChanges()

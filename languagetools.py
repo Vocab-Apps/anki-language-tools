@@ -1,11 +1,13 @@
 # python imports
 import os
+import re
 import random
 import requests
 import json
 import tempfile
 from typing import List, Dict
 import hashlib
+import anki.utils
 
 # anki imports
 import aqt
@@ -316,6 +318,8 @@ class LanguageTools():
 
     def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
+
+        stripImagesRe = re.compile("(?i)<img[^>]+src=[\"']?([^\"'>]+)[\"']?[^>]*>")
         
         def process_field_value(note_id, field_name):
             note = aqt.mw.col.getNote(note_id)
@@ -323,7 +327,8 @@ class LanguageTools():
                 # field was removed
                 raise AnkiItemNotFoundError(f'field {field_name} not found')
             original_field_value = note[field_name]
-            field_value = original_field_value
+            field_value = stripImagesRe.sub('', original_field_value)
+            field_value = anki.utils.htmlToTextLine(field_value)
             max_len = 200 # restrict to 200 characters
             if len(original_field_value) > max_len:
                 field_value = original_field_value[:max_len]
