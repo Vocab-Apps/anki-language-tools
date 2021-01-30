@@ -1431,11 +1431,17 @@ def voice_selection_dialog(languagetools):
         aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
         return
 
-    voice_list = languagetools.get_tts_voice_list()
+    aqt.mw.progress.start(immediate=True, label=f'{constants.MENU_PREFIX} retrieving voice list')
+    def get_complete_lambda(languagetools):
+        def voicelist_complete(fut_result):
+            aqt.mw.progress.finish()
+            voice_list = fut_result.result()
+            voice_selection_dialog = VoiceSelectionDialog(languagetools, voice_list)
+            voice_selection_dialog.setupUi()
+            voice_selection_dialog.exec_()            
+        return voicelist_complete
+    aqt.mw.taskman.run_in_background(languagetools.get_tts_voice_list, get_complete_lambda(languagetools))
 
-    voice_selection_dialog = dialog = VoiceSelectionDialog(languagetools, voice_list)
-    voice_selection_dialog.setupUi()
-    voice_selection_dialog.exec_()
 
 def verify_deck_note_type_consistent(note_id_list):
     if len(note_id_list) == 0:
