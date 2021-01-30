@@ -312,6 +312,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
                     to_field_index = self.field_name_list.index(to_field)                
 
         # set some defaults
+        # don't crash
+        from_field_index = min(from_field_index, len(self.field_name_list) - 1)
+        to_field_index = min(to_field_index, len(self.field_name_list) - 1)
         self.from_field = self.field_name_list[from_field_index]
         self.to_field = self.field_name_list[to_field_index]
 
@@ -401,32 +404,38 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(None))
-        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(True))
-        aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(None))
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
-
-        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
-        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
-
-        # get service
-        if self.transformation_type == constants.TransformationType.Translation:
-            service = self.translation_service_names[self.service_combobox.currentIndex()]
-            translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
-            translation_option_subset = [x for x in translation_options if x['service'] == service]
-            assert(len(translation_option_subset) == 1)
-            self.translation_option = translation_option_subset[0]
-        elif self.transformation_type == constants.TransformationType.Transliteration:
-            self.transliteration_option = self.transliteration_options[self.service_combobox.currentIndex()]
-
-        def get_set_to_field_lambda(i, translation_result):
-            def set_to_field():
-                self.noteTableModel.setToFieldData(i, translation_result)
-            return set_to_field
+        self.load_errors = []
 
         try:
-            self.load_errors = []
+            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
+            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(None))
+            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(True))
+            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(None))
+            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
+
+            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
+            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
+
+            # get service
+            if self.transformation_type == constants.TransformationType.Translation:
+                service = self.translation_service_names[self.service_combobox.currentIndex()]
+                translation_options = self.languagetools.get_translation_options(self.from_language, self.to_language)
+                translation_option_subset = [x for x in translation_options if x['service'] == service]
+                assert(len(translation_option_subset) == 1)
+                self.translation_option = translation_option_subset[0]
+            elif self.transformation_type == constants.TransformationType.Transliteration:
+                self.transliteration_option = self.transliteration_options[self.service_combobox.currentIndex()]
+
+            def get_set_to_field_lambda(i, translation_result):
+                def set_to_field():
+                    self.noteTableModel.setToFieldData(i, translation_result)
+                return set_to_field
+
+        except Exception as e:
+            self.load_errors.append(e)
+            return
+
+        try:
             i = 0
             self.to_field_data = []
             for field_data in self.from_field_data:
