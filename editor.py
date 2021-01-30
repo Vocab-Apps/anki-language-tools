@@ -13,7 +13,7 @@ import anki.notes
 import anki.models
 
 # addon imports
-from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard
+from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError
 from . import constants
 
 
@@ -84,12 +84,15 @@ def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id,
                     return
 
             translation_response = future_result.result()
-            translated_text = languagetools.interpret_translation_response_async(translation_response)
-            # set the field value on the note
-            editor.note.fields[field_index] = translated_text
-            # update the webview
-            js_command = f"""set_field_value({field_index}, "{translated_text}")"""
-            editor.web.eval(js_command)
+            try:
+                translated_text = languagetools.interpret_translation_response_async(translation_response)
+                # set the field value on the note
+                editor.note.fields[field_index] = translated_text
+                # update the webview
+                js_command = f"""set_field_value({field_index}, "{translated_text}")"""
+                editor.web.eval(js_command)
+            except LanguageToolsRequestError as e:
+                aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
         return apply_translation
 
     aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
@@ -116,12 +119,16 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
                     return
 
             translation_response = future_result.result()
-            translated_text = languagetools.interpret_transliteration_response_async(translation_response)
-            # set the field value on the note
-            editor.note.fields[field_index] = translated_text
-            # update the webview
-            js_command = f"""set_field_value({field_index}, "{translated_text}")"""
-            editor.web.eval(js_command)
+            try:
+                translated_text = languagetools.interpret_transliteration_response_async(translation_response)
+                # set the field value on the note
+                editor.note.fields[field_index] = translated_text
+                # update the webview
+                js_command = f"""set_field_value({field_index}, "{translated_text}")"""
+                editor.web.eval(js_command)
+            except LanguageToolsRequestError as e:
+                aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
+                                
         return apply_transliteration
 
     aqt.mw.taskman.run_in_background(get_request_transliteration_lambda(languagetools, field_value, transliteration_option), 

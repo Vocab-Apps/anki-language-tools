@@ -594,14 +594,13 @@ class LanguageTools():
         if response.status_code == 400:
             data = json.loads(response.content)
             error_text = f"Could not load transliteration: {data['error']}"
-            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
+            raise LanguageToolsRequestError(error_text)
             return error_text
         if response.status_code == 401:
             data = json.loads(response.content)
-            return data['error'] # API key invalid
+            raise LanguageToolsRequestError(data['error'])
         error_text = f"Could not load transliteration: {response.text}"
-        aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_text}")
-        return error_text    
+        raise LanguageToolsRequestError(error_text)
 
     def get_transliteration(self, source_text, service, transliteration_key):
         if not self.check_api_key_valid():
