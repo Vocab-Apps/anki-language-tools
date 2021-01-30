@@ -401,6 +401,14 @@ class BatchConversionDialog(aqt.qt.QDialog):
     def loadTranslations(self):
         if self.languagetools.check_api_key_valid() == False:
             return
+        if self.transformation_type == constants.TransformationType.Translation:
+            if len(self.translation_options) == 0:
+                aqt.utils.showCritical(f'No service found for translation from language {self.languagetools.get_language_name(self.from_language)}', title=constants.ADDON_NAME)
+                return
+        elif self.transformation_type == constants.TransformationType.Transliteration:
+            if len(self.transliteration_options) == 0:
+                aqt.utils.showCritical(f'No service found for transliteration from language {self.languagetools.get_language_name(self.from_language)}', title=constants.ADDON_NAME)
+                return
         aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
