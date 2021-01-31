@@ -214,9 +214,12 @@ def init(languagetools):
             return handled
 
         if str.startswith("key:"):
+            # print(str)
             components = str.split(':')
-            if len(components) == 4:
-                (key_str, field_index_str, note_id_str, field_value) = components
+            if len(components) >= 4:
+                field_index_str = components[1]
+                note_id_str = components[2]
+                field_value = ':'.join(components[3:])
                 field_index = int(field_index_str)
                 note_id = int(note_id_str)
                 note = editor.note

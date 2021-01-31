@@ -555,7 +555,7 @@ class LanguageTools():
         return response
 
     def interpret_translation_response_async(self, response):
-        print(response.status_code)
+        # print(response.status_code)
         if response.status_code == 200:
             data = json.loads(response.content)
             return data['translated_text'] 
