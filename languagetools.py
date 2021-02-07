@@ -316,6 +316,10 @@ class LanguageTools():
         notes = aqt.mw.col.find_notes(query)
         return notes
 
+    def field_empty(self, field_value: str) -> bool:
+        stripped_field_value = anki.utils.htmlToTextLine(field_value)
+        return len(stripped_field_value) == 0
+
     def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
 

@@ -67,6 +67,18 @@ def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_valu
 def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
     field_index = get_field_id(to_deck_note_type_field)
 
+    def apply_field_value(field_index, result_text):
+        # set the field value on the note
+        editor.note.fields[field_index] = result_text
+        # update the webview
+        js_command = f"""set_field_value({field_index}, "{result_text}")"""
+        editor.web.eval(js_command)        
+
+    # is the source field empty ?
+    if languagetools.field_empty(field_value):
+        apply_field_value(field_index, '')
+        return
+
     def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn):
         def apply_transformation(future_result):
             if editor.note == None:
@@ -80,11 +92,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
             transformation_response = future_result.result()
             try:
                 result_text = interpret_response_fn(transformation_response)
-                # set the field value on the note
-                editor.note.fields[field_index] = result_text
-                # update the webview
-                js_command = f"""set_field_value({field_index}, "{result_text}")"""
-                editor.web.eval(js_command)
+                apply_field_value(field_index, result_text)
             except LanguageToolsRequestError as e:
                 aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
         return apply_transformation
