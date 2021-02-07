@@ -63,126 +63,73 @@ def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_valu
                                      get_apply_translation_lambda(languagetools, editor, field_index))
 
 
-def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
+# generic function to load a transformation asynchronously (translation / transliteration / audio)
+def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
     field_index = get_field_id(to_deck_note_type_field)
 
-    # print(f'load_translation, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {translation_option}')
+    def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn):
+        def apply_transformation(future_result):
+            if editor.note == None:
+                # user has left the editor
+                return
+            if original_note_id != 0:
+                if editor.note.id != original_note_id:
+                    # user switched to a different note, ignore
+                    return
 
-    # now, we need to do the translation, asynchronously
-    # prepare lambdas
-    #     
+            transformation_response = future_result.result()
+            try:
+                result_text = interpret_response_fn(transformation_response)
+                # set the field value on the note
+                editor.note.fields[field_index] = result_text
+                # update the webview
+                js_command = f"""set_field_value({field_index}, "{result_text}")"""
+                editor.web.eval(js_command)
+            except LanguageToolsRequestError as e:
+                aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
+        return apply_transformation
+
+    aqt.mw.taskman.run_in_background(request_transformation_fn, 
+                                     get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn))
+
+
+
+def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
     def get_request_translation_lambda(languagetools, field_value, translation_option):
         def request_translation():
             return languagetools.get_translation_async(field_value, translation_option)
         return request_translation
+    interpret_response_fn = languagetools.interpret_translation_response_async
 
-    def get_apply_translation_lambda(languagetools, editor, field_index, original_note_id):
-        def apply_translation(future_result):
-            if original_note_id != 0:
-                if editor.note.id != original_note_id:
-                    # user switched to a different note, ignore
-                    return
-            if editor.note == None:
-                # user has left the editor
-                return                    
+    load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_translation_lambda(languagetools, field_value, translation_option), interpret_response_fn)
 
-            translation_response = future_result.result()
-            try:
-                translated_text = languagetools.interpret_translation_response_async(translation_response)
-                # set the field value on the note
-                editor.note.fields[field_index] = translated_text
-                # update the webview
-                js_command = f"""set_field_value({field_index}, "{translated_text}")"""
-                editor.web.eval(js_command)
-            except LanguageToolsRequestError as e:
-                aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
-        return apply_translation
-
-    aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
-                                     get_apply_translation_lambda(languagetools, editor, field_index, original_note_id))
 
 def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, transliteration_option: Dict):
-    field_index = get_field_id(to_deck_note_type_field)
-
-    # print(f'load_transliteration, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} translation_option: {transliteration_option}')
-
-    # now, we need to do the translation, asynchronously
-    # prepare lambdas
-    #     
     def get_request_transliteration_lambda(languagetools, field_value, transliteration_option):
         def request_transliteration():
             return languagetools.get_transliteration_async(field_value, transliteration_option)
         return request_transliteration
+    interpret_response_fn = languagetools.interpret_transliteration_response_async
 
-    def get_apply_transliteration_lambda(languagetools, editor, field_index, original_note_id):
-        def apply_transliteration(future_result):
-            if original_note_id != 0:
-                if editor.note.id != original_note_id:
-                    # user switched to a different note, ignore
-                    return
-            if editor.note == None:
-                # user has left the editor
-                return                    
+    load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_transliteration_lambda(languagetools, field_value, transliteration_option), interpret_response_fn)
 
-            translation_response = future_result.result()
-            try:
-                translated_text = languagetools.interpret_transliteration_response_async(translation_response)
-                # set the field value on the note
-                editor.note.fields[field_index] = translated_text
-                # update the webview
-                js_command = f"""set_field_value({field_index}, "{translated_text}")"""
-                editor.web.eval(js_command)
-            except LanguageToolsRequestError as e:
-                aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
-                                
-        return apply_transliteration
-
-    aqt.mw.taskman.run_in_background(get_request_transliteration_lambda(languagetools, field_value, transliteration_option), 
-                                     get_apply_transliteration_lambda(languagetools, editor, field_index, original_note_id))
 
 def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, voice: Dict):
-    field_index = get_field_id(to_deck_note_type_field)
-
-    # print(f'load_audio, to_deck_note_type_field: {to_deck_note_type_field} field_index: {field_index} voice: {voice}')
-
-    # now, we need to do the translation, asynchronously
-    # prepare lambdas
-    #     
     def get_request_audio_lambda(languagetools, field_value, voice):
         def request_audio():
             return languagetools.generate_audio_tag_collection(field_value, voice)
         return request_audio
 
-    def get_apply_audio_lambda(languagetools, editor, field_index, original_note_id):
-        def apply_audio(future_result):
-            if original_note_id != 0:
-                if editor.note.id != original_note_id:
-                    # user switched to a different note, ignore
-                    return
-            if editor.note == None:
-                # user has left the editor
-                return
+    def interpret_response_fn(response):
+        sound_tag = response['sound_tag']
+        full_filename = response['full_filename']
+        if sound_tag == None:
+            return ''
+        # sound is valid, play sound
+        aqt.sound.av_player.play_file(full_filename)            
+        return sound_tag
 
-            sound_tag, full_filename = future_result.result()
-            if sound_tag == None:
-                sound_tag = ''
-                editor.note.fields[field_index] = sound_tag
-                js_command = f"""set_field_value({field_index}, "")"""
-                editor.web.eval(js_command)                
-            else:
-                # set sound tag, and play sound
-                editor.note.fields[field_index] = sound_tag
-                js_command = f"""set_field_value({field_index}, "{sound_tag}")"""
-                editor.web.eval(js_command)
-                # play sound
-                aqt.sound.av_player.play_file(full_filename)
-
-        return apply_audio
-
-    aqt.mw.taskman.run_in_background(get_request_audio_lambda(languagetools, field_value, voice), 
-                                     get_apply_audio_lambda(languagetools, editor, field_index, original_note_id))
-
-
+    load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_audio_lambda(languagetools, field_value, voice), interpret_response_fn)
 
 
 def init(languagetools):
