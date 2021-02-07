@@ -82,6 +82,9 @@ def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id,
                 if editor.note.id != original_note_id:
                     # user switched to a different note, ignore
                     return
+            if editor.note == None:
+                # user has left the editor
+                return                    
 
             translation_response = future_result.result()
             try:
@@ -117,6 +120,9 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
                 if editor.note.id != original_note_id:
                     # user switched to a different note, ignore
                     return
+            if editor.note == None:
+                # user has left the editor
+                return                    
 
             translation_response = future_result.result()
             try:
@@ -153,6 +159,9 @@ def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field
                 if editor.note.id != original_note_id:
                     # user switched to a different note, ignore
                     return
+            if editor.note == None:
+                # user has left the editor
+                return
 
             sound_tag, full_filename = future_result.result()
             if sound_tag == None:
