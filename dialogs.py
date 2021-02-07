@@ -1031,6 +1031,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
     def language_index_changed(self, current_index):
         self.voice_select_callback_enabled = False
         self.language_code = self.language_code_list[current_index]
+        self.language_name = self.language_name_list[current_index]
         # filter voices that match this language
         available_voices = [x for x in self.voice_list if x['language_code'] == self.language_code]
         self.available_voices = sorted(available_voices, key=lambda x: x['voice_description'])
@@ -1087,6 +1088,10 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
     def play_sample(self, i):
         if i < len(self.field_samples):
             source_text = self.field_samples[i]
+            if len(self.available_voices) == 0:
+                # no voice available
+                aqt.utils.showCritical(f'No voice available for {self.language_name}', title=constants.ADDON_NAME)
+                return
             # get index of voice
             voice_index = self.voice_combobox.currentIndex()
             voice = self.available_voices[voice_index]
