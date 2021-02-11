@@ -642,13 +642,15 @@ class LanguageTools():
     def generate_audio_tag_collection(self, source_text, voice):
         result = {'sound_tag': None,
         'full_filename': None}
-        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
+        result = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
+        generated_filename = result['filename']
         if generated_filename != None:
             full_filename = aqt.mw.col.media.addFile(generated_filename)
             collection_filename = os.path.basename(full_filename)
             sound_tag = f'[sound:{collection_filename}]'
             result['sound_tag'] = sound_tag
             result['full_filename'] = full_filename
+            # todo: delete generated filename
         return result
 
     def get_hash_for_request(self, url_path, data):
@@ -677,9 +679,15 @@ class LanguageTools():
             with open(output_temp_file.name, 'wb') as f:
                 f.write(response.content)
             f.close()
-            return output_temp_file.name
+            return { 'filename': output_temp_file.name,
+                     'error': None }
         else:
-            return None
+            response_data = json.loads(response.content)
+            error_msg = response_data
+            if 'error' in response_data:
+                error_msg = 'Error: ' + response_data['error']
+            return { 'filename': None,
+                     'error': f"Status Code: {response.status_code} ({error_msg})" }
 
     def get_tts_voice_list(self):
         response = requests.get(self.base_url + '/voice_list')

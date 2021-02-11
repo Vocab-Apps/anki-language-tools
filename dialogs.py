@@ -1102,16 +1102,23 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
 
     def play_audio(self, source_text, voice):
+        self.play_audio_error = None
         voice_key = voice['voice_key']
         service = voice['service']
 
-        audio_temp_filename = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-        if audio_temp_filename != None:
-            aqt.sound.av_player.play_file(audio_temp_filename)
+        result = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
+        if result['filename'] != None:
+            aqt.sound.av_player.play_file(result['filename'])
+        else:
+            # aqt.utils.showCritical(result['error'], title=constants.ADDON_NAME)
+            self.play_audio_error = result['error']
 
     def play_audio_done(self, future_result, i):
         self.sample_play_buttons[i].setText('Play Audio')
         self.sample_play_buttons[i].setDisabled(False)
+
+        if self.play_audio_error != None:
+            aqt.utils.showCritical(f'Could not play audio: {self.play_audio_error}', title=constants.ADDON_NAME)
 
     def accept(self):
         for language_code, voice_mapping in self.voice_mapping_changes.items():
