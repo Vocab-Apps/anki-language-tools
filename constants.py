@@ -16,8 +16,8 @@ EDITOR_WEB_FIELD_ID_TRANSLATION = 'translation'
 GREEN_STYLESHEET = 'background-color: #69F0AE;'
 RED_STYLESHEET = 'background-color: #FFCDD2;'
 
-GREEN_STYLESHEET_NIGHTMODE = 'background-color: #2E7D32; color: #424242;'
-RED_STYLESHEET_NIGHTMODE = 'background-color: #B71C1C; color: #424242;'
+GREEN_STYLESHEET_NIGHTMODE = 'background-color: #2E7D32;'
+RED_STYLESHEET_NIGHTMODE = 'background-color: #B71C1C;'
 
 DOCUMENTATION_ENSURE_LANGUAGE_MAPPING = 'Please ensure Language Mapping is correct (Tools -> Language Tools: Language Mapping)'
 
