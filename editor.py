@@ -125,10 +125,16 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
 def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, voice: Dict):
     def get_request_audio_lambda(languagetools, field_value, voice):
         def request_audio():
-            return languagetools.generate_audio_tag_collection(field_value, voice)
+            try:
+                return languagetools.generate_audio_tag_collection(field_value, voice)
+            except LanguageToolsRequestError as err:
+                return {'error': str(err)}
         return request_audio
 
     def interpret_response_fn(response):
+        if 'error' in response:
+            # just re-raise
+            raise LanguageToolsRequestError('Could not generate audio: ' + response['error'])
         sound_tag = response['sound_tag']
         full_filename = response['full_filename']
         if sound_tag == None:
