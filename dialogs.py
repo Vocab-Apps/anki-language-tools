@@ -667,18 +667,33 @@ class AddAudioDialog(aqt.qt.QDialog):
         aqt.mw.taskman.run_in_background(self.add_audio_task, self.add_audio_task_done)
 
     def add_audio_task(self):
+        self.generate_audio_errors = []
         i = 0
         for note_id in self.note_id_list:
-            result = self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
-            if result == True:
-                self.success_count += 1
+            try:
+                result = self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
+                if result == True:
+                    self.success_count += 1
+            except LanguageToolsRequestError as err:
+                self.generate_audio_errors.append(str(err))
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
 
     def add_audio_task_done(self, future_result):
-        completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>. Success: <b>{self.success_count}</b> out of <b>{len(self.note_id_list)}</b>."
+        # are there any errors ?
+        errors_str = ''
+        if len(self.generate_audio_errors) > 0:
+            error_counts = {}
+            for error in self.generate_audio_errors:
+                current_count = error_counts.get(error, 0)
+                error_counts[error] = current_count + 1
+            errors_str = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
+        completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>. Success: <b>{self.success_count}</b> out of <b>{len(self.note_id_list)}</b>.{errors_str}"
         self.close()
-        aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
+        if len(errors_str) > 0:
+            aqt.utils.showWarning(completion_message, title=constants.ADDON_NAME)
+        else:
+            aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
 
 class NoteSettingsDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
@@ -1106,12 +1121,12 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         voice_key = voice['voice_key']
         service = voice['service']
 
-        result = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-        if result['filename'] != None:
-            aqt.sound.av_player.play_file(result['filename'])
-        else:
-            # aqt.utils.showCritical(result['error'], title=constants.ADDON_NAME)
-            self.play_audio_error = result['error']
+        try:
+            filename = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
+            if filename != None:
+                aqt.sound.av_player.play_file(filename)
+        except LanguageToolsRequestError as err:
+            self.play_audio_error = str(err)
 
     def play_audio_done(self, future_result, i):
         self.sample_play_buttons[i].setText('Play Audio')
