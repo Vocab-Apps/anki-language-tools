@@ -29,43 +29,15 @@ def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
     # print(js_command)
     editor.web.eval(js_command)
 
-def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
-    field_index = get_field_id(deck_note_type_field)
-    js_command = f"remove_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index})"
+def show_loading_indicator(editor: aqt.editor.Editor, field_index):
+    js_command = f"show_loading_indicator({field_index})"
+    # print(js_command)
     editor.web.eval(js_command)
 
-def apply_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField, translation_option):
-    # first, remove any inline translation which may be present already
-    remove_inline_translation_changes(languagetools, editor, deck_note_type_field)
-
-    field_index = get_field_id(deck_note_type_field)
-    editor.web.eval(f"add_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, 'Translation')")
-
-    note = editor.note
-    field_value = note[deck_note_type_field.field_name]
-    load_inline_translation(languagetools, editor, field_value, deck_note_type_field, translation_option)
-
-def load_inline_translation(languagetools, editor: aqt.editor.Editor, field_value: str, deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
-    field_index = get_field_id(deck_note_type_field)
-
-    # now, we need to do the translation, asynchronously
-    # prepare lambdas
-    #     
-    def get_request_translation_lambda(languagetools, field_value, translation_option):
-        def request_translation():
-            return languagetools.get_translation_async(field_value, translation_option)
-        return request_translation
-
-    def get_apply_translation_lambda(languagetools, editor, field_index):
-        def apply_translation(future_result):
-            translation_response = future_result.result()
-            translated_text = languagetools.interpret_translation_response_async(translation_response)
-            js_command = f"""set_inline_field_value('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index}, "{translated_text}")"""
-            editor.web.eval(js_command)
-        return apply_translation
-
-    aqt.mw.taskman.run_in_background(get_request_translation_lambda(languagetools, field_value, translation_option), 
-                                     get_apply_translation_lambda(languagetools, editor, field_index))
+def hide_loading_indicator(editor: aqt.editor.Editor, field_index):
+    js_command = f"hide_loading_indicator({field_index})"
+    # print(js_command)
+    editor.web.eval(js_command)
 
 
 # generic function to load a transformation asynchronously (translation / transliteration / audio)
@@ -94,6 +66,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
                     # user switched to a different note, ignore
                     return
 
+            hide_loading_indicator(editor, field_index)
             transformation_response = future_result.result()
             try:
                 result_text = interpret_response_fn(transformation_response)
@@ -101,6 +74,8 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
             except LanguageToolsRequestError as e:
                 aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
         return apply_transformation
+
+    show_loading_indicator(editor, field_index)
 
     aqt.mw.taskman.run_in_background(request_transformation_fn, 
                                      get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn))
@@ -168,7 +143,6 @@ def init(languagetools):
             deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
         else:
             deck_note_type = build_deck_note_type_from_note(note)
-        # print(f'loadNote, deck_note_type: {deck_note_type}')
 
         model = note.model()
         fields = model['flds']
@@ -176,14 +150,6 @@ def init(languagetools):
             field_name = field['name']
             add_loading_indicator(editor, index, field_name)
 
-        return
-
-        inline_translations = languagetools.get_inline_translations(deck_note_type)
-        # print(f'loadNote {deck_note_type} inline_translations: {inline_translations}')
-
-        for field_name, target_language in inline_translations.items():
-            deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
-            apply_inline_translation_changes(languagetools, editor, deck_note_type_field, target_language)
 
     def onBridge(handled, str, editor):
         # return handled # don't do anything for now
