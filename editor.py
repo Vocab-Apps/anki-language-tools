@@ -34,8 +34,8 @@ def show_loading_indicator(editor: aqt.editor.Editor, field_index):
     # print(js_command)
     editor.web.eval(js_command)
 
-def hide_loading_indicator(editor: aqt.editor.Editor, field_index):
-    js_command = f"hide_loading_indicator({field_index})"
+def hide_loading_indicator(editor: aqt.editor.Editor, field_index, original_field_value):
+    js_command = f"""hide_loading_indicator({field_index}, "{original_field_value}")"""
     # print(js_command)
     editor.web.eval(js_command)
 
@@ -56,7 +56,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
         apply_field_value(field_index, '')
         return
 
-    def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn):
+    def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, original_field_value, interpret_response_fn):
         def apply_transformation(future_result):
             if editor.note == None:
                 # user has left the editor
@@ -66,7 +66,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
                     # user switched to a different note, ignore
                     return
 
-            hide_loading_indicator(editor, field_index)
+            hide_loading_indicator(editor, field_index, original_field_value)
             transformation_response = future_result.result()
             try:
                 result_text = interpret_response_fn(transformation_response)
@@ -78,7 +78,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
     show_loading_indicator(editor, field_index)
 
     aqt.mw.taskman.run_in_background(request_transformation_fn, 
-                                     get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, interpret_response_fn))
+                                     get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, field_value, interpret_response_fn))
 
 
 

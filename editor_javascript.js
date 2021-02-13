@@ -4,15 +4,23 @@
 function add_loading_indicator(field_id, field_name) {
     var div_id = 'name' + field_id;
     $field_name_td = $("#" + div_id);
-    $(`<span id="loadingindicator${field_id}" style="display: none;"><i>loading...</i></span>`).appendTo($field_name_td);
+    $(`<span id="loadingindicator${field_id}" style="display: none;">
+        <i>loading...</i>
+       </span>
+       <span id="generatedfor${field_id}" style="display: none;">
+        <i>(<span id="originalfieldvalue${field_id}"></span>)</i>
+       </span>`).appendTo($field_name_td);
 }
 
-function hide_loading_indicator(field_id) {
+function hide_loading_indicator(field_id, original_field_value) {
     $('#loadingindicator' + field_id).hide();
+    $('#originalfieldvalue' + field_id).text(original_field_value);
+    $('#generatedfor' + field_id).show();
 }
 
 function show_loading_indicator(field_id) {
     $('#loadingindicator' + field_id).show();
+    $('#generatedfor' + field_id).hide();
 }
 
 function add_inline_field(field_type, field_id, header_text) {
