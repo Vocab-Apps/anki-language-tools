@@ -24,8 +24,10 @@ def get_field_id(deck_note_type_field: DeckNoteTypeField):
     field_index = field_names.index(deck_note_type_field.field_name)
     return field_index    
 
-def add_loading_indicator(editor: aqt.editor.Editor, field_index):
-    editor.web.eval(f"add_loading_indicator({field_index})")
+def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
+    js_command = f"add_loading_indicator({field_index}, '{field_name}')"
+    print(js_command)
+    editor.web.eval(js_command)
 
 def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
     field_index = get_field_id(deck_note_type_field)
@@ -168,8 +170,11 @@ def init(languagetools):
             deck_note_type = build_deck_note_type_from_note(note)
         # print(f'loadNote, deck_note_type: {deck_note_type}')
 
-        for index, field in enumerate(note.fields):
-            add_loading_indicator(editor, index)
+        model = note.model()
+        fields = model['flds']
+        for index, field in enumerate(fields):
+            field_name = field['name']
+            add_loading_indicator(editor, index, field_name)
 
         return
 

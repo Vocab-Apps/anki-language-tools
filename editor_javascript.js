@@ -1,8 +1,8 @@
 
-function add_loading_indicator(field_id) {
+function add_loading_indicator(field_id, field_name) {
     var div_id = 'name' + field_id;
-    $field_name_tr = $("#" + div_id).parent();
-    $(`<tr><td><span><i>loading...</i></span></td></tr>`).insertAfter($field_name_tr);
+    $field_name_td = $("#" + div_id);
+    $(`<span><i>loading...</i></span>`).appendTo($field_name_td);
 }
 
 
