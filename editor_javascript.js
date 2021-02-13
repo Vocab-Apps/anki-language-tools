@@ -1,10 +1,19 @@
 
+// see anki's editor.ts to understand the DOM structure
+
 function add_loading_indicator(field_id, field_name) {
     var div_id = 'name' + field_id;
     $field_name_td = $("#" + div_id);
-    $(`<span><i>loading...</i></span>`).appendTo($field_name_td);
+    $(`<span id="loadingindicator${field_id}"><i>loading...</i></span>`).hide().appendTo($field_name_td);
 }
 
+function hide_loading_indicator(field_id) {
+    $('loadingindicator' + field_id).hide();
+}
+
+function show_loading_indicator(field_id) {
+    $('loadingindicator' + field_id).show();
+}
 
 function add_inline_field(field_type, field_id, header_text) {
     var div_id = 'f' + field_id;

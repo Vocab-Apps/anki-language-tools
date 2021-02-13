@@ -26,7 +26,7 @@ def get_field_id(deck_note_type_field: DeckNoteTypeField):
 
 def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
     js_command = f"add_loading_indicator({field_index}, '{field_name}')"
-    print(js_command)
+    # print(js_command)
     editor.web.eval(js_command)
 
 def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
