@@ -1,3 +1,11 @@
+
+function add_loading_indicator(field_id) {
+    var div_id = 'name' + field_id;
+    $field_name_tr = $("#" + div_id).parent();
+    $(`<tr><td><span><i>loading...</i></span></td></tr>`).insertAfter($field_name_tr);
+}
+
+
 function add_inline_field(field_type, field_id, header_text) {
     var div_id = 'f' + field_id;
     $field_div = $("#" + div_id);

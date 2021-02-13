@@ -24,6 +24,9 @@ def get_field_id(deck_note_type_field: DeckNoteTypeField):
     field_index = field_names.index(deck_note_type_field.field_name)
     return field_index    
 
+def add_loading_indicator(editor: aqt.editor.Editor, field_index):
+    editor.web.eval(f"add_loading_indicator({field_index})")
+
 def remove_inline_translation_changes(languagetools: LanguageTools, editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
     field_index = get_field_id(deck_note_type_field)
     js_command = f"remove_inline_field('{constants.EDITOR_WEB_FIELD_ID_TRANSLATION}', {field_index})"
@@ -157,8 +160,6 @@ def init(languagetools):
         web_content.js.insert(0,  javascript_path)
 
     def loadNote(editor: aqt.editor.Editor):
-        return # disable for now, and inline translations should be retired
-
         note = editor.note
         # can we get the card from the editor ?
         if editor.card != None:
@@ -166,6 +167,11 @@ def init(languagetools):
         else:
             deck_note_type = build_deck_note_type_from_note(note)
         # print(f'loadNote, deck_note_type: {deck_note_type}')
+
+        for index, field in enumerate(note.fields):
+            add_loading_indicator(editor, index)
+
+        return
 
         inline_translations = languagetools.get_inline_translations(deck_note_type)
         # print(f'loadNote {deck_note_type} inline_translations: {inline_translations}')
