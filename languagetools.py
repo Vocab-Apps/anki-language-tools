@@ -24,6 +24,9 @@ from . import version
 class AnkiItemNotFoundError(Exception):
     pass
 
+class AnkiNoteEditorError(Exception):
+    pass
+
 class LanguageToolsRequestError(Exception):
     pass
 

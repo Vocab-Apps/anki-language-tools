@@ -33,8 +33,11 @@ def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
 
 def add_play_sound_collection(editor: aqt.editor.Editor, field_index, field_name):
     js_command = f"add_play_sound_collection({field_index}, '{field_name}')"
-    # print(js_command)
     editor.web.eval(js_command)    
+
+def add_tts_speak(editor: aqt.editor.Editor, field_index, field_name):
+    js_command = f"add_tts_speak({field_index}, '{field_name}')"
+    editor.web.eval(js_command)        
 
 def show_loading_indicator(editor: aqt.editor.Editor, field_index):
     js_command = f"show_loading_indicator({field_index})"
@@ -133,6 +136,24 @@ def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field
     load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_audio_lambda(languagetools, field_value, voice), interpret_response_fn)
 
 
+def editor_get_decknotetype(editor, languagetools):
+    note = editor.note
+    if note == None:
+        raise languagetools.AnkiNoteEditorError(f'editor.note not found')
+
+    if editor.addMode:
+        deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
+    else:
+        deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
+
+    return deck_note_type
+
+
+def editor_get_dntf(editor, languagetools, field_index):
+    deck_note_type = editor_get_decknotetype(editor, languagetools)
+    deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
+    return deck_note_type_field
+
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
 
@@ -145,11 +166,7 @@ def init(languagetools):
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
-        # can we get the card from the editor ?
-        if editor.card != None:
-            deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
-        else:
-            deck_note_type = build_deck_note_type_from_note(note)
+        deck_note_type = editor_get_decknotetype(editor, languagetools)
 
         model = note.model()
         fields = model['flds']
@@ -160,8 +177,12 @@ def init(languagetools):
             # is this field a sound field ?
             dntf = DeckNoteTypeField(deck_note_type, field_name)
             field_language = languagetools.get_language(dntf)
-            if field_language == constants.SpecialLanguage.sound.name:
-                add_play_sound_collection(editor, index, field_name)
+            if field_language != None:
+                if field_language == constants.SpecialLanguage.sound.name:
+                    add_play_sound_collection(editor, index, field_name)
+                elif field_language in languagetools.get_voice_selection_settings(): # is there a voice associated with this language ?
+                    add_tts_speak(editor, index, field_name)
+
 
 
     def onBridge(handled, str, editor):
@@ -182,11 +203,53 @@ def init(languagetools):
             logging.debug(f'sound tag: {sound_tag}')
 
             utils.play_anki_sound_tag(sound_tag)
-
-            # aqt.sound.av_player.play_file(full_filename)
-
-
             return handled
+
+        if str.startswith('ttsspeak:'):
+            logging.debug(f'ttsspeak command: [{str}]')
+            components = str.split(':')
+            field_index_str = components[1]
+            field_index = int(field_index_str)
+            note_id_str = components[2]
+            note_id = int(note_id_str)
+
+            note = editor.note
+            source_text = note.fields[field_index]
+            logging.debug(f'source_text: {source_text}')
+
+            try:
+
+                from_deck_note_type_field = editor_get_dntf(editor, languagetools, field_index)
+
+                # do we have a voice set ?
+                field_language = languagetools.get_language(from_deck_note_type_field)
+                if field_language == None:
+                    raise languagetools.AnkiNoteEditorError(f'No language set for field {from_deck_note_type_field}')
+                voice_selection_settings = languagetools.get_voice_selection_settings()
+                if field_language not in voice_selection_settings:
+                    raise languagetools.AnkiNoteEditorError(f'No voice set for language {languagetools.get_language_name(field_language)}')
+                voice = voice_selection_settings[field_language]
+
+                def play_audio(languagetools, source_text, voice):
+                    voice_key = voice['voice_key']
+                    service = voice['service']
+
+                    try:
+                        filename = languagetools.get_tts_audio(source_text, service, voice_key, {})
+                        if filename != None:
+                            aqt.sound.av_player.play_file(filename)
+                    except LanguageToolsRequestError as err:
+                        pass
+
+                def play_audio_done(future_result):
+                    pass
+
+                aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))
+
+            except languagetools.AnkiNoteEditorError:
+                logging.error('Could not speak', exc_info=True)
+
+            return handled            
 
         if languagetools.get_apply_updates_automatically() == False:
             # user doesn't want updates as they type
@@ -204,14 +267,8 @@ def init(languagetools):
                 note = editor.note
                 note_id = note.id
 
-                if editor.addMode:
-                    deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
-                    #print(f'deck_note_type: {deck_note_type}')
-                else:
-                    deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
-                    # print(f'deck_note_type: {deck_note_type}')
-
-                from_deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
+                from_deck_note_type_field = from_deck_note_type_field = editor_get_dntf(editor, languagetools, field_index)
+                deck_note_type = from_deck_note_type_field.deck_note_type
 
                 original_field_value = note[from_deck_note_type_field.field_name]
 
