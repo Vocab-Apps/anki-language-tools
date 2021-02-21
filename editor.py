@@ -1,6 +1,7 @@
 #python imports
 import json
 import urllib.parse
+import logging
 from typing import List, Dict
 
 # anki imports
@@ -15,6 +16,7 @@ import anki.models
 # addon imports
 from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError
 from . import constants
+from . import utils
 
 
 def get_field_id(deck_note_type_field: DeckNoteTypeField):
@@ -28,6 +30,11 @@ def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
     js_command = f"add_loading_indicator({field_index}, '{field_name}')"
     # print(js_command)
     editor.web.eval(js_command)
+
+def add_play_sound_collection(editor: aqt.editor.Editor, field_index, field_name):
+    js_command = f"add_play_sound_collection({field_index}, '{field_name}')"
+    # print(js_command)
+    editor.web.eval(js_command)    
 
 def show_loading_indicator(editor: aqt.editor.Editor, field_index):
     js_command = f"show_loading_indicator({field_index})"
@@ -150,10 +157,35 @@ def init(languagetools):
             field_name = field['name']
             add_loading_indicator(editor, index, field_name)
 
+            # is this field a sound field ?
+            dntf = DeckNoteTypeField(deck_note_type, field_name)
+            field_language = languagetools.get_language(dntf)
+            if field_language == constants.SpecialLanguage.sound.name:
+                add_play_sound_collection(editor, index, field_name)
+
 
     def onBridge(handled, str, editor):
         # return handled # don't do anything for now
         if not isinstance(editor, aqt.editor.Editor):
+            return handled
+
+        if str.startswith('playsoundcollection:'):
+            logging.debug(f'playsoundcollection command: [{str}]')
+            components = str.split(':')
+            field_index_str = components[1]
+            field_index = int(field_index_str)
+            note_id_str = components[2]
+            note_id = int(note_id_str)
+
+            note = editor.note
+            sound_tag = note.fields[field_index]
+            logging.debug(f'sound tag: {sound_tag}')
+
+            utils.play_anki_sound_tag(sound_tag)
+
+            # aqt.sound.av_player.play_file(full_filename)
+
+
             return handled
 
         if languagetools.get_apply_updates_automatically() == False:

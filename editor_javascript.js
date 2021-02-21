@@ -12,6 +12,14 @@ function add_loading_indicator(field_id, field_name) {
        </span>`).appendTo($field_name_td);
 }
 
+function add_play_sound_collection(field_id, field_name) {
+    var div_id = 'name' + field_id;
+    $field_name_td = $("#" + div_id);
+    $(`<span id="playsoundcollection${field_id}">
+        <button onclick="pycmd('playsoundcollection:${field_id}:${currentNoteId}')">Play Sound</button>
+       </span>`).appendTo($field_name_td);
+}
+
 function hide_loading_indicator(field_id, original_field_value) {
     $('#loadingindicator' + field_id).hide();
     $('#originalfieldvalue' + field_id).text(original_field_value);
