@@ -477,7 +477,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
     def accept(self):
         if self.to_fields_empty == False:
-            proceed = aqt.utils.askUser(f'Overwrite existing data in field {self.to_field} ?')
+            proceed = aqt.utils.askUser(f'Overwrite existing data in field {self.to_field} ?', parent=self)
             if proceed == False:
                 return
         # set field on notes
@@ -692,9 +692,9 @@ class AddAudioDialog(aqt.qt.QDialog):
         completion_message = f"Added Audio to field <b>{self.to_field}</b> using voice <b>{self.voice['voice_description']}</b>. Success: <b>{self.success_count}</b> out of <b>{len(self.note_id_list)}</b>.{errors_str}"
         self.close()
         if len(errors_str) > 0:
-            aqt.utils.showWarning(completion_message, title=constants.ADDON_NAME)
+            aqt.utils.showWarning(completion_message, title=constants.ADDON_NAME, parent=self)
         else:
-            aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME)
+            aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME, parent=self)
 
 class NoteSettingsDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
