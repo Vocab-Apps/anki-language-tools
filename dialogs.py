@@ -940,6 +940,8 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
 
         vlayout.addWidget(get_header_label(self.get_header_text()))
 
+        vlayout.addWidget(aqt.qt.QLabel('You can visualize and remove Audio / Translation / Transliteration rules from here.'))
+
         self.layout_rules(vlayout)
 
         vlayout.addWidget(get_medium_label(f'Apply Changes While Typing'))
@@ -1025,6 +1027,8 @@ class RunRulesDialog(NoteSettingsDialogBase):
         vlayout = QtWidgets.QVBoxLayout(self)
 
         vlayout.addWidget(get_header_label(self.get_header_text()))
+
+        vlayout.addWidget(aqt.qt.QLabel('Select the rules you want to run, then click Apply Rules.'))
 
         self.layout_rules(vlayout)
 
