@@ -751,7 +751,6 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 if self.add_rule_enable_checkbox():
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
-                    checkbox.setContentsMargins(10, 0, 10, 0)
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1
 
@@ -777,6 +776,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
             x_offset = 0
             if self.add_rule_enable_checkbox():
+                gridlayout.setColumnStretch(0, 10) # enable checkbox
                 x_offset = 1
             gridlayout.setColumnStretch(x_offset + 0, 10) # from:
             gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
@@ -812,7 +812,6 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 if self.add_rule_enable_checkbox():
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
-                    checkbox.setContentsMargins(10, 0, 10, 0)
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1                
 
@@ -838,7 +837,8 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
             x_offset = 0
             if self.add_rule_enable_checkbox():
-                x_offset = 1                
+                gridlayout.setColumnStretch(0, 10) # enable checkbox
+                x_offset = 1
             gridlayout.setColumnStretch(x_offset + 0, 10) # from:
             gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
             gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
@@ -877,7 +877,6 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 if self.add_rule_enable_checkbox():
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
-                    checkbox.setContentsMargins(10, 0, 10, 0)
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1                
 
@@ -903,6 +902,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
             x_offset = 0
             if self.add_rule_enable_checkbox():
+                gridlayout.setColumnStretch(0, 10) # enable checkbox
                 x_offset = 1
             gridlayout.setColumnStretch(x_offset + 0, 10) # from:
             gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
