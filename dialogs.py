@@ -723,7 +723,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label(f'Rules for {self.deck_note_type}'))
+        vlayout.addWidget(get_header_label(self.get_header_text()))
 
         font_bold = QtGui.QFont()
         font_bold.setBold(True)
@@ -754,16 +754,17 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 gridlayout.addWidget(to_field_label, i, 4, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, 5, 1, 1)
                 
-                delete_button = QtWidgets.QPushButton()
-                delete_button.setText('Remove')
-                def get_remove_lambda(to_dntf, button):
-                    def remove():
-                        button.setEnabled(False)
-                        button.setText('Removed')
-                        self.remove_translation(to_dntf)
-                    return remove
-                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
-                gridlayout.addWidget(delete_button, i, 6, 1, 1)
+                if self.add_delete_button():
+                    delete_button = QtWidgets.QPushButton()
+                    delete_button.setText('Remove')
+                    def get_remove_lambda(to_dntf, button):
+                        def remove():
+                            button.setEnabled(False)
+                            button.setText('Removed')
+                            self.remove_translation(to_dntf)
+                        return remove
+                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
+                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
             gridlayout.setColumnStretch(1, 20) # from field label
@@ -771,7 +772,8 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
             gridlayout.setColumnStretch(3, 10) # to:
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
-            gridlayout.setColumnStretch(6, 10) # remove button
+            if self.add_delete_button():
+                gridlayout.setColumnStretch(6, 10) # remove button
             gridlayout.setContentsMargins(10, 0, 10, 0)
             vlayout.addLayout(gridlayout)
 
@@ -801,16 +803,17 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 gridlayout.addWidget(to_field_label, i, 4, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({transliteration_name})'), i, 5, 1, 1)
                 
-                delete_button = QtWidgets.QPushButton()
-                delete_button.setText('Remove')
-                def get_remove_lambda(to_dntf, button):
-                    def remove():
-                        button.setEnabled(False)
-                        button.setText('Removed')                        
-                        self.remove_transliteration(to_dntf)
-                    return remove
-                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
-                gridlayout.addWidget(delete_button, i, 6, 1, 1)
+                if self.add_delete_button():
+                    delete_button = QtWidgets.QPushButton()
+                    delete_button.setText('Remove')
+                    def get_remove_lambda(to_dntf, button):
+                        def remove():
+                            button.setEnabled(False)
+                            button.setText('Removed')                        
+                            self.remove_transliteration(to_dntf)
+                        return remove
+                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
+                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
             gridlayout.setColumnStretch(1, 20) # from field label
@@ -818,7 +821,8 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
             gridlayout.setColumnStretch(3, 10) # to:
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
-            gridlayout.setColumnStretch(6, 10) # remove button          
+            if self.add_delete_button():
+                gridlayout.setColumnStretch(6, 10) # remove button          
             gridlayout.setContentsMargins(10, 0, 10, 0)      
             vlayout.addLayout(gridlayout)            
 
@@ -854,16 +858,17 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
                 gridlayout.addWidget(QtWidgets.QLabel(f'({voice_description})'), i, x_offset + 5, 1, 1)
                 
-                delete_button = QtWidgets.QPushButton()
-                delete_button.setText('Remove')
-                def get_remove_lambda(to_dntf, button):
-                    def remove():
-                        button.setEnabled(False)
-                        button.setText('Removed')                        
-                        self.remove_audio(to_dntf)
-                    return remove
-                delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))                
-                gridlayout.addWidget(delete_button, i, 6, 1, 1)
+                if self.add_delete_button():
+                    delete_button = QtWidgets.QPushButton()
+                    delete_button.setText('Remove')
+                    def get_remove_lambda(to_dntf, button):
+                        def remove():
+                            button.setEnabled(False)
+                            button.setText('Removed')                        
+                            self.remove_audio(to_dntf)
+                        return remove
+                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))                
+                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
             gridlayout.setColumnStretch(0, 10) # from:
             gridlayout.setColumnStretch(1, 20) # from field label
@@ -871,7 +876,8 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
             gridlayout.setColumnStretch(3, 10) # to:
             gridlayout.setColumnStretch(4, 20) # to field label
             gridlayout.setColumnStretch(5, 30) # to language name
-            gridlayout.setColumnStretch(6, 10) # remove button            
+            if self.add_delete_button():
+                gridlayout.setColumnStretch(6, 10) # remove button
             gridlayout.setContentsMargins(10, 0, 10, 0)    
             vlayout.addLayout(gridlayout)                        
 
@@ -939,6 +945,27 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
         super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
 
+    def get_header_text(self):
+        return f'Rules for {self.deck_note_type}'
+
+    def add_delete_button(self):
+        return True
+
+    def add_rule_enable_checkbox(self):
+        return False
+
+class RunRulesDialog(NoteSettingsDialogBase):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+        super(RunRulesDialog, self).__init__(languagetools, deck_note_type)
+
+    def get_header_text(self):
+        return f'Run Rules for {self.deck_note_type}'
+
+    def add_delete_button(self):
+        return False
+
+    def add_rule_enable_checkbox(self):
+        return True        
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
@@ -1580,7 +1607,7 @@ def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     if deck_note_type == None:
         return
 
-    dialog = NoteSettingsDialog(languagetools, deck_note_type)
+    dialog = RunRulesDialog(languagetools, deck_note_type)
     dialog.setupUi()
     dialog.exec_()
 
