@@ -747,12 +747,20 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 to_field_label = QtWidgets.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, 5, 1, 1)
+                x_offset = 0
+                if self.add_rule_enable_checkbox():
+                    checkbox = QtWidgets.QCheckBox()
+                    checkbox.setChecked(True)
+                    checkbox.setContentsMargins(10, 0, 10, 0)
+                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
+                    x_offset = 1
+
+                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, x_offset + 5, 1, 1)
                 
                 if self.add_delete_button():
                     delete_button = QtWidgets.QPushButton()
@@ -766,12 +774,16 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                     delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
                     gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
-            gridlayout.setColumnStretch(0, 10) # from:
-            gridlayout.setColumnStretch(1, 20) # from field label
-            gridlayout.setColumnStretch(2, 30) # from language name
-            gridlayout.setColumnStretch(3, 10) # to:
-            gridlayout.setColumnStretch(4, 20) # to field label
-            gridlayout.setColumnStretch(5, 30) # to language name
+
+            x_offset = 0
+            if self.add_rule_enable_checkbox():
+                x_offset = 1
+            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
+            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
+            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
+            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
+            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
+            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
             if self.add_delete_button():
                 gridlayout.setColumnStretch(6, 10) # remove button
             gridlayout.setContentsMargins(10, 0, 10, 0)
@@ -796,12 +808,20 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 to_field_label = QtWidgets.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({transliteration_name})'), i, 5, 1, 1)
+                x_offset = 0
+                if self.add_rule_enable_checkbox():
+                    checkbox = QtWidgets.QCheckBox()
+                    checkbox.setChecked(True)
+                    checkbox.setContentsMargins(10, 0, 10, 0)
+                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
+                    x_offset = 1                
+
+                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({transliteration_name})'), i, x_offset + 5, 1, 1)
                 
                 if self.add_delete_button():
                     delete_button = QtWidgets.QPushButton()
@@ -815,12 +835,16 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                     delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
                     gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
-            gridlayout.setColumnStretch(0, 10) # from:
-            gridlayout.setColumnStretch(1, 20) # from field label
-            gridlayout.setColumnStretch(2, 30) # from language name
-            gridlayout.setColumnStretch(3, 10) # to:
-            gridlayout.setColumnStretch(4, 20) # to field label
-            gridlayout.setColumnStretch(5, 30) # to language name
+
+            x_offset = 0
+            if self.add_rule_enable_checkbox():
+                x_offset = 1                
+            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
+            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
+            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
+            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
+            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
+            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
             if self.add_delete_button():
                 gridlayout.setColumnStretch(6, 10) # remove button          
             gridlayout.setContentsMargins(10, 0, 10, 0)      
@@ -850,6 +874,12 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                 to_field_label.setFont(font_bold)
 
                 x_offset = 0
+                if self.add_rule_enable_checkbox():
+                    checkbox = QtWidgets.QCheckBox()
+                    checkbox.setChecked(True)
+                    checkbox.setContentsMargins(10, 0, 10, 0)
+                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
+                    x_offset = 1                
 
                 gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
                 gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
@@ -870,12 +900,16 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
                     delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))                
                     gridlayout.addWidget(delete_button, i, 6, 1, 1)
                 i += 1
-            gridlayout.setColumnStretch(0, 10) # from:
-            gridlayout.setColumnStretch(1, 20) # from field label
-            gridlayout.setColumnStretch(2, 30) # from language name
-            gridlayout.setColumnStretch(3, 10) # to:
-            gridlayout.setColumnStretch(4, 20) # to field label
-            gridlayout.setColumnStretch(5, 30) # to language name
+
+            x_offset = 0
+            if self.add_rule_enable_checkbox():
+                x_offset = 1
+            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
+            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
+            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
+            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
+            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
+            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
             if self.add_delete_button():
                 gridlayout.setColumnStretch(6, 10) # remove button
             gridlayout.setContentsMargins(10, 0, 10, 0)    
@@ -901,6 +935,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         self.checkbox.stateChanged.connect(self.apply_updates_state_changed)
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)        
+
 
     def remove_translation(self, deck_note_type_field):
         # print(f'remove_translation, dntf: {deck_note_type_field}')

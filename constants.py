@@ -24,6 +24,7 @@ DOCUMENTATION_ENSURE_LANGUAGE_MAPPING = 'Please ensure Language Mapping is corre
 class TransformationType(enum.Enum):
     Translation = enum.auto()
     Transliteration = enum.auto()
+    Audio = enum.auto()
 
 
 # these are special languages that we store on a field level, which don't allow translating to/from
