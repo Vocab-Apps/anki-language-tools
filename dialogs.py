@@ -1,6 +1,7 @@
 from typing import List, Dict
 import sys
 import traceback
+import logging
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
@@ -743,8 +744,10 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
+                    self.target_field_enabled_map[to_field] = True
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
+                    self.target_field_checkbox_map[to_field] = checkbox
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1
 
@@ -804,8 +807,10 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
+                    self.target_field_enabled_map[to_field] = True
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
+                    self.target_field_checkbox_map[to_field] = checkbox
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1                
 
@@ -869,9 +874,11 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
+                    self.target_field_enabled_map[to_field] = True
                     checkbox = QtWidgets.QCheckBox()
                     checkbox.setChecked(True)
-                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
+                    self.target_field_checkbox_map[to_field] = checkbox
+                    gridlayout.addWidget(checkbox, i, 0, 1, 1)
                     x_offset = 1                
 
                 gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
@@ -996,8 +1003,11 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
         aqt.utils.tooltip(f'Saved Settings')
 
 class RunRulesDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
         super(RunRulesDialog, self).__init__(languagetools, deck_note_type)
+        self.note_id_list = note_id_list
+        self.target_field_enabled_map = {}
+        self.target_field_checkbox_map = {}
 
     def get_header_text(self):
         return f'Run Rules for {self.deck_note_type}'
@@ -1019,7 +1029,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
         self.layout_rules(vlayout)
 
         # progress bar
-        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setContentsMargins(0, 20, 0, 0)
         self.progress_bar = QtWidgets.QProgressBar()
         hlayout.addWidget(self.progress_bar)
@@ -1038,6 +1048,58 @@ class RunRulesDialog(NoteSettingsDialogBase):
         # wire events
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
+
+    def accept(self):
+        proceed = aqt.utils.askUser(f'Overwrite existing data in target fields ?')
+        if proceed == False:
+            # don't continue
+            return
+
+        aqt.mw.taskman.run_in_background(self.process_rules_task, self.process_rules_task_done)
+
+
+
+    def process_rules_task(self):
+        try:
+            translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+            transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
+            audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
+
+            num_rules = 0
+            for rule_list in [translation_settings, transliteration_settings, audio_settings]:
+                for to_field, setting in rule_list.items():
+                    if self.target_field_checkbox_map[to_field].isChecked():
+                        num_rules += 1
+
+            logging.debug(f'num rules enabled: {num_rules}')
+            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
+
+            progress_value = 0
+            for note_id in self.note_id_list:
+                for to_field, setting in translation_settings.items():
+                    if self.target_field_checkbox_map[to_field].isChecked():
+                        progress_value += 1
+                for to_field, setting in transliteration_settings.items():
+                    if self.target_field_checkbox_map[to_field].isChecked():
+                        progress_value += 1
+                for to_field, from_field in audio_settings.items():
+                    if self.target_field_checkbox_map[to_field].isChecked():
+                        from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                        to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                        from_language_code = self.languagetools.get_language(from_dntf)
+                        voice_selection_settings = self.languagetools.get_voice_selection_settings()
+                        voice = voice_selection_settings[from_language_code]
+                        result = self.languagetools.generate_audio_for_field(note_id, from_field, to_field, voice)
+                        progress_value += 1
+
+
+        except:
+            logging.error('processing error', exc_info=True)
+
+
+
+    def process_rules_task_done(self, future_result):
+        self.close()
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
@@ -1679,9 +1741,12 @@ def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     if deck_note_type == None:
         return
 
-    dialog = RunRulesDialog(languagetools, deck_note_type)
+    dialog = RunRulesDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
     dialog.exec_()
+
+    # force browser to reload notes
+    browser.model.reset()        
 
 def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     deck_note_type = verify_deck_note_type_consistent(note_id_list)
