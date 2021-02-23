@@ -1076,21 +1076,48 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
             progress_value = 0
             for note_id in self.note_id_list:
+                note = aqt.mw.col.getNote(note_id)
                 for to_field, setting in translation_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
+                        try:
+                            from_field = setting['from_field']
+                            field_data = note[from_field]
+                            translation_option = setting['translation_option']
+                            translation_result = self.languagetools.get_translation(field_data, translation_option)
+                            note[to_field] = translation_result
+                        except:
+                            logging.error(f'error while getting translation for note_id {note_id}', exc_info=True)
                         progress_value += 1
+                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
                 for to_field, setting in transliteration_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
+                        try:
+                            from_field = setting['from_field']
+                            field_data = note[from_field]
+                            transliteration_option = setting['transliteration_option']
+                            service = transliteration_option['service']
+                            transliteration_key = transliteration_option['transliteration_key']
+                            transliteration_result = self.languagetools.get_transliteration(field_data, service, transliteration_key)
+                            note[to_field] = transliteration_result
+                        except:
+                            logging.error(f'error while getting transliteration for note_id {note_id}', exc_info=True)
                         progress_value += 1
+                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
                 for to_field, from_field in audio_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
-                        from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                        to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
-                        from_language_code = self.languagetools.get_language(from_dntf)
-                        voice_selection_settings = self.languagetools.get_voice_selection_settings()
-                        voice = voice_selection_settings[from_language_code]
-                        result = self.languagetools.generate_audio_for_field(note_id, from_field, to_field, voice)
+                        try:
+                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            from_language_code = self.languagetools.get_language(from_dntf)
+                            voice_selection_settings = self.languagetools.get_voice_selection_settings()
+                            voice = voice_selection_settings[from_language_code]
+                            result = self.languagetools.generate_audio_for_field(note_id, from_field, to_field, voice)
+                        except:
+                            logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
                         progress_value += 1
+                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
+                # write the note
+                note.flush()
 
 
         except:
