@@ -24,18 +24,6 @@ def init(languagetools):
     def show_voice_selection():
         dialogs.voice_selection_dialog(languagetools)
 
-        # # request audio
-        # source_text = 'Je ne suis pas intéressé.'
-        # voice_key = {
-        #     "name": "Microsoft Server Speech Text to Speech Voice (fr-FR, DeniseNeural)"
-        # }
-
-        # audio_temp_file = languagetools.get_tts_audio(source_text, 'Azure', voice_key, {})
-        # print(f'got filename: {audio_temp_file.name}')
-        # aqt.sound.av_player.play_file(audio_temp_file.name)
-
-        
-
     def show_change_language(deck_note_type_field: DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
 
@@ -248,7 +236,11 @@ def init(languagetools):
         action.triggered.connect(lambda: dialogs.add_audio_dialog(languagetools, browser, browser.selectedNotes()))
         menu.addAction(action)        
 
-        action = aqt.qt.QAction(f'Show Settings for Selected Notes...', browser)
+        action = aqt.qt.QAction(f'Run Rules for Selected Notes...', browser)
+        action.triggered.connect(lambda: dialogs.run_rules_dialog(languagetools, browser, browser.selectedNotes()))
+        menu.addAction(action)                
+
+        action = aqt.qt.QAction(f'Show Rules for Selected Notes...', browser)
         action.triggered.connect(lambda: dialogs.show_settings_dialog(languagetools, browser, browser.selectedNotes()))
         menu.addAction(action)                
 

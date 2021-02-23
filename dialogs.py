@@ -147,6 +147,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         vlayout.addWidget(get_header_label(header_label_text_map[self.transformation_type]))
 
+        description_label = aqt.qt.QLabel(f'After adding {self.transformation_type.name.lower()} to notes, the setting will be memorized.')
+        vlayout.addWidget(description_label)
+
         # setup to/from fields
         # ====================
 
@@ -544,6 +547,9 @@ class AddAudioDialog(aqt.qt.QDialog):
 
         vlayout.addWidget(get_header_label('Add Audio'))
 
+        description_label = aqt.qt.QLabel(f'After adding audio to notes, the setting will be memorized.')
+        vlayout.addWidget(description_label)        
+
         # from/ to field
         gridlayout = QtWidgets.QGridLayout()
 
@@ -696,7 +702,9 @@ class AddAudioDialog(aqt.qt.QDialog):
         else:
             aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME, parent=self)
 
-class NoteSettingsDialog(aqt.qt.QDialog):
+
+
+class NoteSettingsDialogBase(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
@@ -715,7 +723,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label(f'Settings for {self.deck_note_type}'))
+        vlayout.addWidget(get_header_label(f'Rules for {self.deck_note_type}'))
 
         font_bold = QtGui.QFont()
         font_bold.setBold(True)
@@ -723,7 +731,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         # do we have translation rules for this deck_note_type
         translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
         if len(translation_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Translation Settings'))
+            vlayout.addWidget(get_medium_label(f'Translation Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, setting in translation_settings.items():
@@ -770,7 +778,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         # do we have transliteration rules for this deck_note_type
         transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
         if len(transliteration_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Transliteration Settings'))
+            vlayout.addWidget(get_medium_label(f'Transliteration Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, setting in transliteration_settings.items():
@@ -817,7 +825,7 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         # do we have any audio rules for this deck_note_type
         audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
         if len(audio_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Audio Settings'))
+            vlayout.addWidget(get_medium_label(f'Audio Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, from_field in audio_settings.items():
@@ -837,12 +845,14 @@ class NoteSettingsDialog(aqt.qt.QDialog):
                 to_field_label = QtWidgets.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({voice_description})'), i, 5, 1, 1)
+                x_offset = 0
+
+                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
+                gridlayout.addWidget(QtWidgets.QLabel(f'({voice_description})'), i, x_offset + 5, 1, 1)
                 
                 delete_button = QtWidgets.QPushButton()
                 delete_button.setText('Remove')
@@ -924,6 +934,10 @@ class NoteSettingsDialog(aqt.qt.QDialog):
         
         self.close()
         aqt.utils.tooltip(f'Saved Settings')
+
+class NoteSettingsDialog(NoteSettingsDialogBase):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+        super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
 
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
@@ -1560,6 +1574,15 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
 
     # force browser to reload notes
     browser.model.reset()    
+
+def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    if deck_note_type == None:
+        return
+
+    dialog = NoteSettingsDialog(languagetools, deck_note_type)
+    dialog.setupUi()
+    dialog.exec_()
 
 def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     deck_note_type = verify_deck_note_type_consistent(note_id_list)
