@@ -1081,6 +1081,10 @@ class RunRulesDialog(NoteSettingsDialogBase):
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
                             from_field = setting['from_field']
+                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            logging.info(f'generating translation from {from_dntf} to {to_dntf}')
+
                             field_data = note[from_field]
                             translation_option = setting['translation_option']
                             translation_result = self.languagetools.get_translation(field_data, translation_option)
@@ -1093,6 +1097,10 @@ class RunRulesDialog(NoteSettingsDialogBase):
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
                             from_field = setting['from_field']
+                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
+                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
+
                             field_data = note[from_field]
                             transliteration_option = setting['transliteration_option']
                             service = transliteration_option['service']
@@ -1108,15 +1116,20 @@ class RunRulesDialog(NoteSettingsDialogBase):
                         try:
                             from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
                             to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            logging.info(f'generating audio from {from_dntf} to {to_dntf}')
+
+                            field_data = note[from_field]
                             from_language_code = self.languagetools.get_language(from_dntf)
                             voice_selection_settings = self.languagetools.get_voice_selection_settings()
                             voice = voice_selection_settings[from_language_code]
-                            result = self.languagetools.generate_audio_for_field(note_id, from_field, to_field, voice)
+                            result = self.languagetools.generate_audio_tag_collection(field_data, voice)
+                            note[to_field] = result['sound_tag']
                         except:
                             logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
                         progress_value += 1
                         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-                # write the note
+
+                # write output to note
                 note.flush()
 
 
