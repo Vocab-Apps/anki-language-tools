@@ -1008,6 +1008,37 @@ class RunRulesDialog(NoteSettingsDialogBase):
     def add_rule_enable_checkbox(self):
         return True        
 
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 300)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label(self.get_header_text()))
+
+        self.layout_rules(vlayout)
+
+        # progress bar
+        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout.setContentsMargins(0, 20, 0, 0)
+        self.progress_bar = QtWidgets.QProgressBar()
+        hlayout.addWidget(self.progress_bar)
+        vlayout.addLayout(hlayout)
+
+        # buttom buttons
+        buttonBox = QtWidgets.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply Rules", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setStyleSheet(utils.get_green_stylesheet())
+        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton.setStyleSheet(utils.get_red_stylesheet())
+        vlayout.addWidget(buttonBox)
+
+        vlayout.addStretch()        
+  
+        # wire events
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
         super(aqt.qt.QDialog, self).__init__()
