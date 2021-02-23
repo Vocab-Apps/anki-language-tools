@@ -717,13 +717,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         self.apply_updates_setting_changed = False
         self.apply_updates_value = True
 
-    def setupUi(self):
-        self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 500)
-
-        vlayout = QtWidgets.QVBoxLayout(self)
-
-        vlayout.addWidget(get_header_label(self.get_header_text()))
+    def layout_rules(self, vlayout):
 
         font_bold = QtGui.QFont()
         font_bold.setBold(True)
@@ -915,6 +909,32 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
             gridlayout.setContentsMargins(10, 0, 10, 0)    
             vlayout.addLayout(gridlayout)                        
 
+
+
+
+class NoteSettingsDialog(NoteSettingsDialogBase):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+        super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
+
+    def get_header_text(self):
+        return f'Rules for {self.deck_note_type}'
+
+    def add_delete_button(self):
+        return True
+
+    def add_rule_enable_checkbox(self):
+        return False
+
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 500)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label(self.get_header_text()))
+
+        self.layout_rules(vlayout)
+
         vlayout.addWidget(get_medium_label(f'Apply Changes While Typing'))
         self.checkbox = QtWidgets.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
         self.checkbox.setChecked(self.languagetools.get_apply_updates_automatically())
@@ -934,8 +954,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         # wire events
         self.checkbox.stateChanged.connect(self.apply_updates_state_changed)
         buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)        
-
+        buttonBox.rejected.connect(self.reject)
 
     def remove_translation(self, deck_note_type_field):
         # print(f'remove_translation, dntf: {deck_note_type_field}')
@@ -975,19 +994,6 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         
         self.close()
         aqt.utils.tooltip(f'Saved Settings')
-
-class NoteSettingsDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
-        super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
-
-    def get_header_text(self):
-        return f'Rules for {self.deck_note_type}'
-
-    def add_delete_button(self):
-        return True
-
-    def add_rule_enable_checkbox(self):
-        return False
 
 class RunRulesDialog(NoteSettingsDialogBase):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
