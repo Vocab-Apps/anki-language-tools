@@ -1075,11 +1075,15 @@ class RunRulesDialog(NoteSettingsDialogBase):
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
 
             progress_value = 0
+            self.attempt_count = 0
+            self.success_count = 0
+            self.generate_errors = []
             for note_id in self.note_id_list:
                 note = aqt.mw.col.getNote(note_id)
                 for to_field, setting in translation_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
+                            self.attempt_count += 1
                             from_field = setting['from_field']
                             from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
                             to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
@@ -1089,13 +1093,16 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             translation_option = setting['translation_option']
                             translation_result = self.languagetools.get_translation(field_data, translation_option)
                             note[to_field] = translation_result
-                        except:
+                            self.success_count += 1
+                        except Exception as err:
                             logging.error(f'error while getting translation for note_id {note_id}', exc_info=True)
+                            self.generate_errors.append(str(err))
                         progress_value += 1
                         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
                 for to_field, setting in transliteration_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
+                            self.attempt_count += 1
                             from_field = setting['from_field']
                             from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
                             to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
@@ -1107,13 +1114,16 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             transliteration_key = transliteration_option['transliteration_key']
                             transliteration_result = self.languagetools.get_transliteration(field_data, service, transliteration_key)
                             note[to_field] = transliteration_result
-                        except:
+                            self.success_count += 1
+                        except Exception as err:
                             logging.error(f'error while getting transliteration for note_id {note_id}', exc_info=True)
+                            self.generate_errors.append(str(err))
                         progress_value += 1
                         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
                 for to_field, from_field in audio_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
+                            self.attempt_count += 1
                             from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
                             to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
                             logging.info(f'generating audio from {from_dntf} to {to_dntf}')
@@ -1124,8 +1134,10 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             voice = voice_selection_settings[from_language_code]
                             result = self.languagetools.generate_audio_tag_collection(field_data, voice)
                             note[to_field] = result['sound_tag']
-                        except:
+                            self.success_count += 1
+                        except Exception as err:
                             logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
+                            self.generate_errors.append(str(err))
                         progress_value += 1
                         aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
 
@@ -1139,7 +1151,20 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
 
     def process_rules_task_done(self, future_result):
+        # are there any errors ?
+        errors_str = ''
+        if len(self.generate_errors) > 0:
+            error_counts = {}
+            for error in self.generate_errors:
+                current_count = error_counts.get(error, 0)
+                error_counts[error] = current_count + 1
+            errors_str = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
+        completion_message = f"Generated data for <b>{len(self.note_id_list)}</b> notes. Success: <b>{self.success_count}</b> out of <b>{self.attempt_count}</b>.{errors_str}"
         self.close()
+        if len(errors_str) > 0:
+            aqt.utils.showWarning(completion_message, title=constants.ADDON_NAME, parent=self)
+        else:
+            aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME, parent=self)        
 
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
