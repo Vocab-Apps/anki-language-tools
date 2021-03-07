@@ -1181,7 +1181,7 @@ class YomichanDialog(aqt.qt.QDialog):
         
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 300)
+        self.resize(700, 250)
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
@@ -1189,8 +1189,24 @@ class YomichanDialog(aqt.qt.QDialog):
 
         voice_name = self.japanese_voice['voice_description']
 
-        label_text = f'Using voice: <b>{voice_name}</b>. You can change this in the <b>Voice Selection</b> dialog.'
-        vlayout.addWidget(QtWidgets.QLabel(label_text))
+        label_text1 = f'You can use Language Tools voices from within Yomichan. Currently using voice: <b>{voice_name}</b>. You can change this in the <b>Voice Selection</b> dialog.'
+        label_text2 = """
+        <ol>
+            <li>Please go to <b>Yomichan settings</b></li>
+            <li>Look for <b>Audio</b></li>
+            <li>Configure audio playback sources...</li>
+            <li>In <b>Custom audio source</b>, choose <b>Type: Audio</b>, and enter the URL below (it should already be copied to your clipboard)</li>
+            <li>In the <b>Audio sources</b> dropdown, choose <b>Custom</b></li>
+            <li>Try playing some audio using Yomichan, you should hear it played back in the voice you've chosen.</li>
+        </ol>
+        """
+
+        label = QtWidgets.QLabel(label_text1)
+        label.setWordWrap(True)
+        vlayout.addWidget(label)
+
+        label = QtWidgets.QLabel(label_text2)
+        vlayout.addWidget(label)        
 
         # compute URL
 
@@ -1200,6 +1216,8 @@ class YomichanDialog(aqt.qt.QDialog):
         url_params = f"api_key={api_key}&service={service}&voice_key={voice_key_str}&text={'{'}expression{'}'}"
         url_end = f'yomichan_audio?{url_params}'        
         full_url = self.languagetools.base_url + '/' + url_end
+
+        QtWidgets.QApplication.clipboard().setText(full_url)
 
         line_edit = QtWidgets.QLineEdit(full_url)
         vlayout.addWidget(line_edit)
