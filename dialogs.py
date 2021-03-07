@@ -2,6 +2,8 @@ from typing import List, Dict
 import sys
 import traceback
 import logging
+import json
+import urllib.parse
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
@@ -1172,20 +1174,47 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
 
 class YomichanDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools):
+    def __init__(self, languagetools: LanguageTools, japanese_voice):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
+        self.japanese_voice = japanese_voice
         
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 500)
+        self.resize(700, 300)
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
         vlayout.addWidget(get_header_label('Yomichan Integration'))
 
-        # setup grid
-        # ==========
+        voice_name = self.japanese_voice['voice_description']
+
+        label_text = f'Using voice: <b>{voice_name}</b>. You can change this in the <b>Voice Selection</b> dialog.'
+        vlayout.addWidget(QtWidgets.QLabel(label_text))
+
+        # compute URL
+
+        api_key = self.languagetools.config['api_key']
+        voice_key_str = urllib.parse.quote_plus(json.dumps(self.japanese_voice['voice_key']))
+        service = self.japanese_voice['service']
+        url_params = f"api_key={api_key}&service={service}&voice_key={voice_key_str}&text={'{'}expression{'}'}"
+        url_end = f'yomichan_audio?{url_params}'        
+        full_url = self.languagetools.base_url + '/' + url_end
+
+        line_edit = QtWidgets.QLineEdit(full_url)
+        vlayout.addWidget(line_edit)
+        
+        vlayout.addStretch()
+
+        # add buttons
+        buttonBox = QtWidgets.QDialogButtonBox()
+        self.okButton = buttonBox.addButton("OK", QtWidgets.QDialogButtonBox.AcceptRole)
+        vlayout.addWidget(buttonBox)
+
+        # wire events
+        # ===========
+        buttonBox.accepted.connect(self.accept)
+
 
 
 
@@ -1756,7 +1785,15 @@ def yomichan_dialog(languagetools):
         aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
         return
 
-    yomichan_dialog = YomichanDialog(languagetools)
+    # do we have a voice set for japanese ?
+    voice_settings = languagetools.get_voice_selection_settings()
+    if 'ja' not in voice_settings:
+        aqt.utils.showCritical(text='Please choose a Japanese voice, from the Anki main screen: Tools -> Language Tools: Voice Selection', title=constants.ADDON_NAME)
+        return
+
+    japanese_voice = voice_settings['ja']
+
+    yomichan_dialog = YomichanDialog(languagetools, japanese_voice)
     yomichan_dialog.setupUi()
     yomichan_dialog.exec_()
 
