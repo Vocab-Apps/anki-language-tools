@@ -1170,6 +1170,26 @@ class RunRulesDialog(NoteSettingsDialogBase):
         else:
             aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME, parent=self)        
 
+
+class YomichanDialog(aqt.qt.QDialog):
+    def __init__(self, languagetools: LanguageTools):
+        super(aqt.qt.QDialog, self).__init__()
+        self.languagetools = languagetools
+        
+    def setupUi(self):
+        self.setWindowTitle(constants.ADDON_NAME)
+        self.resize(700, 500)
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+
+        vlayout.addWidget(get_header_label('Yomichan Integration'))
+
+        # setup grid
+        # ==========
+
+
+
+
 class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
         super(aqt.qt.QDialog, self).__init__()
@@ -1730,6 +1750,15 @@ def voice_selection_dialog(languagetools):
             voice_selection_dialog.exec_()            
         return voicelist_complete
     aqt.mw.taskman.run_in_background(languagetools.get_tts_voice_list, get_complete_lambda(languagetools))
+
+def yomichan_dialog(languagetools):
+    if not languagetools.language_detection_done():
+        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
+        return
+
+    yomichan_dialog = YomichanDialog(languagetools)
+    yomichan_dialog.setupUi()
+    yomichan_dialog.exec_()
 
 
 def verify_deck_note_type_consistent(note_id_list):
