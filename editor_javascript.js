@@ -1,73 +1,81 @@
 
-// see anki's editor.ts to understand the DOM structure
 
-function add_loading_indicator(field_id, field_name) {
-    var div_id = 'name' + field_id;
-    $field_name_td = $("#" + div_id);
-    $(`<span id="loadingindicator${field_id}" style="display: none;">
-        <i>loading...</i>
-       </span>
-       <span id="generatedfor${field_id}" style="display: none;">
-        <i>(<span id="originalfieldvalue${field_id}"></span>)</i>
-       </span>`).appendTo($field_name_td);
-}
+function configure_languagetools_fields(options) {
+    console.log(options);
+    forEditorField(options, (field, field_type) => {
+        const ord = field.editingArea.ord
+         
+        console.log(ord);
+        console.log(field);
+        console.log(field_type);
 
-function add_play_sound_collection(field_id, field_name) {
-    var div_id = 'name' + field_id;
-    $field_name_td = $("#" + div_id);
-    $(`<span id="playsoundcollection${field_id}">
-        <button onclick="pycmd('playsoundcollection:${field_id}:${currentNoteId}')">Play Sound</button>
-       </span>`).appendTo($field_name_td);
-}
+        if (!field.hasAttribute("has-languagetools")) {
 
-function add_tts_speak(field_id, field_name) {
-    var div_id = 'name' + field_id;
-    $field_name_td = $("#" + div_id);
-    $(`<span id="ttsspeak${field_id}">
-        <button onclick="pycmd('ttsspeak:${field_id}:${currentNoteId}')">Speak</button>
-       </span>`).appendTo($field_name_td);
+            // add loading indicator
+            const loadingIndicator = document.createElement('span');
+            loadingIndicator.id = 'loading_indicator' + ord;
+            loadingIndicator.classList.add('field-label-element');
+            loadingIndicator.classList.add('loading-indicator');
+            loadingIndicator.classList.add('loading-indicator-hidden');
+            loadingIndicator.innerText = 'loading...';
+            field.labelContainer.appendChild(loadingIndicator);
+
+            // add generated for 
+            const generatedForIndicator = document.createElement('span');
+            generatedForIndicator.id = 'generatedfor_indicator' + ord;
+            generatedForIndicator.classList.add('field-label-element');
+            generatedForIndicator.classList.add('generated-for');
+            generatedForIndicator.classList.add('generated-for-hidden');
+            field.labelContainer.appendChild(generatedForIndicator);
+
+            // do we need to add some audio buttons ?
+            if( field_type == 'language') {
+                const speakButton = document.createElement('button');
+                speakButton.classList.add('field-label-element');
+                speakButton.innerText = 'Speak';
+                speakButton.addEventListener(
+                    'click',
+                    (() => {
+                        pycmd('ttsspeak:' + ord)
+                    }),
+                );
+                field.labelContainer.appendChild(speakButton);
+            }
+
+            if( field_type == 'sound') {
+                const speakButton = document.createElement('button');
+                speakButton.classList.add('field-label-element');
+                speakButton.innerText = 'Play';
+                speakButton.addEventListener(
+                    'click',
+                    (() => {
+                        pycmd('playsoundcollection:' + ord)
+                    }),
+                );
+                field.labelContainer.appendChild(speakButton);
+            }            
+
+            field.setAttribute("has-languagetools", "")
+        }
+
+    })    
 }
 
 function hide_loading_indicator(field_id, original_field_value) {
-    $('#loadingindicator' + field_id).hide();
-    $('#originalfieldvalue' + field_id).text(original_field_value);
-    $('#generatedfor' + field_id).show();
+    $('#loading_indicator' + field_id).hide();
+    $('#generatedfor_indicator' + field_id).text('generated from: ' + original_field_value);
+    $('#generatedfor_indicator' + field_id).show();
 }
 
 function show_loading_indicator(field_id) {
-    $('#loadingindicator' + field_id).show();
-    $('#generatedfor' + field_id).hide();
-}
-
-function add_inline_field(field_type, field_id, header_text) {
-    var div_id = 'f' + field_id;
-    $field_div = $("#" + div_id);
-    $tr_element = $field_div.parent().parent();
-    var row_id = 'row_'+field_type+field_id;
-    $(`<tr id="${row_id}"  >
-        <td width=100% style='padding-bottom: 10px;'>
-            <i>${header_text}</i>: <span id="${field_type}${field_id}">translation loading...</span>
-        </td>
-      </tr>`).insertAfter($tr_element);
-}
-
-function remove_inline_field(field_type, field_id) {
-    var row_id = 'row_'+field_type+field_id;
-    $("#"+row_id).remove();
-}
-
-function set_inline_field_value(field_type, field_id, value) {
-    var decoded_value = decodeURI(value);
-    // console.log('decoded_value: ', decoded_value);
-    var element_id = field_type + field_id;
-    $element = $("#" + element_id);
-    $element.html(decoded_value);
+    $('#loading_indicator' + field_id).show();
+    $('#generatedfor_indicator' + field_id).hide();
 }
 
 function set_field_value(field_id, value) {
     var decoded_value = decodeURI(value);
-    // console.log('decoded_value: ', decoded_value);
-    var element_id = 'f' + field_id;
-    $element = $("#" + element_id);
-    $element.html(decoded_value);
+
+    var field = getEditorField(field_id);
+    console.log(field.editingArea);
+    field.editingArea.fieldHTML = decoded_value;
 }

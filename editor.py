@@ -26,18 +26,10 @@ def get_field_id(deck_note_type_field: DeckNoteTypeField):
     field_index = field_names.index(deck_note_type_field.field_name)
     return field_index    
 
-def add_loading_indicator(editor: aqt.editor.Editor, field_index, field_name):
-    js_command = f"add_loading_indicator({field_index}, '{field_name}')"
-    # print(js_command)
+def configure_editor_fields(editor: aqt.editor.Editor, field_options):
+    js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
+    print(js_command)
     editor.web.eval(js_command)
-
-def add_play_sound_collection(editor: aqt.editor.Editor, field_index, field_name):
-    js_command = f"add_play_sound_collection({field_index}, '{field_name}')"
-    editor.web.eval(js_command)    
-
-def add_tts_speak(editor: aqt.editor.Editor, field_index, field_name):
-    js_command = f"add_tts_speak({field_index}, '{field_name}')"
-    editor.web.eval(js_command)        
 
 def show_loading_indicator(editor: aqt.editor.Editor, field_index):
     js_command = f"show_loading_indicator({field_index})"
@@ -162,7 +154,9 @@ def init(languagetools):
             return
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
         javascript_path = f"/_addons/{addon_package}/editor_javascript.js"
-        web_content.js.insert(0,  javascript_path)
+        css_path = f"/_addons/{addon_package}/editor_style.css"
+        web_content.js.append(javascript_path)
+        web_content.css.append(css_path)
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
@@ -170,18 +164,24 @@ def init(languagetools):
 
         model = note.model()
         fields = model['flds']
+        field_options = []
         for index, field in enumerate(fields):
             field_name = field['name']
-            add_loading_indicator(editor, index, field_name)
 
+            field_type ='regular'
             # is this field a sound field ?
             dntf = DeckNoteTypeField(deck_note_type, field_name)
             field_language = languagetools.get_language(dntf)
             if field_language != None:
                 if field_language == constants.SpecialLanguage.sound.name:
-                    add_play_sound_collection(editor, index, field_name)
+                    # add_play_sound_collection(editor, index, field_name)
+                    field_type = 'sound'
                 elif field_language in languagetools.get_voice_selection_settings(): # is there a voice associated with this language ?
-                    add_tts_speak(editor, index, field_name)
+                    # add_tts_speak(editor, index, field_name)
+                    field_type = 'language'
+            field_options.append(field_type)
+        configure_editor_fields(editor, field_options)
+        
 
 
 
@@ -195,8 +195,6 @@ def init(languagetools):
             components = str.split(':')
             field_index_str = components[1]
             field_index = int(field_index_str)
-            note_id_str = components[2]
-            note_id = int(note_id_str)
 
             note = editor.note
             sound_tag = note.fields[field_index]
@@ -210,8 +208,6 @@ def init(languagetools):
             components = str.split(':')
             field_index_str = components[1]
             field_index = int(field_index_str)
-            note_id_str = components[2]
-            note_id = int(note_id_str)
 
             note = editor.note
             source_text = note.fields[field_index]
