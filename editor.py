@@ -28,7 +28,7 @@ def get_field_id(deck_note_type_field: DeckNoteTypeField):
 
 def configure_editor_fields(editor: aqt.editor.Editor, field_options):
     js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
-    print(js_command)
+    # print(js_command)
     editor.web.eval(js_command)
 
 def show_loading_indicator(editor: aqt.editor.Editor, field_index):

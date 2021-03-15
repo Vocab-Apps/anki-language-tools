@@ -194,7 +194,10 @@ class LanguageTools():
         return self.api_key_checked
 
     def run_api_key_verification(self):
-        (api_key, return_code) = aqt.utils.getText(f'{constants.MENU_PREFIX} Enter API Key', title=constants.MENU_PREFIX, default=self.config['api_key'])
+        prompt = f"""{constants.MENU_PREFIX} Enter API Key"""
+        (api_key, return_code) = aqt.utils.getText(prompt, title=constants.MENU_PREFIX, default=self.config['api_key'])
+        if return_code == False:
+            return False
         result = self.api_key_validate_query(api_key)
         if result['key_valid'] == True:
             self.config['api_key'] = api_key
