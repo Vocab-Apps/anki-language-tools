@@ -1,19 +1,15 @@
 
 
 function configure_languagetools_fields(options) {
-    console.log(options);
+    // console.log(options);
     forEditorField(options, (field, field_type) => {
-        const ord = field.editingArea.ord
+        const field_id = field.editingArea.ord
          
-        console.log(ord);
-        console.log(field);
-        console.log(field_type);
-
         if (!field.hasAttribute("has-languagetools")) {
 
             // add loading indicator
             const loadingIndicator = document.createElement('span');
-            loadingIndicator.id = 'loading_indicator' + ord;
+            loadingIndicator.id = 'loading_indicator' + field_id;
             loadingIndicator.classList.add('field-label-element');
             loadingIndicator.classList.add('loading-indicator');
             loadingIndicator.classList.add('loading-indicator-hidden');
@@ -22,7 +18,7 @@ function configure_languagetools_fields(options) {
 
             // add generated for 
             const generatedForIndicator = document.createElement('span');
-            generatedForIndicator.id = 'generatedfor_indicator' + ord;
+            generatedForIndicator.id = 'generatedfor_indicator' + field_id;
             generatedForIndicator.classList.add('field-label-element');
             generatedForIndicator.classList.add('generated-for');
             generatedForIndicator.classList.add('generated-for-hidden');
@@ -36,7 +32,7 @@ function configure_languagetools_fields(options) {
                 speakButton.addEventListener(
                     'click',
                     (() => {
-                        pycmd('ttsspeak:' + ord)
+                        pycmd('ttsspeak:' + field_id)
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
@@ -49,13 +45,17 @@ function configure_languagetools_fields(options) {
                 speakButton.addEventListener(
                     'click',
                     (() => {
-                        pycmd('playsoundcollection:' + ord)
+                        pycmd('playsoundcollection:' + field_id)
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
             }            
 
             field.setAttribute("has-languagetools", "")
+        } else {
+            // hide out loading / generated for indicators
+            $('#loading_indicator' + field_id).hide();
+            $('#generatedfor_indicator' + field_id).hide();
         }
 
     })    
@@ -76,6 +76,5 @@ function set_field_value(field_id, value) {
     var decoded_value = decodeURI(value);
 
     var field = getEditorField(field_id);
-    console.log(field.editingArea);
     field.editingArea.fieldHTML = decoded_value;
 }
