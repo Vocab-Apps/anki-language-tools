@@ -14,7 +14,7 @@ import anki.notes
 import anki.models
 
 # addon imports
-from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError
+from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError, AnkiNoteEditorError
 from . import constants
 from . import utils
 
@@ -220,10 +220,10 @@ def init(languagetools):
                 # do we have a voice set ?
                 field_language = languagetools.get_language(from_deck_note_type_field)
                 if field_language == None:
-                    raise languagetools.AnkiNoteEditorError(f'No language set for field {from_deck_note_type_field}')
+                    raise AnkiNoteEditorError(f'No language set for field {from_deck_note_type_field}')
                 voice_selection_settings = languagetools.get_voice_selection_settings()
                 if field_language not in voice_selection_settings:
-                    raise languagetools.AnkiNoteEditorError(f'No voice set for language {languagetools.get_language_name(field_language)}')
+                    raise AnkiNoteEditorError(f'No voice set for language {languagetools.get_language_name(field_language)}')
                 voice = voice_selection_settings[field_language]
 
                 def play_audio(languagetools, source_text, voice):
@@ -242,8 +242,9 @@ def init(languagetools):
 
                 aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))
 
-            except languagetools.AnkiNoteEditorError:
+            except AnkiNoteEditorError as e:
                 logging.error('Could not speak', exc_info=True)
+                aqt.utils.showCritical(repr(e))
 
             return handled            
 
