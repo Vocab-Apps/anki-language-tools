@@ -1529,11 +1529,13 @@ class LanguageMappingDialog_UI(object):
 
         # add filter bar
         hlayout = QtWidgets.QHBoxLayout()
-        filter_label = QtWidgets.QLabel('Filter Decks: (type part of deck name)')
+        filter_label = QtWidgets.QLabel('Filter Decks:')
         hlayout.addWidget(filter_label)
         self.filter_text_input = QtWidgets.QLineEdit()
         self.filter_text_input.textChanged.connect(self.filterTextChanged)
         hlayout.addWidget(self.filter_text_input)
+        self.filter_result_label = QtWidgets.QLabel(f'Showing {len(deck_map)} / {len(deck_map)} decks')
+        hlayout.addWidget(self.filter_result_label)
         
         self.topLevel.addLayout(hlayout)
 
@@ -1599,6 +1601,8 @@ class LanguageMappingDialog_UI(object):
 
         # add spacing at the end
         layout.addSpacing(30)
+
+        layout.addStretch(1)
 
         return layout
                         
@@ -1731,17 +1735,22 @@ class LanguageMappingDialog_UI(object):
         self.Dialog.close()
 
     def filterTextChanged(self, new_filter_text):
-        logging.info(f'new filter text: {new_filter_text}')
-        # deck_layout = self.layoutDecks(deck_name, deck)
-        # self.deck_name_widget_map[deck_name, deck_layout]
+        # logging.info(f'new filter text: {new_filter_text}')
+        total_count = len(self.deck_name_widget_map)
+        displayed_count = 0
         for deck_name, frame in self.deck_name_widget_map.items():
             if len(new_filter_text) == 0:
                 frame.setVisible(True)
+                displayed_count += 1
             else:
                 if new_filter_text.lower() in deck_name.lower():
                     frame.setVisible(True)
+                    displayed_count += 1
                 else:
                     frame.setVisible(False)
+        filter_result = f'Showing {displayed_count} / {total_count} decks'
+        self.filter_result_label.setText(filter_result)
+
 
 
     def saveLanguageMappingChanges(self):
