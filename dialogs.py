@@ -1537,10 +1537,14 @@ class LanguageMappingDialog_UI(object):
         
         self.topLevel.addLayout(hlayout)
 
-
+        self.deck_name_widget_map = {}
         for deck_name, deck in deck_map.items():
             deck_layout = self.layoutDecks(deck_name, deck)
-            all_decks.addLayout(deck_layout)
+            frame = QtWidgets.QFrame()
+            frame.setLayout(deck_layout)
+            self.deck_name_widget_map[deck_name] = frame
+            # all_decks.addLayout(deck_layout)
+            all_decks.addWidget(frame)
 
 
         self.scrollArea.setWidget(self.layoutWidget)
@@ -1728,7 +1732,17 @@ class LanguageMappingDialog_UI(object):
 
     def filterTextChanged(self, new_filter_text):
         logging.info(f'new filter text: {new_filter_text}')
-        pass
+        # deck_layout = self.layoutDecks(deck_name, deck)
+        # self.deck_name_widget_map[deck_name, deck_layout]
+        for deck_name, frame in self.deck_name_widget_map.items():
+            if len(new_filter_text) == 0:
+                frame.setVisible(True)
+            else:
+                if new_filter_text.lower() in deck_name.lower():
+                    frame.setVisible(True)
+                else:
+                    frame.setVisible(False)
+
 
     def saveLanguageMappingChanges(self):
         for key, value in self.language_mapping_changes.items():
