@@ -1519,7 +1519,7 @@ class LanguageMappingDialog_UI(object):
         font2 = QtGui.QFont()
         font2.setPointSize(14)
         self.autodetect_button = QtWidgets.QPushButton()
-        self.autodetect_button.setText('Run Auto Detection')
+        self.autodetect_button.setText('Run Auto Detection\n(all decks)')
         self.autodetect_button.setFont(font2)
         self.autodetect_button.setStyleSheet(utils.get_green_stylesheet())
         self.autodetect_button.pressed.connect(self.runLanguageDetection)
@@ -1531,6 +1531,7 @@ class LanguageMappingDialog_UI(object):
         hlayout = QtWidgets.QHBoxLayout()
         filter_label = QtWidgets.QLabel('Filter Decks:')
         hlayout.addWidget(filter_label)
+        self.filter_text = None
         self.filter_text_input = QtWidgets.QLineEdit()
         self.filter_text_input.textChanged.connect(self.filterTextChanged)
         hlayout.addWidget(self.filter_text_input)
@@ -1545,7 +1546,6 @@ class LanguageMappingDialog_UI(object):
             frame = QtWidgets.QFrame()
             frame.setLayout(deck_layout)
             self.deck_name_widget_map[deck_name] = frame
-            # all_decks.addLayout(deck_layout)
             all_decks.addWidget(frame)
 
 
@@ -1734,23 +1734,35 @@ class LanguageMappingDialog_UI(object):
     def reject(self):
         self.Dialog.close()
 
+    def filterEmpty(self, filter_text):
+        if filter_text == None:
+            return True
+        if len(filter_text) == 0:
+            return True
+        return False
+
+    def matchFilter(self, filter_text, deck_name):
+        if self.filterEmpty(filter_text):
+            return True
+        return filter_text.lower() in deck_name.lower()
+
     def filterTextChanged(self, new_filter_text):
-        # logging.info(f'new filter text: {new_filter_text}')
+        self.filter_text = new_filter_text
         total_count = len(self.deck_name_widget_map)
         displayed_count = 0
         for deck_name, frame in self.deck_name_widget_map.items():
-            if len(new_filter_text) == 0:
+            if self.matchFilter(new_filter_text, deck_name):
                 frame.setVisible(True)
                 displayed_count += 1
             else:
-                if new_filter_text.lower() in deck_name.lower():
-                    frame.setVisible(True)
-                    displayed_count += 1
-                else:
-                    frame.setVisible(False)
+                frame.setVisible(False)
         filter_result = f'Showing {displayed_count} / {total_count} decks'
         self.filter_result_label.setText(filter_result)
 
+        if displayed_count != total_count:
+            self.autodetect_button.setText('Run Auto Detection\n(Selected)')
+        else:
+            self.autodetect_button.setText('Run Auto Detection\n(All Decks)')
 
 
     def saveLanguageMappingChanges(self):
@@ -1770,20 +1782,26 @@ class LanguageMappingDialog_UI(object):
             self.disableApplyButton()
 
             dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
-            progress_max = len(dtnf_list)
+            progress_max = 0
+            for dntf in dtnf_list:
+                deck_name = dntf.deck_note_type.deck_name
+                if self.matchFilter(self.filter_text, deck_name):
+                    progress_max += 1
             self.setProgressBarMax(progress_max)
 
             progress = 0
             for dntf in dtnf_list:
-                language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
-                #self.language_mapping_changes[deck_note_type_field] = language
-                # need to set combo box correctly.
-                comboBox = self.dntfComboxBoxMap[dntf]
-                self.setFieldLanguageIndex(comboBox, language)
+                deck_name = dntf.deck_note_type.deck_name
+                if self.matchFilter(self.filter_text, deck_name):
+                    language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
+                    #self.language_mapping_changes[deck_note_type_field] = language
+                    # need to set combo box correctly.
+                    comboBox = self.dntfComboxBoxMap[dntf]
+                    self.setFieldLanguageIndex(comboBox, language)
 
-                # progress bar
-                self.setProgressValue(progress)
-                progress += 1
+                    # progress bar
+                    self.setProgressValue(progress)
+                    progress += 1
             
             self.setProgressValue(progress_max)
         except:
