@@ -243,10 +243,10 @@ def init(languagetools):
                 aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))
 
             except AnkiNoteEditorError as e:
-                logging.error('Could not speak', exc_info=True)
+                # logging.error('Could not speak', exc_info=True)
                 aqt.utils.showCritical(repr(e))
 
-            return handled            
+            return handled
 
         if languagetools.get_apply_updates_automatically() == False:
             # user doesn't want updates as they type
