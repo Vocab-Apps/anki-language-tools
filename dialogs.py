@@ -1527,6 +1527,16 @@ class LanguageMappingDialog_UI(object):
 
         self.topLevel.addLayout(hlayout)
 
+        # add filter bar
+        hlayout = QtWidgets.QHBoxLayout()
+        filter_label = QtWidgets.QLabel('Filter Decks: (type part of deck name)')
+        hlayout.addWidget(filter_label)
+        self.filter_text_input = QtWidgets.QLineEdit()
+        self.filter_text_input.textChanged.connect(self.filterTextChanged)
+        hlayout.addWidget(self.filter_text_input)
+        
+        self.topLevel.addLayout(hlayout)
+
 
         for deck_name, deck in deck_map.items():
             self.layoutDecks(deck_name, deck)
@@ -1710,6 +1720,10 @@ class LanguageMappingDialog_UI(object):
 
     def reject(self):
         self.Dialog.close()
+
+    def filterTextChanged(self, new_filter_text):
+        logging.info(f'new filter text: {new_filter_text}')
+        pass
 
     def saveLanguageMappingChanges(self):
         for key, value in self.language_mapping_changes.items():

@@ -290,11 +290,7 @@ class LanguageTools():
 
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
         populated_set = aqt.mw.col.db.all("select did, mid from notes inner join cards on notes.id = cards.nid group by mid, did")
-        #print(populated_set)
         
-        deck_list = aqt.mw.col.decks.all_names_and_ids()
-        note_types = aqt.mw.col.models.all_names_and_ids()
-
         result: List[DeckNoteTypeField] = []
 
         for entry in populated_set:
