@@ -1504,9 +1504,9 @@ class LanguageMappingDialog_UI(object):
         self.layoutWidget = QtWidgets.QWidget()
         self.layoutWidget.setObjectName("layoutWidget")
 
-        self.all_decks = QtWidgets.QVBoxLayout(self.layoutWidget)
-        self.all_decks.setContentsMargins(20, 20, 20, 20)
-        self.all_decks.setObjectName("all_decks")
+        all_decks = QtWidgets.QVBoxLayout(self.layoutWidget)
+        all_decks.setContentsMargins(20, 20, 20, 20)
+        all_decks.setObjectName("all_decks")
 
         # add header
         self.topLevel.addWidget(get_header_label('Language Mapping'))
@@ -1539,7 +1539,8 @@ class LanguageMappingDialog_UI(object):
 
 
         for deck_name, deck in deck_map.items():
-            self.layoutDecks(deck_name, deck)
+            deck_layout = self.layoutDecks(deck_name, deck)
+            all_decks.addLayout(deck_layout)
 
 
         self.scrollArea.setWidget(self.layoutWidget)
@@ -1555,6 +1556,8 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(self.buttonBox)
 
     def layoutDecks(self, deck_name, deck: Deck):
+        layout = QtWidgets.QVBoxLayout()
+
         deckWidgets = LanguageMappingDeckWidgets()
         self.deckWidgetMap[deck_name] = deckWidgets
         self.deckNoteTypeWidgetMap[deck_name] = {}
@@ -1584,17 +1587,19 @@ class LanguageMappingDialog_UI(object):
 
         deckWidgets.deck_info.addStretch(1)
 
-        self.all_decks.addLayout(deckWidgets.deck_info)
+        layout.addLayout(deckWidgets.deck_info)
         
         # iterate over note types 
         for note_type_name, dntf_list in deck.note_type_map.items():
-            self.layoutNoteTypes(deck_name, note_type_name, dntf_list)
+            self.layoutNoteTypes(layout, deck_name, note_type_name, dntf_list)
 
         # add spacing at the end
-        self.all_decks.addSpacing(30)
+        layout.addSpacing(30)
+
+        return layout
                         
 
-    def layoutNoteTypes(self, deck_name, note_type_name, dntf_list: List[DeckNoteTypeField]):
+    def layoutNoteTypes(self, layout, deck_name, note_type_name, dntf_list: List[DeckNoteTypeField]):
         noteTypeWidgets = LanguageMappingNoteTypeWidgets()
         self.deckNoteTypeWidgetMap[deck_name][note_type_name] = noteTypeWidgets
         self.fieldWidgetMap[deck_name][note_type_name] = {}
@@ -1624,7 +1629,7 @@ class LanguageMappingDialog_UI(object):
 
         noteTypeWidgets.note_type_info.addStretch(1)
 
-        self.all_decks.addLayout(noteTypeWidgets.note_type_info)
+        layout.addLayout(noteTypeWidgets.note_type_info)
 
         noteTypeWidgets.field_info = QtWidgets.QGridLayout()
         noteTypeWidgets.field_info.setContentsMargins(20, 0, 0, 0)
@@ -1639,7 +1644,7 @@ class LanguageMappingDialog_UI(object):
             self.layoutField(row, deck_note_type_field, noteTypeWidgets.field_info)
             row += 1
 
-        self.all_decks.addLayout(noteTypeWidgets.field_info)
+        layout.addLayout(noteTypeWidgets.field_info)
 
 
     def layoutField(self, row:int, deck_note_type_field: DeckNoteTypeField, gridLayout: QtWidgets.QGridLayout):
