@@ -1512,9 +1512,11 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(get_header_label('Language Mapping'))
 
         # add auto-detection widgets
-        hlayout = QtWidgets.QHBoxLayout()
+        hlayout_global = QtWidgets.QHBoxLayout()
+        vlayout_left_side = QtWidgets.QVBoxLayout()
         self.autodetect_progressbar = QtWidgets.QProgressBar()
-        hlayout.addWidget(self.autodetect_progressbar)
+        vlayout_left_side.addWidget(self.autodetect_progressbar)
+        hlayout_global.addLayout(vlayout_left_side)
 
         font2 = QtGui.QFont()
         font2.setPointSize(14)
@@ -1523,9 +1525,7 @@ class LanguageMappingDialog_UI(object):
         self.autodetect_button.setFont(font2)
         self.autodetect_button.setStyleSheet(utils.get_green_stylesheet())
         self.autodetect_button.pressed.connect(self.runLanguageDetection)
-        hlayout.addWidget(self.autodetect_button)
-
-        self.topLevel.addLayout(hlayout)
+        hlayout_global.addWidget(self.autodetect_button)
 
         # add filter bar
         hlayout = QtWidgets.QHBoxLayout()
@@ -1535,10 +1535,12 @@ class LanguageMappingDialog_UI(object):
         self.filter_text_input = QtWidgets.QLineEdit()
         self.filter_text_input.textChanged.connect(self.filterTextChanged)
         hlayout.addWidget(self.filter_text_input)
-        self.filter_result_label = QtWidgets.QLabel(f'Showing {len(deck_map)} / {len(deck_map)} decks')
+        self.filter_result_label = QtWidgets.QLabel(self.getFilterResultText(len(deck_map), len(deck_map)))
         hlayout.addWidget(self.filter_result_label)
         
-        self.topLevel.addLayout(hlayout)
+        vlayout_left_side.addLayout(hlayout)
+
+        self.topLevel.addLayout(hlayout_global)
 
         self.deck_name_widget_map = {}
         for deck_name, deck in deck_map.items():
@@ -1746,6 +1748,10 @@ class LanguageMappingDialog_UI(object):
             return True
         return filter_text.lower() in deck_name.lower()
 
+    def getFilterResultText(self, displayed_count, total_count):
+        filter_result = f'{displayed_count} / {total_count} decks'
+        return filter_result
+
     def filterTextChanged(self, new_filter_text):
         self.filter_text = new_filter_text
         total_count = len(self.deck_name_widget_map)
@@ -1756,7 +1762,7 @@ class LanguageMappingDialog_UI(object):
                 displayed_count += 1
             else:
                 frame.setVisible(False)
-        filter_result = f'Showing {displayed_count} / {total_count} decks'
+        filter_result = self.getFilterResultText(displayed_count, total_count)
         self.filter_result_label.setText(filter_result)
 
         if displayed_count != total_count:
