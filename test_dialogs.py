@@ -27,6 +27,9 @@ def test_add_audio_regular(qtbot):
     field_chinese = 'Chinese'
     field_english = 'English'
     field_sound = 'Sound'
+
+    chinese_voice_key = 'chinese voice'
+    chinese_voice_description = 'this is a chinese voice'
     languagetools_config = {
         constants.CONFIG_DECK_LANGUAGES: {
             model_name: {
@@ -38,6 +41,10 @@ def test_add_audio_regular(qtbot):
             }
         },
         constants.CONFIG_VOICE_SELECTION: {
+            'zh_cn': {
+                'voice_key': chinese_voice_key,
+                'voice_description': chinese_voice_description
+            }
         }
 
     }
@@ -46,8 +53,14 @@ def test_add_audio_regular(qtbot):
     note_id_list = [42, 43]
     add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     add_audio_dialog.setupUi()
-    # add_audio_dialog.exec_()
-    assert True
+
+    # do some checks on the from field combo box
+    assert add_audio_dialog.from_field_combobox.count() == 2
+    items = []
+    items.append(add_audio_dialog.from_field_combobox.itemText(0))
+    items.append(add_audio_dialog.from_field_combobox.itemText(1))
+    assert items[0] == 'Chinese'
+    assert items[1] == 'English'
 
 @pytest.mark.skip(reason="skip for now")
 def test_add_audio_dialog_unmapped(qtbot):
