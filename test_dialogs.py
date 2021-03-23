@@ -1,6 +1,6 @@
 import unittest
+import pytest
 
-class TestDialogs(unittest.TestCase):
-
-    def test_1(self):
-        self.assertTrue(True)
+def test_add_audio_dialog(qtbot):
+    print(qtbot)
+    assert True
