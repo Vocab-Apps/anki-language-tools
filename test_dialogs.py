@@ -62,6 +62,9 @@ def test_add_audio_regular(qtbot):
     assert items[0] == 'Chinese'
     assert items[1] == 'English'
 
+    # only uncomment if you want to see the dialog come up
+    # add_audio_dialog.exec_()
+
 @pytest.mark.skip(reason="skip for now")
 def test_add_audio_dialog_unmapped(qtbot):
     mock_language_tools = MockLanguageTools()
