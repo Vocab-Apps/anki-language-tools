@@ -1,18 +1,25 @@
+import sys
 import re
 import logging
 import aqt
 import anki.template
 import anki.sound
-from . import constants
+
+if hasattr(sys, '_pytest_mode'):
+    import constants
+    import anki_interface
+else:
+    from . import constants
+    from . import anki_interface
 
 def get_green_stylesheet():
-    night_mode = aqt.mw.pm.night_mode()
+    night_mode = anki_interface.anki_night_mode_enabled()
     if night_mode:
         return constants.GREEN_STYLESHEET_NIGHTMODE
     return constants.GREEN_STYLESHEET
 
 def get_red_stylesheet():
-    night_mode = aqt.mw.pm.night_mode()
+    night_mode = anki_interface.anki_night_mode_enabled()
     if night_mode:
         return constants.RED_STYLESHEET_NIGHTMODE
     return constants.RED_STYLESHEET

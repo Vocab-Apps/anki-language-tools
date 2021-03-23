@@ -10,6 +10,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 if hasattr(sys, '_pytest_mode'):
     from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
+    import constants
+    import utils
 else:
     from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
     from . import constants

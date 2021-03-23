@@ -3,10 +3,15 @@ import pytest
 
 import dialogs
 import languagetools
+import constants
 
-class MockLanguageTools():
+class MockLanguageTools(languagetools.LanguageTools):
     def __init__(self):
-        pass
+        self.config = {
+            constants.CONFIG_VOICE_SELECTION: {
+                
+            }
+        }
 
 class MockDeckNoteType(languagetools.DeckNoteType):
     def __init__(self, deck_id, deck_name, model_id, model_name):
