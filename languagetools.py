@@ -1,4 +1,5 @@
 # python imports
+import sys
 import os
 import re
 import random
@@ -16,8 +17,12 @@ import aqt.addcards
 import anki.notes
 import anki.cards
 
-from . import constants
-from . import version
+if hasattr(sys, '_pytest_mode'):
+    import constants
+    import version
+else:
+    from . import constants
+    from . import version
 
 # util functions
 

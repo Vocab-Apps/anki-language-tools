@@ -1,3 +1,4 @@
 pytest
 pytest-qt
-pyqt5
+aqt
+anki

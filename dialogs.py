@@ -1,5 +1,5 @@
-from typing import List, Dict
 import sys
+from typing import List, Dict
 import traceback
 import logging
 import json
@@ -7,9 +7,13 @@ import urllib.parse
 
 import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
-from . import constants
-from . import utils
+
+if hasattr(sys, '_pytest_mode'):
+    from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
+else:
+    from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
+    from . import constants
+    from . import utils
 
 
 def get_header_label(text):
