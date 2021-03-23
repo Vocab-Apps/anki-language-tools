@@ -57,6 +57,13 @@ class DeckNoteType():
     def __hash__(self):
         return hash((self.deck_id, self.model_id))
 
+    def get_field_names(self) -> List[str]:
+        model = aqt.mw.col.models.get(self.model_id)
+        fields = model['flds']
+        field_names = [x['name'] for x in fields]
+        return field_names
+
+
 class DeckNoteTypeField():
     def __init__(self, deck_note_type, field_name):
         self.deck_note_type = deck_note_type

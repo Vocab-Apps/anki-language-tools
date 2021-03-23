@@ -516,9 +516,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.note_id_list = note_id_list
 
         # get field list
-        model = aqt.mw.col.models.get(deck_note_type.model_id)
-        fields = model['flds']
-        field_names = [x['name'] for x in fields]
+        field_names = self.deck_note_type.get_field_names()
 
         self.voice_selection_settings = languagetools.get_voice_selection_settings()
         self.batch_audio_settings = languagetools.get_batch_audio_settings(self.deck_note_type)
