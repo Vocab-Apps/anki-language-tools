@@ -66,6 +66,11 @@ class TestConfigGenerator():
         }
         return languagetools_config
 
+    def get_config_no_language_mapping(self):
+        base_config = self.get_default_config()
+        base_config[constants.CONFIG_DECK_LANGUAGES] = {}
+        return base_config
+
     def get_config_batch_audio(self):
         base_config = self.get_default_config()
         base_config[constants.CONFIG_BATCH_AUDIO] = {
@@ -112,6 +117,14 @@ def test_add_audio_regular(qtbot):
     assert add_audio_dialog.from_field_combobox.currentText() == config_gen.field_chinese
     assert add_audio_dialog.to_field_combobox.currentText() == config_gen.field_sound
 
+    # test 3 - no language mapping done for any field
+    # -----------------------------------------------
+    languagetools_config = config_gen.get_config_no_language_mapping()
+    mock_language_tools = MockLanguageTools(languagetools_config)
+
+    # add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
+    testcase_instance = unittest.TestCase()
+    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.AddAudioDialog, mock_language_tools, deck_note_type, note_id_list)
 
     # only uncomment if you want to see the dialog come up
     # add_audio_dialog.exec_()

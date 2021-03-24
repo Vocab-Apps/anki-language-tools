@@ -33,6 +33,9 @@ class AnkiItemNotFoundError(Exception):
 class AnkiNoteEditorError(Exception):
     pass
 
+class LanguageMappingError(Exception):
+    pass
+
 class LanguageToolsRequestError(Exception):
     pass
 

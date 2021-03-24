@@ -9,11 +9,11 @@ import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 if hasattr(sys, '_pytest_mode'):
-    from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
+    from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     import constants
     import utils
 else:
-    from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError
+    from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     from . import constants
     from . import utils
 
@@ -547,6 +547,11 @@ class AddAudioDialog(aqt.qt.QDialog):
 
             self.to_field_name_list.append(field_name)
             self.to_deck_note_type_field_list.append(deck_note_type_field)
+        
+        # do we have any language mappings at all ? 
+        if len(self.from_field_name_list) == 0:
+            error_message = f'Language Mapping not done for {self.deck_note_type}'
+            raise LanguageMappingError(error_message)
 
         
     def setupUi(self):
@@ -1958,12 +1963,18 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     if deck_note_type == None:
         return
 
-    dialog = AddAudioDialog(languagetools, deck_note_type, note_id_list)
-    dialog.setupUi()
-    dialog.exec_()
+    try:
+        dialog = AddAudioDialog(languagetools, deck_note_type, note_id_list)
+        dialog.setupUi()
+        dialog.exec_()
 
-    # force browser to reload notes
-    browser.model.reset()    
+        # force browser to reload notes
+        browser.model.reset()    
+
+    except LanguageMappingError as exception:
+        original_message = str(exception)
+        final_message = original_message + '<br/>' + constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING
+        aqt.utils.showCritical(final_message, title=constants.ADDON_NAME)
 
 def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     deck_note_type = verify_deck_note_type_consistent(note_id_list)

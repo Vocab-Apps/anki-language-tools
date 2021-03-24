@@ -20,6 +20,7 @@ GREEN_STYLESHEET_NIGHTMODE = 'background-color: #2E7D32;'
 RED_STYLESHEET_NIGHTMODE = 'background-color: #B71C1C;'
 
 DOCUMENTATION_ENSURE_LANGUAGE_MAPPING = 'Please ensure Language Mapping is correct (Tools -> Language Tools: Language Mapping)'
+DOCUMENTATION_PERFORM_LANGUAGE_MAPPING = 'Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping'
 
 class TransformationType(enum.Enum):
     Translation = enum.auto()
