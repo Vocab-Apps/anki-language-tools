@@ -12,6 +12,7 @@ git push origin ${GIT_TAG}
 # create .addon file
 # remove meta.json, which contains private key
 rm meta.json
+rm -rf __pycache__
 ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION_NUMBER}.ankiaddon
 zip -r ${ADDON_FILENAME} *
 
