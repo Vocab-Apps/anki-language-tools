@@ -557,7 +557,7 @@ class LanguageTools():
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
 
-        logging.debug(f'get_batch_audio_settings, config: {self.config}')
+        # logging.debug(f'get_batch_audio_settings, config: {self.config}')
 
         return self.config.get(constants.CONFIG_BATCH_AUDIO, {}).get(model_name, {}).get(deck_name, {})
 
