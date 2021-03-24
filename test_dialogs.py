@@ -82,7 +82,7 @@ class TestConfigGenerator():
         }
         return base_config
 
-def test_add_audio_regular(qtbot):
+def test_add_audio(qtbot):
     # pytest test_dialogs.py -rPP -k test_add_audio_regular
 
     config_gen = TestConfigGenerator()
@@ -129,12 +129,20 @@ def test_add_audio_regular(qtbot):
     # only uncomment if you want to see the dialog come up
     # add_audio_dialog.exec_()
 
-@pytest.mark.skip(reason="skip for now")
-def test_add_audio_dialog_unmapped(qtbot):
-    mock_language_tools = MockLanguageTools()
-    deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type") 
+def test_add_translation_transliteration_no_language_mapping(qtbot):
+    config_gen = TestConfigGenerator()
+    languagetools_config = config_gen.get_config_no_language_mapping()
+
+    mock_language_tools = MockLanguageTools(languagetools_config)
+    deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type", config_gen.all_fields) 
+
     note_id_list = [42, 43]
-    add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
-    add_audio_dialog.setupUi()
-    add_audio_dialog.exec_()
-    assert True
+
+    testcase_instance = unittest.TestCase()
+    
+    # translation
+    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Translation)
+
+    # transliteration
+    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
+

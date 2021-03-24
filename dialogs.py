@@ -96,9 +96,6 @@ class NoteTableModel(QtCore.QAbstractTableModel):
                 return QtCore.QVariant(self.to_field)
         return QtCore.QVariant()
 
-class NoFieldsAvailable(Exception):
-    pass
-
 class BatchConversionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list, transformation_type):
         super(aqt.qt.QDialog, self).__init__()
@@ -108,9 +105,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.transformation_type = transformation_type
 
         # get field list
-        model = aqt.mw.col.models.get(deck_note_type.model_id)
-        fields = model['flds']
-        field_names = [x['name'] for x in fields]
+        field_names = self.deck_note_type.get_field_names()
 
         # these are the available fields
         self.field_name_list = []
@@ -124,10 +119,16 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         self.noteTableModel = NoteTableModel()
 
+        at_least_one_field_language_set = False
+
         # retain fields which have a language set
         for field_name in field_names:
             deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
             language = self.languagetools.get_language(deck_note_type_field)
+
+            if self.languagetools.language_available_for_translation(language):
+                at_least_one_field_language_set = True
+
             if self.transformation_type == constants.TransformationType.Translation:
                 if self.languagetools.language_available_for_translation(language):
                     self.field_name_list.append(field_name)
@@ -138,9 +139,10 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 self.deck_note_type_field_list.append(deck_note_type_field)
                 self.field_language.append(language)                
 
-        if len(self.field_name_list) == 0:
+        if at_least_one_field_language_set == False:
+            error_message = f'No fields available for {self.transformation_type.name} in {self.deck_note_type}'
             # no fields were found, could be that no fields have a language set
-            raise NoFieldsAvailable(f'No fields available for {self.transformation_type.name} in  {self.deck_note_type}. {constants.DOCUMENTATION_ENSURE_LANGUAGE_MAPPING}')
+            raise LanguageMappingError(error_message)
 
 
     def setupUi(self):
@@ -1943,8 +1945,10 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
 
         # force browser to reload notes
         browser.model.reset()
-    except NoFieldsAvailable as exception:
-        aqt.utils.showCritical(str(exception), title=constants.ADDON_NAME)
+    except LanguageMappingError as exception:
+        original_message = str(exception)
+        final_message = original_message + '<br/>' + constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING
+        aqt.utils.showCritical(final_message, title=constants.ADDON_NAME)
 
 
 def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
