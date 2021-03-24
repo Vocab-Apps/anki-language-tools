@@ -18,10 +18,21 @@ class MockDeckNoteType(languagetools.DeckNoteType):
         languagetools.DeckNoteType.__init__(self, deck_id, deck_name, model_id, model_name)
     
     def get_field_names(self):
-        return ['Chinese', 'English']
+        return ['Chinese', 'English', 'Sound']
 
+
+def assert_combobox_items_equal(combobox, expected_items):
+    combobox_items = []
+    for i in range(combobox.count()):
+        combobox_items.append(combobox.itemText(i))
+    
+    combobox_items.sort()
+    expected_items.sort()
+    assert combobox_items == expected_items
 
 def test_add_audio_regular(qtbot):
+    # pytest test_dialogs.py -rPP -k test_add_audio_regular
+
     model_name = 'note-type'
     deck_name = 'deck 1'
     field_chinese = 'Chinese'
@@ -55,12 +66,9 @@ def test_add_audio_regular(qtbot):
     add_audio_dialog.setupUi()
 
     # do some checks on the from field combo box
-    assert add_audio_dialog.from_field_combobox.count() == 2
-    items = []
-    items.append(add_audio_dialog.from_field_combobox.itemText(0))
-    items.append(add_audio_dialog.from_field_combobox.itemText(1))
-    assert items[0] == 'Chinese'
-    assert items[1] == 'English'
+    assert_combobox_items_equal(add_audio_dialog.from_field_combobox, ['Chinese', 'English'])
+    assert_combobox_items_equal(add_audio_dialog.to_field_combobox, ['Chinese', 'English', 'Sound'])
+
 
     # only uncomment if you want to see the dialog come up
     # add_audio_dialog.exec_()
