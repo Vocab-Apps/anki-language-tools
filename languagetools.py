@@ -333,9 +333,21 @@ class LanguageTools():
             deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
-    def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType):
-        query = f'deck:"{deck_note_type.deck_name}" note:"{deck_note_type.model_name}"'
-        notes = aqt.mw.col.find_notes(query)
+    def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType, sample_size):
+        deck_id = deck_note_type.deck_id
+        model_id = deck_note_type.model_id
+        sql_query = f'SELECT notes.id FROM notes INNER JOIN cards ON notes.id = cards.nid WHERE notes.mid={model_id} AND cards.did={deck_id} ORDER BY RANDOM() LIMIT {sample_size}'
+
+        note_ids = aqt.mw.col.db.all(sql_query)
+        query_strings = []
+        for entry in note_ids:
+            note_id = entry[0]
+            query_string = f'nid:{note_id}'
+            query_strings.append(query_string)
+        
+        final_query_string = ' OR '.join(query_strings)
+
+        notes = aqt.mw.col.find_notes(final_query_string)
         return notes
 
     def field_empty(self, field_value: str) -> bool:
@@ -343,7 +355,7 @@ class LanguageTools():
         return len(stripped_field_value) == 0
 
     def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
-        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type)
+        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type, sample_size)
 
         stripImagesRe = re.compile("(?i)<img[^>]+src=[\"']?([^\"'>]+)[\"']?[^>]*>")
         
