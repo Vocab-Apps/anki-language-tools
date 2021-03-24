@@ -69,6 +69,7 @@ def test_add_audio_regular(qtbot):
     assert_combobox_items_equal(add_audio_dialog.from_field_combobox, ['Chinese', 'English'])
     assert_combobox_items_equal(add_audio_dialog.to_field_combobox, ['Chinese', 'English', 'Sound'])
 
+    assert add_audio_dialog.voice_label.text() == '<b>' + chinese_voice_description + '</b>'
 
     # only uncomment if you want to see the dialog come up
     # add_audio_dialog.exec_()
