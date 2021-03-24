@@ -5,8 +5,10 @@ function configure_languagetools_fields(options) {
     forEditorField(options, (field, field_type) => {
         const field_id = field.editingArea.ord
          
-        if (!field.hasAttribute("has-languagetools")) {
+        console.log('configuring field: ', field, field_id, field.hasAttribute("has-languagetools"));
 
+        // the common set only needs to be added once, and doesn't need to be removed
+        if (!field.hasAttribute("languagetools-common")) {
             // add loading indicator
             const loadingIndicator = document.createElement('span');
             loadingIndicator.id = 'loading_indicator' + field_id;
@@ -24,10 +26,35 @@ function configure_languagetools_fields(options) {
             generatedForIndicator.classList.add('generated-for-hidden');
             field.labelContainer.appendChild(generatedForIndicator);
 
+            field.setAttribute("languagetools-common", "")
+        } else {
+            // hide out loading / generated for indicators
+            $('#loading_indicator' + field_id).hide();
+            $('#generatedfor_indicator' + field_id).hide();            
+        }
+
+        var old_field_type = "";
+        if (field.hasAttribute("languagetools-type")) {
+            old_field_type = field.getAttribute("languagetools-type");
+        }
+
+        if( old_field_type != field_type ) {
+            // need to clean up old elements
+            if(old_field_type == "language") {
+                var elements = field.getElementsByClassName("class-language-field");
+                elements[0].remove();
+            }
+
+            if(old_field_type == "sound") {
+                var elements = field.getElementsByClassName("class-language-field");
+                elements[0].remove();
+            }
+
             // do we need to add some audio buttons ?
             if( field_type == 'language') {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
+                speakButton.classList.add('class-language-field');
                 speakButton.innerText = 'Speak';
                 speakButton.addEventListener(
                     'click',
@@ -36,11 +63,13 @@ function configure_languagetools_fields(options) {
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
+                field.setAttribute("languagetools-type", "language")
             }
 
             if( field_type == 'sound') {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
+                speakButton.classList.add('class-sound-field');
                 speakButton.innerText = 'Play';
                 speakButton.addEventListener(
                     'click',
@@ -49,14 +78,11 @@ function configure_languagetools_fields(options) {
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
+                field.setAttribute("languagetools-type", "sound")
             }            
-
-            field.setAttribute("has-languagetools", "")
-        } else {
-            // hide out loading / generated for indicators
-            $('#loading_indicator' + field_id).hide();
-            $('#generatedfor_indicator' + field_id).hide();
         }
+    
+
 
     })    
 }
