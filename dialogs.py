@@ -523,6 +523,9 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.voice_selection_settings = languagetools.get_voice_selection_settings()
         self.batch_audio_settings = languagetools.get_batch_audio_settings(self.deck_note_type)
 
+        logging.debug(f'voice_selection_settings: {self.voice_selection_settings}')
+        logging.debug(f'batch_audio_settings: {self.batch_audio_settings}')
+
         # these are the available fields
         # build separate lists for to and from
         self.from_field_name_list = []
@@ -602,11 +605,14 @@ class AddAudioDialog(aqt.qt.QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def pick_default_fields(self):
+        logging.info('pick_default_fields')
         #self.batch_audio_settings
         self.from_field_index = 0
         self.to_field_index = 0
 
+        logging.debug(f'batch_audio_settings: {self.batch_audio_settings}')
         if len(self.batch_audio_settings) > 0:
+            logging.info(f'some batch audio settings found')
             to_field = list(self.batch_audio_settings.keys())[0]
             from_field = self.batch_audio_settings[to_field]
             try:

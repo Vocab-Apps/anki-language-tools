@@ -6,6 +6,7 @@ import random
 import requests
 import json
 import tempfile
+import logging
 from typing import List, Dict
 import hashlib
 import anki.utils
@@ -540,6 +541,8 @@ class LanguageTools():
     def get_batch_audio_settings(self, deck_note_type: DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
+
+        logging.debug(f'get_batch_audio_settings, config: {self.config}')
 
         return self.config.get(constants.CONFIG_BATCH_AUDIO, {}).get(model_name, {}).get(deck_name, {})
 
