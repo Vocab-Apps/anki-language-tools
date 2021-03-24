@@ -5,7 +5,7 @@ function configure_languagetools_fields(options) {
     forEditorField(options, (field, field_type) => {
         const field_id = field.editingArea.ord
          
-        console.log('configuring field: ', field, field_id, field.hasAttribute("has-languagetools"));
+        // console.log('configuring field: ', field, field_id, field_type, field.hasAttribute("languagetools-common"));
 
         // the common set only needs to be added once, and doesn't need to be removed
         if (!field.hasAttribute("languagetools-common")) {
@@ -46,7 +46,7 @@ function configure_languagetools_fields(options) {
             }
 
             if(old_field_type == "sound") {
-                var elements = field.getElementsByClassName("class-language-field");
+                var elements = field.getElementsByClassName("class-sound-field");
                 elements[0].remove();
             }
 
@@ -63,7 +63,6 @@ function configure_languagetools_fields(options) {
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
-                field.setAttribute("languagetools-type", "language")
             }
 
             if( field_type == 'sound') {
@@ -78,9 +77,9 @@ function configure_languagetools_fields(options) {
                     }),
                 );
                 field.labelContainer.appendChild(speakButton);
-                field.setAttribute("languagetools-type", "sound")
-            }            
+            }
         }
+        field.setAttribute("languagetools-type", field_type);
     
 
 
