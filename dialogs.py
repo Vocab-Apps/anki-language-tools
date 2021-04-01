@@ -1484,8 +1484,9 @@ class LanguageMappingFieldWidgets(object):
 
 
 class LanguageMappingDialog_UI(object):
-    def __init__(self, languagetools: LanguageTools):
+    def __init__(self, languagetools: LanguageTools, dialog):
         self.languagetools: LanguageTools = languagetools
+        self.dialog = dialog
         
         # do some processing on languages
         data = languagetools.get_all_language_arrays()
@@ -1579,6 +1580,7 @@ class LanguageMappingDialog_UI(object):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
         self.topLevel.addWidget(self.buttonBox)
+
 
     def layoutDecks(self, deck_name, deck: Deck):
         layout = QtWidgets.QVBoxLayout()
@@ -1740,11 +1742,11 @@ class LanguageMappingDialog_UI(object):
     def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
         if len(field_samples) == 0:
-            aqt.utils.showInfo('No usable field data found', title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
+            aqt.utils.showInfo('No usable field data found', title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich', parent=self.dialog)
         else:
             joined_text = ', '.join(field_samples)
             text = f'<b>Samples</b>: {joined_text}'
-            aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich')
+            aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich', parent=self.dialog)
 
     def accept(self):
         self.saveLanguageMappingChanges()
@@ -1860,7 +1862,7 @@ def language_mapping_dialogue(languagetools):
     deck_map: Dict[str, Deck] = languagetools.get_populated_decks()
 
     mapping_dialog = aqt.qt.QDialog()
-    mapping_dialog.ui = LanguageMappingDialog_UI(languagetools)
+    mapping_dialog.ui = LanguageMappingDialog_UI(languagetools, mapping_dialog)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     mapping_dialog.exec_()
 
