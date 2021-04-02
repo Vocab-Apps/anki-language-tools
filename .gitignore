@@ -1,4 +1,5 @@
 meta.json
 __pycache__/
 temp/
+.coverage
 htmlcov/
