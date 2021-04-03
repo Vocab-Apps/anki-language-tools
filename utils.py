@@ -12,14 +12,14 @@ else:
     from . import constants
     from . import anki_interface
 
-def get_green_stylesheet():
-    night_mode = anki_interface.anki_night_mode_enabled()
+def get_green_stylesheet(interface):
+    night_mode = interface.night_mode_enabled()
     if night_mode:
         return constants.GREEN_STYLESHEET_NIGHTMODE
     return constants.GREEN_STYLESHEET
 
-def get_red_stylesheet():
-    night_mode = anki_interface.anki_night_mode_enabled()
+def get_red_stylesheet(interface):
+    night_mode = interface.night_mode_enabled()
     if night_mode:
         return constants.RED_STYLESHEET_NIGHTMODE
     return constants.RED_STYLESHEET

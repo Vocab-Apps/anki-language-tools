@@ -4,8 +4,14 @@ if hasattr(sys, '_pytest_mode'):
 else:
     import aqt
 
-def anki_night_mode_enabled():
-    if not hasattr(sys, '_pytest_mode'):
+    
+class AnkiInterface():
+    def __init__(self):
+        pass
+
+    def get_config(self):
+        return aqt.mw.addonManager.getConfig(__name__)
+
+    def night_mode_enabled(self):
         night_mode = aqt.mw.pm.night_mode()
         return night_mode
-    return False

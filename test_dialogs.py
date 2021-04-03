@@ -146,3 +146,6 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
     # transliteration
     testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
 
+
+def test_language_mapping(qtbot):
+    pass
