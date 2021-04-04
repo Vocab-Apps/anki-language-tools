@@ -17,10 +17,11 @@ import anki.models
 # from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError, AnkiNoteEditorError
 from . import constants
 from . import errors
+from . import deck_utils
 from .languagetools import LanguageTools
 
 
-def get_field_id(deck_note_type_field: DeckNoteTypeField):
+def get_field_id(deck_note_type_field: deck_utils.DeckNoteTypeField):
     model = aqt.mw.col.models.get(deck_note_type_field.deck_note_type.model_id)
     fields = model['flds']
     field_names = [x['name'] for x in fields]
@@ -45,7 +46,7 @@ def hide_loading_indicator(editor: aqt.editor.Editor, field_index, original_fiel
 
 
 # generic function to load a transformation asynchronously (translation / transliteration / audio)
-def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
+def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
     field_index = get_field_id(to_deck_note_type_field)
 
     def apply_field_value(field_index, result_text):
@@ -86,7 +87,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
 
 
 
-def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, translation_option: Dict):
+def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, translation_option: Dict):
     def get_request_translation_lambda(languagetools, field_value, translation_option):
         def request_translation():
             return languagetools.get_translation_async(field_value, translation_option)
@@ -96,7 +97,7 @@ def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id,
     load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_translation_lambda(languagetools, field_value, translation_option), interpret_response_fn)
 
 
-def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, transliteration_option: Dict):
+def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, transliteration_option: Dict):
     def get_request_transliteration_lambda(languagetools, field_value, transliteration_option):
         def request_transliteration():
             return languagetools.get_transliteration_async(field_value, transliteration_option)
@@ -106,7 +107,7 @@ def load_transliteration(languagetools, editor: aqt.editor.Editor, original_note
     load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_transliteration_lambda(languagetools, field_value, transliteration_option), interpret_response_fn)
 
 
-def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: DeckNoteTypeField, voice: Dict):
+def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, voice: Dict):
     def get_request_audio_lambda(languagetools, field_value, voice):
         def request_audio():
             try:

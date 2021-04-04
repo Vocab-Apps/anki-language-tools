@@ -11,7 +11,7 @@ import anki.hooks
 from . import constants
 from . import editor
 from . import dialogs
-from .languagetools import DeckNoteTypeField, build_deck_note_type_field
+# from .languagetools import DeckNoteTypeField, build_deck_note_type_field
 
 
 def init(languagetools):
