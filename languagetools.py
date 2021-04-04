@@ -22,10 +22,12 @@ if hasattr(sys, '_pytest_mode'):
     import constants
     import version
     import errors
+    import deck_utils
 else:
     from . import constants
     from . import version
     from . import errors
+    from . import deck_utils
 
 
 class LanguageTools():
@@ -174,10 +176,10 @@ class LanguageTools():
                 'language_code_list': language_code_list
         }        
 
-    def get_populated_dntf(self) -> List[DeckNoteTypeField]:
+    def get_populated_dntf(self) -> List[deck_utils.DeckNoteTypeField]:
         populated_set = self.anki_utils.get_deckid_modelid_pairs()
         
-        result: List[DeckNoteTypeField] = []
+        result: List[deck_utils.DeckNoteTypeField] = []
 
         for entry in populated_set:
             deck_id = entry[0]
@@ -194,7 +196,7 @@ class LanguageTools():
 
 
     def get_populated_decks(self) -> Dict[str, Deck]:
-        deck_note_type_field_list: List[DeckNoteTypeField] = self.get_populated_dntf()
+        deck_note_type_field_list: List[deck_utils.DeckNoteTypeField] = self.get_populated_dntf()
         deck_map = {}
         for deck_note_type_field in deck_note_type_field_list:
             deck_name = deck_note_type_field.deck_note_type.deck_name
@@ -224,7 +226,7 @@ class LanguageTools():
         stripped_field_value = anki.utils.htmlToTextLine(field_value)
         return len(stripped_field_value) == 0
 
-    def get_field_samples(self, deck_note_type_field: DeckNoteTypeField, sample_size: int) -> List[str]:
+    def get_field_samples(self, deck_note_type_field: deck_utils.DeckNoteTypeField, sample_size: int) -> List[str]:
         notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type, sample_size)
 
         stripImagesRe = re.compile("(?i)<img[^>]+src=[\"']?([^\"'>]+)[\"']?[^>]*>")
@@ -286,7 +288,7 @@ class LanguageTools():
         return result
 
 
-    def perform_language_detection_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
+    def perform_language_detection_deck_note_type_field(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         # get a random sample of data within this field
 
         sample_size = 100 # max supported by azure
@@ -306,11 +308,11 @@ class LanguageTools():
             # error occured, return none
             return None
 
-    def guess_language(self, deck_note_type_field: DeckNoteTypeField):
+    def guess_language(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         # retrieve notes
         return self.perform_language_detection_deck_note_type_field(deck_note_type_field)
 
-    def store_language_detection_result(self, deck_note_type_field: DeckNoteTypeField, language, tooltip=False):
+    def store_language_detection_result(self, deck_note_type_field: deck_utils.DeckNoteTypeField, language, tooltip=False):
         # write per-deck detected languages
 
         model_name = deck_note_type_field.get_model_name()
@@ -336,7 +338,7 @@ class LanguageTools():
         if tooltip:
             aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
  
-    def store_batch_translation_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str, translation_option):
+    def store_batch_translation_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField, source_field: str, translation_option):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name
@@ -353,14 +355,14 @@ class LanguageTools():
         }
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    def remove_translation_setting(self, deck_note_type_field: DeckNoteTypeField):
+    def remove_translation_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name        
         del self.config[constants.CONFIG_BATCH_TRANSLATION][model_name][deck_name][field_name]
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    def store_batch_transliteration_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str, transliteration_option):
+    def store_batch_transliteration_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField, source_field: str, transliteration_option):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name
@@ -380,7 +382,7 @@ class LanguageTools():
         # the language for the target field should be set to transliteration
         self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.transliteration.name)
 
-    def remove_transliteration_setting(self, deck_note_type_field: DeckNoteTypeField):
+    def remove_transliteration_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name        
@@ -399,7 +401,7 @@ class LanguageTools():
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLITERATION, {}).get(model_name, {}).get(deck_name, {})
 
-    def store_batch_audio_setting(self, deck_note_type_field: DeckNoteTypeField, source_field: str):
+    def store_batch_audio_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField, source_field: str):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name
@@ -416,7 +418,7 @@ class LanguageTools():
         # the language for the target field should be set to sound
         self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.sound.name)
 
-    def remove_audio_setting(self, deck_note_type_field: DeckNoteTypeField):
+    def remove_audio_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
         field_name = deck_note_type_field.field_name        
@@ -445,7 +447,7 @@ class LanguageTools():
         self.config[constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY] = value
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    def get_language(self, deck_note_type_field: DeckNoteTypeField):
+    def get_language(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         """will return None if no language is associated with this field"""
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()
@@ -625,7 +627,7 @@ class LanguageTools():
         return translation_options
 
 
-    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> DeckNoteTypeField:
+    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> deck_utils.DeckNoteTypeField:
         model = aqt.mw.col.models.get(deck_note_type.model_id)
         fields = model['flds']
         field_name = fields[field_index]['name']
