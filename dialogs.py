@@ -144,7 +144,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         if at_least_one_field_language_set == False:
             error_message = f'No fields available for {self.transformation_type.name} in {self.deck_note_type}'
             # no fields were found, could be that no fields have a language set
-            raise LanguageMappingError(error_message)
+            raise errors.LanguageMappingError(error_message)
 
 
     def setupUi(self):

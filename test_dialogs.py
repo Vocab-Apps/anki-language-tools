@@ -156,23 +156,29 @@ def test_add_audio(qtbot):
     # add_audio_dialog.exec_()
 
 def test_add_translation_transliteration_no_language_mapping(qtbot):
+    # pytest test_dialogs.py -rPP -k test_add_translation_transliteration_no_language_mapping
+
     config_gen = TestConfigGenerator()
     languagetools_config = config_gen.get_config_no_language_mapping()
 
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    anki_utils.models = config_gen.get_model_map()
+    anki_utils.decks = config_gen.get_deck_map()        
+    deckutils = deck_utils.DeckUtils(anki_utils)
     mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
-    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
-    deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type", config_gen.all_fields) 
+    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
+    
+    deck_note_type = deckutils.build_deck_note_type(config_gen.deck_id, config_gen.model_id)
 
     note_id_list = [42, 43]
 
     testcase_instance = unittest.TestCase()
     
     # translation
-    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Translation)
+    testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Translation)
 
     # transliteration
-    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
+    testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
 
 
 
