@@ -200,7 +200,7 @@ def init(languagetools):
             sound_tag = note.fields[field_index]
             logging.debug(f'sound tag: {sound_tag}')
 
-            utils.play_anki_sound_tag(sound_tag)
+            languagetools.anki_utils.play_anki_sound_tag(sound_tag)
             return handled
 
         if str.startswith('ttsspeak:'):

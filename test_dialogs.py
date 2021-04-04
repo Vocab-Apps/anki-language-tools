@@ -6,15 +6,8 @@ import logging
 import dialogs
 import languagetools
 import constants
+import testing_utils
 
-class MockLanguageTools(languagetools.LanguageTools):
-    def __init__(self, config):
-        self.config = config
-        self.language_list = {
-            'zh_cn': 'Chinese',
-            'en': 'English'
-        }
-    
 class MockDeckNoteType(languagetools.DeckNoteType):
     def __init__(self, deck_id, deck_name, model_id, model_name, all_fields):
         languagetools.DeckNoteType.__init__(self, deck_id, deck_name, model_id, model_name)
@@ -87,11 +80,13 @@ def test_add_audio(qtbot):
 
     config_gen = TestConfigGenerator()
     languagetools_config = config_gen.get_default_config()
+    mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
 
     # test 1 - everything setup but no prior setting
     # ----------------------------------------------
 
-    mock_language_tools = MockLanguageTools(languagetools_config)
+    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
     deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type", config_gen.all_fields) 
 
     note_id_list = [42, 43]
@@ -106,7 +101,8 @@ def test_add_audio(qtbot):
     # test 2 - some defaults already exist
     # ------------------------------------
     languagetools_config = config_gen.get_config_batch_audio()
-    mock_language_tools = MockLanguageTools(languagetools_config)
+    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)    
 
     add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     add_audio_dialog.setupUi()
@@ -120,7 +116,8 @@ def test_add_audio(qtbot):
     # test 3 - no language mapping done for any field
     # -----------------------------------------------
     languagetools_config = config_gen.get_config_no_language_mapping()
-    mock_language_tools = MockLanguageTools(languagetools_config)
+    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
 
     # add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     testcase_instance = unittest.TestCase()
@@ -133,7 +130,9 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
     config_gen = TestConfigGenerator()
     languagetools_config = config_gen.get_config_no_language_mapping()
 
-    mock_language_tools = MockLanguageTools(languagetools_config)
+    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
+    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
     deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type", config_gen.all_fields) 
 
     note_id_list = [42, 43]
@@ -147,5 +146,11 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
     testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
 
 
+
 def test_language_mapping(qtbot):
-    pass
+
+    config = {}
+    mock_ankiutils = testing_utils.MockAnkiUtils(config) 
+    mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
+
+    mock_languagetools = languagetools.LanguageTools(mock_ankiutils, mock_cloudlanguagetools)
