@@ -155,11 +155,9 @@ def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> 
 
 class LanguageTools():
 
-    def __init__(self, anki_interface):
+    def __init__(self, anki_interface, cloud_language_tools):
         self.anki_interface = anki_interface
-        self.base_url = 'https://cloud-language-tools-prod.anki.study'
-        if constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL in os.environ:
-            self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
+        self.cloud_language_tools = cloud_language_tools
         self.config = self.anki_interface.get_config()
 
         self.collectionLoaded = False
@@ -188,15 +186,10 @@ class LanguageTools():
     def initialize(self):
         self.initDone = True
 
-        # get language list
-        response = requests.get(self.base_url + '/language_list')
-        self.language_list = json.loads(response.content)
-
-        response = requests.get(self.base_url + '/translation_language_list')
-        self.translation_language_list = json.loads(response.content)
-
-        response = requests.get(self.base_url + '/transliteration_language_list')
-        self.transliteration_language_list = json.loads(response.content)
+        # get language lists
+        self.language_list = self.cloud_language_tools.get_language_list()
+        self.translation_language_list = self.cloud_language_tools.get_translation_language_list()
+        self.transliteration_language_list = self.cloud_language_tools.get_transliteration_language_list()
 
         # do we have an API key in the config ?
         if len(self.config['api_key']) > 0:

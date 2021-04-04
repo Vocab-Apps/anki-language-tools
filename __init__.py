@@ -7,8 +7,10 @@ else:
     from . import gui
     from . import editor
     from . import anki_interface
+    from . import cloudlanguagetools
 
     interface = anki_interface.AnkiInterface()
-    languagetools = languagetools.LanguageTools(interface)
+    cloud_language_tools = cloudlanguagetools.CloudLanguageTools()
+    languagetools = languagetools.LanguageTools(interface, cloud_language_tools)
     gui.init(languagetools)
     editor.init(languagetools)
