@@ -71,7 +71,7 @@ class LanguageTools():
 
         # do we have an API key in the config ?
         if len(self.config['api_key']) > 0:
-            validation_result = self.api_key_validate_query(self.config['api_key'])
+            validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
             if validation_result['key_valid'] == True:
                 self.api_key_checked = True
 
@@ -86,7 +86,7 @@ class LanguageTools():
         (api_key, return_code) = aqt.utils.getText(prompt, title=constants.MENU_PREFIX, default=self.config['api_key'])
         if return_code == False:
             return False
-        result = self.api_key_validate_query(api_key)
+        result = self.cloud_language_tools.api_key_validate_query(api_key)
         if result['key_valid'] == True:
             self.config['api_key'] = api_key
             aqt.mw.addonManager.writeConfig(__name__, self.config)
@@ -104,12 +104,6 @@ class LanguageTools():
             return True
         return self.run_api_key_verification()
 
-    def api_key_validate_query(self, api_key):
-        response = requests.post(self.base_url + '/verify_api_key', json={
-            'api_key': api_key
-        })
-        data = json.loads(response.content)
-        return data
 
     def language_detection_done(self):
         return len(self.config[constants.CONFIG_DECK_LANGUAGES]) > 0

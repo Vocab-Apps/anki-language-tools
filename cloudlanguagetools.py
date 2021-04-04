@@ -22,3 +22,10 @@ class CloudLanguageTools():
     def get_transliteration_language_list(self):
         response = requests.get(self.base_url + '/transliteration_language_list')
         return json.loads(response.content)
+
+    def api_key_validate_query(self, api_key):
+        response = requests.post(self.base_url + '/verify_api_key', json={
+            'api_key': api_key
+        })
+        data = json.loads(response.content)
+        return data
