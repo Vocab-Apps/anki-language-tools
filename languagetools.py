@@ -290,17 +290,8 @@ class LanguageTools():
         if len(field_sample) == 0:
             return None
 
-        response = requests.post(self.base_url + '/detect', json={
-                'text_list': field_sample
-        }, headers={'api_key': self.config['api_key']})
-        if response.status_code == 200:
-            data = json.loads(response.content)
-            detected_language = data['detected_language']
+        return self.cloud_language_tools.language_detection(self.config['api_key'], field_sample)
 
-            return detected_language
-        else:
-            # error occured, return none
-            return None
 
     def guess_language(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         # retrieve notes

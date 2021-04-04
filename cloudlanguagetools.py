@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import logging
 
 from . import constants
 
@@ -29,3 +30,17 @@ class CloudLanguageTools():
         })
         data = json.loads(response.content)
         return data
+
+    def language_detection(self, api_key, field_sample):
+        response = requests.post(self.base_url + '/detect', json={
+                'text_list': field_sample
+        }, headers={'api_key': api_key})
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            detected_language = data['detected_language']
+
+            return detected_language
+        else:
+            # error occured, return none
+            logging.error(f'could not perform language detection: (status code {response.status_code}) {response.content}')
+            return None        
