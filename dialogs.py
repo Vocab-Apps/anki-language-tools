@@ -103,7 +103,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.transformation_type = transformation_type
 
         # get field list
-        field_names = self.deck_note_type.get_field_names()
+        field_names = self.languagetools.deck_utils.get_field_names(deck_note_type)
 
         # these are the available fields
         self.field_name_list = []

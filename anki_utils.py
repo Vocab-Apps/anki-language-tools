@@ -44,3 +44,12 @@ class AnkiUtils():
 
     def get_model(self, model_id):
         return aqt.mw.col.models.get(model_id)
+
+    def get_deck(self, deck_id):
+        return aqt.mw.col.decks.get(deck_id)
+
+    def get_model_id(self, model_name):
+        return aqt.mw.col.models.id_for_name(model_name)
+
+    def get_deck_id(self, deck_name):
+        return aqt.mw.col.decks.id_for_name(deck_name)

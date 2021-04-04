@@ -23,12 +23,6 @@ class DeckNoteType():
     def __hash__(self):
         return hash((self.deck_id, self.model_id))
 
-    def get_field_names(self) -> List[str]:
-        model = aqt.mw.col.models.get(self.model_id)
-        fields = model['flds']
-        field_names = [x['name'] for x in fields]
-        return field_names
-
 
 # represent a deck + notetype + field combination (DNTF), which can be associated with a language
 class DeckNoteTypeField():
@@ -78,26 +72,26 @@ class DeckUtils():
         return DeckNoteTypeField(deck_note_type, field_name)
 
     # given a note and the card, build DNT (used within note editor)
-    def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
+    def build_deck_note_type_from_note_card(self, note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
         model_id = note.mid
         deck_id = card.did
         deck_note_type = build_deck_note_type(deck_id, model_id)
         return deck_note_type
 
     # given a note being edited and the AddCards dialog, build DNT (used when adding a new note)
-    def build_deck_note_type_from_addcard(note: anki.notes.Note, add_cards: aqt.addcards.AddCards) -> DeckNoteType:
+    def build_deck_note_type_from_addcard(self, note: anki.notes.Note, add_cards: aqt.addcards.AddCards) -> DeckNoteType:
         model_id = note.mid
         deck_id = add_cards.deckChooser.selectedId()
         deck_note_type = build_deck_note_type(deck_id, model_id)
         return deck_note_type    
 
     # given deck id, model id, build DNT
-    def build_deck_note_type(deck_id, model_id) -> DeckNoteType:
-        model = aqt.mw.col.models.get(model_id)
+    def build_deck_note_type(self, deck_id, model_id) -> DeckNoteType:
+        model = self.anki_utils.get_model(model_id)
         if model == None:
             raise errors.AnkiItemNotFoundError(f'Note Type id {model_id} not found')
         model_name = model['name']
-        deck = aqt.mw.col.decks.get(deck_id)
+        deck = self.anki_utils.get_deck(deck_id)
         if deck == None:
             raise errors.AnkiItemNotFoundError(f'Deck id {deck_id} not found')
         deck_name = deck['name']
@@ -105,17 +99,17 @@ class DeckUtils():
         return deck_note_type
 
     # given a deck id, model id and field name, build DNTF
-    def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
+    def build_deck_note_type_field(self, deck_id, model_id, field_name) -> DeckNoteTypeField:
         deck_note_type = build_deck_note_type(deck_id, model_id)
         return DeckNoteTypeField(deck_note_type, field_name)
 
     # given a deck name, model name and field name, build the DNTF
-    def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> DeckNoteTypeField:
+    def build_deck_note_type_field_from_names(self, deck_name, model_name, field_name) -> DeckNoteTypeField:
         # get the deck_id from the deck_name
         # get the model_id from the model_name
 
-        model_id = aqt.mw.col.models.id_for_name(model_name)
-        deck_id = aqt.mw.col.decks.id_for_name(deck_name)
+        model_id = self.anki_utils.get_model_id(model_name)
+        deck_id = self.anki_utils.get_deck_id(deck_name)
 
         if model_id == None:
             raise errors.AnkiItemNotFoundError(f'Note Type {model_name} not found')
@@ -124,3 +118,10 @@ class DeckUtils():
 
         deck_note_type = build_deck_note_type(deck_id, model_id)
         return DeckNoteTypeField(deck_note_type, field_name)    
+
+    # given a DNT, get field names
+    def get_field_names(self, deck_note_type):
+        model = self.anki_utils.get_model(deck_note_type.model_id)
+        fields = model['flds']
+        field_names = [x['name'] for x in fields]
+        return field_names        
