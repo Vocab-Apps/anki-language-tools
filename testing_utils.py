@@ -16,6 +16,13 @@ class MockAnkiUtils():
     def play_anki_sound_tag(self, text):
         self.last_played_sound_tag = text
 
+    def get_deckid_modelid_pairs(self):
+        return self.deckid_modelid_pairs
+
+    def get_model(self, model_id):
+        # should return a dict which has flds
+        return self.models[model_id]
+
 class MockCloudLanguageTools():
     def __init__(self):
         self.language_list = {

@@ -1855,13 +1855,16 @@ class LanguageMappingDialog_UI(object):
         self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.applyButton.setDisabled(False)
 
-
-def language_mapping_dialogue(languagetools):
+def prepare_language_mapping_dialogue(languagetools):
     deck_map: Dict[str, Deck] = languagetools.get_populated_decks()
 
     mapping_dialog = aqt.qt.QDialog()
     mapping_dialog.ui = LanguageMappingDialog_UI(languagetools, mapping_dialog)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
+    return mapping_dialog
+
+def language_mapping_dialogue(languagetools):
+    mapping_dialog = prepare_language_mapping_dialogue(languagetools)
     mapping_dialog.exec_()
 
 def voice_selection_dialog(languagetools):

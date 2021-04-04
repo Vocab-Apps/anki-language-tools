@@ -299,7 +299,7 @@ class LanguageTools():
         }        
 
     def get_populated_dntf(self) -> List[DeckNoteTypeField]:
-        populated_set = aqt.mw.col.db.all("select did, mid from notes inner join cards on notes.id = cards.nid group by mid, did")
+        populated_set = self.anki_utils.get_deckid_modelid_pairs()
         
         result: List[DeckNoteTypeField] = []
 
@@ -307,7 +307,7 @@ class LanguageTools():
             deck_id = entry[0]
             model_id = entry[1]
             deck_note_type = build_deck_note_type(deck_id, model_id)
-            model = aqt.mw.col.models.get(model_id)
+            model = self.anki_utils.get_model(model_id)
             fields = model['flds']
             for field in fields:
                 field_name = field['name']

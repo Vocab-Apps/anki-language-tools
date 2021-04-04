@@ -38,3 +38,9 @@ class AnkiUtils():
         if len(file_list) >= 1:
             filename = file_list[0]
             aqt.sound.av_player.play_file(filename)
+
+    def get_deckid_modelid_pairs(self):
+        return aqt.mw.col.db.all("select did, mid from notes inner join cards on notes.id = cards.nid group by mid, did")
+
+    def get_model(self, model_id):
+        return aqt.mw.col.models.get(model_id)

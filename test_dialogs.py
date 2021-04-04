@@ -154,3 +154,17 @@ def test_language_mapping(qtbot):
     mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
 
     mock_languagetools = languagetools.LanguageTools(mock_ankiutils, mock_cloudlanguagetools)
+
+    deck_id_1 = 42001
+    model_id_1 = 43001
+    mock_ankiutils.deckid_modelid_pairs = [[deck_id_1, model_id_1]]
+    mock_ankiutils.models = {
+        model_id_1: {
+            'flds': [
+                {'name': 'English Definition'},
+                {'name': 'Chinese Word'}
+            ]
+        }
+    }
+
+    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_languagetools)
