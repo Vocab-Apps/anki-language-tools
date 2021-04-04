@@ -155,10 +155,10 @@ def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> 
 
 class LanguageTools():
 
-    def __init__(self, anki_interface, cloud_language_tools):
-        self.anki_interface = anki_interface
+    def __init__(self, anki_utils, cloud_language_tools):
+        self.anki_utils = anki_utils
         self.cloud_language_tools = cloud_language_tools
-        self.config = self.anki_interface.get_config()
+        self.config = self.anki_utils.get_config()
 
         self.collectionLoaded = False
         self.mainWindowInitialized = False

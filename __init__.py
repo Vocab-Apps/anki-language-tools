@@ -6,7 +6,7 @@ else:
     from . import languagetools
     from . import gui
     from . import editor
-    from . import anki_interface
+    from . import anki_utils
     from . import cloudlanguagetools
 
     interface = anki_interface.AnkiInterface()
