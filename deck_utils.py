@@ -72,14 +72,18 @@ class DeckUtils():
         return DeckNoteTypeField(deck_note_type, field_name)
 
     # given a note and the card, build DNT (used within note editor)
-    def build_deck_note_type_from_note_card(self, note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
+    # note: anki.notes.Note
+    # card: anki.cards.Card
+    def build_deck_note_type_from_note_card(self, note, card) -> DeckNoteType:
         model_id = note.mid
         deck_id = card.did
         deck_note_type = build_deck_note_type(deck_id, model_id)
         return deck_note_type
 
     # given a note being edited and the AddCards dialog, build DNT (used when adding a new note)
-    def build_deck_note_type_from_addcard(self, note: anki.notes.Note, add_cards: aqt.addcards.AddCards) -> DeckNoteType:
+    # note: anki.notes.Note
+    # add_cards: aqt.addcards.AddCards
+    def build_deck_note_type_from_addcard(self, note, add_cards) -> DeckNoteType:
         model_id = note.mid
         deck_id = add_cards.deckChooser.selectedId()
         deck_note_type = build_deck_note_type(deck_id, model_id)

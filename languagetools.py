@@ -195,7 +195,7 @@ class LanguageTools():
         return result
 
 
-    def get_populated_decks(self) -> Dict[str, Deck]:
+    def get_populated_decks(self) -> Dict[str, deck_utils.Deck]:
         deck_note_type_field_list: List[deck_utils.DeckNoteTypeField] = self.get_populated_dntf()
         deck_map = {}
         for deck_note_type_field in deck_note_type_field_list:
@@ -205,7 +205,7 @@ class LanguageTools():
             deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
-    def get_notes_for_deck_note_type(self, deck_note_type: DeckNoteType, sample_size):
+    def get_notes_for_deck_note_type(self, deck_note_type: deck_utils.DeckNoteType, sample_size):
         deck_id = deck_note_type.deck_id
         model_id = deck_note_type.model_id
         sql_query = f'SELECT notes.id FROM notes INNER JOIN cards ON notes.id = cards.nid WHERE notes.mid={model_id} AND cards.did={deck_id} ORDER BY RANDOM() LIMIT {sample_size}'
@@ -389,13 +389,13 @@ class LanguageTools():
         del self.config[constants.CONFIG_BATCH_TRANSLITERATION][model_name][deck_name][field_name]
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    def get_batch_translation_settings(self, deck_note_type: DeckNoteType):
+    def get_batch_translation_settings(self, deck_note_type: deck_utils.DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
 
-    def get_batch_transliteration_settings(self, deck_note_type: DeckNoteType):
+    def get_batch_transliteration_settings(self, deck_note_type: deck_utils.DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
 
@@ -425,7 +425,7 @@ class LanguageTools():
         del self.config[constants.CONFIG_BATCH_AUDIO][model_name][deck_name][field_name]
         aqt.mw.addonManager.writeConfig(__name__, self.config)
 
-    def get_batch_audio_settings(self, deck_note_type: DeckNoteType):
+    def get_batch_audio_settings(self, deck_note_type: deck_utils.DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name
 
@@ -627,7 +627,7 @@ class LanguageTools():
         return translation_options
 
 
-    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> deck_utils.DeckNoteTypeField:
+    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: deck_utils.DeckNoteType, field_index) -> deck_utils.DeckNoteTypeField:
         model = aqt.mw.col.models.get(deck_note_type.model_id)
         fields = model['flds']
         field_name = fields[field_index]['name']
