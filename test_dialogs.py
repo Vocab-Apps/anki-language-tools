@@ -8,6 +8,7 @@ import languagetools
 import constants
 import testing_utils
 import deck_utils
+import errors
 
 def assert_combobox_items_equal(combobox, expected_items):
     combobox_items = []
@@ -75,8 +76,8 @@ class TestConfigGenerator():
             self.model_id: {
                 'name': self.model_name,
                 'flds': [
-                    {'name': self.field_english},
                     {'name': self.field_chinese},
+                    {'name': self.field_english},
                     {'name': self.field_sound}
                 ]
             }
@@ -122,7 +123,10 @@ def test_add_audio(qtbot):
     # ------------------------------------
     languagetools_config = config_gen.get_config_batch_audio()
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
-    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)    
+    anki_utils.models = config_gen.get_model_map()
+    anki_utils.decks = config_gen.get_deck_map()    
+    deckutils = deck_utils.DeckUtils(anki_utils)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)    
     mock_language_tools.initialize()
 
     add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
@@ -138,12 +142,15 @@ def test_add_audio(qtbot):
     # -----------------------------------------------
     languagetools_config = config_gen.get_config_no_language_mapping()
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
-    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
+    anki_utils.models = config_gen.get_model_map()
+    anki_utils.decks = config_gen.get_deck_map()    
+    deckutils = deck_utils.DeckUtils(anki_utils)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
     mock_language_tools.initialize()
 
     # add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     testcase_instance = unittest.TestCase()
-    testcase_instance.assertRaises(languagetools.LanguageMappingError, dialogs.AddAudioDialog, mock_language_tools, deck_note_type, note_id_list)
+    testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.AddAudioDialog, mock_language_tools, deck_note_type, note_id_list)
 
     # only uncomment if you want to see the dialog come up
     # add_audio_dialog.exec_()
