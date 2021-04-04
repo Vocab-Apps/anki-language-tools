@@ -11,7 +11,7 @@ import anki.hooks
 from . import constants
 from . import editor
 from . import dialogs
-# from .languagetools import DeckNoteTypeField, build_deck_note_type_field
+from . import deck_utils
 
 
 def init(languagetools):
@@ -27,7 +27,7 @@ def init(languagetools):
     def show_yomichan_integration():
         dialogs.yomichan_dialog(languagetools)
 
-    def show_change_language(deck_note_type_field: DeckNoteTypeField):
+    def show_change_language(deck_note_type_field: deck_utils.DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
 
         if current_language == None:
@@ -67,7 +67,7 @@ def init(languagetools):
         text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Transliteration', textFormat="rich")
 
-    def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: DeckNoteTypeField):
+    def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: deck_utils.DeckNoteTypeField):
         # choose translation service
         translation_options = languagetools.get_translation_options(source_language, target_language)
 
@@ -80,7 +80,7 @@ def init(languagetools):
         languagetools.add_inline_translation(deck_note_type_field, chosen_option, target_language)
         editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, chosen_option)
 
-    def disable_inline_translation(note_editor: aqt.editor.Editor, deck_note_type_field: DeckNoteTypeField):
+    def disable_inline_translation(note_editor: aqt.editor.Editor, deck_note_type_field: deck_utils.DeckNoteTypeField):
         languagetools.remove_inline_translations(deck_note_type_field)
         editor.remove_inline_translation_changes(languagetools, note_editor, deck_note_type_field)
 
@@ -108,7 +108,7 @@ def init(languagetools):
             return
         deck_id = card.did
 
-        deck_note_type_field = build_deck_note_type_field(deck_id, model_id, field_name)
+        deck_note_type_field = languagetools.deck_utils.build_deck_note_type_field(deck_id, model_id, field_name)
         language = languagetools.get_language(deck_note_type_field)
 
         # check whether a language is set
