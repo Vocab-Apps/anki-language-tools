@@ -90,6 +90,11 @@ class TestConfigGenerator():
             }
         }
 
+    def get_deckid_modelid_pairs(self):
+        return [
+            [self.deck_id, self.model_id]
+        ]
+
 
 def test_add_audio(qtbot):
     # pytest test_dialogs.py -rPP -k test_add_audio
@@ -183,23 +188,22 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
 
 
 def test_language_mapping(qtbot):
+    # pytest test_dialogs.py -rPP -k test_language_mapping
 
-    config = {}
-    mock_ankiutils = testing_utils.MockAnkiUtils(config) 
+    config_gen = TestConfigGenerator()
+
     mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
+    languagetools_config = config_gen.get_config_no_language_mapping()
+    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
+    anki_utils.models = config_gen.get_model_map()
+    anki_utils.decks = config_gen.get_deck_map()    
+    anki_utils.deckid_modelid_pairs = config_gen.get_deckid_modelid_pairs()
+    deckutils = deck_utils.DeckUtils(anki_utils)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
+    mock_language_tools.initialize()
 
-    mock_languagetools = languagetools.LanguageTools(mock_ankiutils, mock_cloudlanguagetools)
+    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
 
-    deck_id_1 = 42001
-    model_id_1 = 43001
-    mock_ankiutils.deckid_modelid_pairs = [[deck_id_1, model_id_1]]
-    mock_ankiutils.models = {
-        model_id_1: {
-            'flds': [
-                {'name': 'English Definition'},
-                {'name': 'Chinese Word'}
-            ]
-        }
-    }
+    mapping_dialog.exec_()
 
-    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_languagetools)
+
