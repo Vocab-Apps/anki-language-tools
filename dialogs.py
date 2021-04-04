@@ -9,11 +9,13 @@ import aqt.qt
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 if hasattr(sys, '_pytest_mode'):
-    from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     import constants
+    import deck_utils
+    import languagetools.LanguageTools
 else:
-    from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     from . import constants
+    from . import deck_utils
+    from .languagetools import LanguageTools
 
 
 def get_header_label(text):
@@ -95,7 +97,7 @@ class NoteTableModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
 class BatchConversionDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list, transformation_type):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list, transformation_type):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
@@ -511,7 +513,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
 class AddAudioDialog(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
@@ -723,7 +725,7 @@ class AddAudioDialog(aqt.qt.QDialog):
 
 
 class NoteSettingsDialogBase(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType):
         super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
@@ -937,7 +939,7 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
 
 
 class NoteSettingsDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType):
         super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
 
     def get_header_text(self):
@@ -1022,7 +1024,7 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
         aqt.utils.tooltip(f'Saved Settings')
 
 class RunRulesDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: DeckNoteType, note_id_list):
+    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list):
         super(RunRulesDialog, self).__init__(languagetools, deck_note_type)
         self.note_id_list = note_id_list
         self.target_field_enabled_map = {}
@@ -1502,7 +1504,7 @@ class LanguageMappingDialog_UI(object):
 
         self.autodetect_in_progress = False
 
-    def setupUi(self, Dialog, deck_map: Dict[str, Deck]):
+    def setupUi(self, Dialog, deck_map: Dict[str, deck_utils.Deck]):
         Dialog.setObjectName("Dialog")
         Dialog.resize(700, 800)
 
@@ -1580,7 +1582,7 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(self.buttonBox)
 
 
-    def layoutDecks(self, deck_name, deck: Deck):
+    def layoutDecks(self, deck_name, deck: deck_utils.Deck):
         layout = QtWidgets.QVBoxLayout()
 
         deckWidgets = LanguageMappingDeckWidgets()
@@ -1626,7 +1628,7 @@ class LanguageMappingDialog_UI(object):
         return layout
                         
 
-    def layoutNoteTypes(self, layout, deck_name, note_type_name, dntf_list: List[DeckNoteTypeField]):
+    def layoutNoteTypes(self, layout, deck_name, note_type_name, dntf_list: List[deck_utils.DeckNoteTypeField]):
         noteTypeWidgets = LanguageMappingNoteTypeWidgets()
         self.deckNoteTypeWidgetMap[deck_name][note_type_name] = noteTypeWidgets
         self.fieldWidgetMap[deck_name][note_type_name] = {}
@@ -1674,7 +1676,7 @@ class LanguageMappingDialog_UI(object):
         layout.addLayout(noteTypeWidgets.field_info)
 
 
-    def layoutField(self, row:int, deck_note_type_field: DeckNoteTypeField, gridLayout: QtWidgets.QGridLayout):
+    def layoutField(self, row:int, deck_note_type_field: deck_utils.DeckNoteTypeField, gridLayout: QtWidgets.QGridLayout):
 
         fieldWidgets = LanguageMappingFieldWidgets()
         self.fieldWidgetMap[deck_note_type_field.deck_note_type.deck_name][deck_note_type_field.deck_note_type.model_name][deck_note_type_field.field_name] = fieldWidgets
@@ -1725,7 +1727,7 @@ class LanguageMappingDialog_UI(object):
             # not set
             comboBox.setCurrentIndex(len(self.language_name_list) - 1)
 
-    def fieldLanguageIndexChanged(self, comboBox, deck_note_type_field: DeckNoteTypeField, currentIndex):
+    def fieldLanguageIndexChanged(self, comboBox, deck_note_type_field: deck_utils.DeckNoteTypeField, currentIndex):
         # print(f'fieldLanguageIndexChanged: {deck_note_type_field}')
         language_code = None
         if currentIndex < len(self.language_code_list):
@@ -1737,7 +1739,7 @@ class LanguageMappingDialog_UI(object):
         if not self.autodetect_in_progress:
             self.enableApplyButton()
 
-    def showFieldSamples(self, deck_note_type_field: DeckNoteTypeField):
+    def showFieldSamples(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
         if len(field_samples) == 0:
             aqt.utils.showInfo('No usable field data found', title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich', parent=self.dialog)
