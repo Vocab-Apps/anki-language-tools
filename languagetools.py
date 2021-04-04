@@ -21,142 +21,18 @@ import anki.cards
 if hasattr(sys, '_pytest_mode'):
     import constants
     import version
+    import errors
 else:
     from . import constants
     from . import version
-
-# util functions
-
-class AnkiItemNotFoundError(Exception):
-    pass
-
-class AnkiNoteEditorError(Exception):
-    pass
-
-class LanguageMappingError(Exception):
-    pass
-
-class LanguageToolsRequestError(Exception):
-    pass
-
-class AudioLanguageToolsRequestError(LanguageToolsRequestError):
-    pass
-
-
-class DeckNoteType():
-    def __init__(self, deck_id, deck_name, model_id, model_name):
-        self.deck_id = deck_id
-        self.deck_name = deck_name
-        self.model_id = model_id 
-        self.model_name = model_name
-    def __str__(self):
-        return f'{self.model_name} / {self.deck_name}'
-
-    def __eq__(self, other):
-        if type(other) is type(self):
-            return self.deck_id == other.deck_id and self.model_id == other.model_id
-        else:
-            return False    
-
-    def __hash__(self):
-        return hash((self.deck_id, self.model_id))
-
-    def get_field_names(self) -> List[str]:
-        model = aqt.mw.col.models.get(self.model_id)
-        fields = model['flds']
-        field_names = [x['name'] for x in fields]
-        return field_names
-
-
-class DeckNoteTypeField():
-    def __init__(self, deck_note_type, field_name):
-        self.deck_note_type = deck_note_type
-        self.field_name = field_name
-
-    def get_model_name(self):
-        return self.deck_note_type.model_name
-
-    def get_deck_name(self):
-        return self.deck_note_type.deck_name
-
-    def __str__(self):
-        return f'{self.get_model_name()} / {self.get_deck_name()} / {self.field_name}'
-
-    def __eq__(self, other):
-        if type(other) is type(self):
-            return self.deck_note_type == other.deck_note_type and self.field_name == other.field_name
-        else:
-            return False    
-
-    def __hash__(self):
-        return hash((self.deck_note_type, self.field_name))
-
-class Deck():
-    def __init__(self):
-        self.note_type_map = {}
-
-    def add_deck_note_type_field(self, deck_note_type_field: DeckNoteTypeField):
-        note_type = deck_note_type_field.get_model_name()
-        if note_type not in self.note_type_map:
-            self.note_type_map[note_type] = []
-        self.note_type_map[note_type].append(deck_note_type_field)
-
-def build_deck_note_type_from_note_card(note: anki.notes.Note, card: anki.cards.Card) -> DeckNoteType:
-    model_id = note.mid
-    deck_id = card.did
-    deck_note_type = build_deck_note_type(deck_id, model_id)
-    return deck_note_type
-
-def build_deck_note_type_from_addcard(note: anki.notes.Note, add_cards: aqt.addcards.AddCards) -> DeckNoteType:
-    model_id = note.mid
-    deck_id = add_cards.deckChooser.selectedId()
-    deck_note_type = build_deck_note_type(deck_id, model_id)
-    return deck_note_type    
-
-def build_deck_note_type_from_note(note: anki.notes.Note) -> DeckNoteType:
-    model_id = note.mid
-    deck_id = note.model()["did"]
-
-    deck_note_type = build_deck_note_type(deck_id, model_id)
-
-    return deck_note_type
-
-def build_deck_note_type(deck_id, model_id) -> DeckNoteType:
-    model = aqt.mw.col.models.get(model_id)
-    if model == None:
-        raise AnkiItemNotFoundError(f'Note Type id {model_id} not found')
-    model_name = model['name']
-    deck = aqt.mw.col.decks.get(deck_id)
-    if deck == None:
-        raise AnkiItemNotFoundError(f'Deck id {deck_id} not found')
-    deck_name = deck['name']
-    deck_note_type = DeckNoteType(deck_id, deck_name, model_id, model_name)
-    return deck_note_type
-
-def build_deck_note_type_field(deck_id, model_id, field_name) -> DeckNoteTypeField:
-    deck_note_type = build_deck_note_type(deck_id, model_id)
-    return DeckNoteTypeField(deck_note_type, field_name)
-
-def build_deck_note_type_field_from_names(deck_name, model_name, field_name) -> DeckNoteTypeField:
-    # get the deck_id from the deck_name
-    # get the model_id from the model_name
-
-    model_id = aqt.mw.col.models.id_for_name(model_name)
-    deck_id = aqt.mw.col.decks.id_for_name(deck_name)
-
-    if model_id == None:
-        raise AnkiItemNotFoundError(f'Note Type {model_name} not found')
-    if deck_id == None:
-        raise AnkiItemNotFoundError(f'Deck {deck_name} not found')
-
-    deck_note_type = build_deck_note_type(deck_id, model_id)
-    return DeckNoteTypeField(deck_note_type, field_name)
+    from . import errors
 
 
 class LanguageTools():
 
-    def __init__(self, anki_utils, cloud_language_tools):
+    def __init__(self, anki_utils, deck_utils, cloud_language_tools):
         self.anki_utils = anki_utils
+        self.deck_utils = deck_utils
         self.cloud_language_tools = cloud_language_tools
         self.config = self.anki_utils.get_config()
 
@@ -306,12 +182,12 @@ class LanguageTools():
         for entry in populated_set:
             deck_id = entry[0]
             model_id = entry[1]
-            deck_note_type = build_deck_note_type(deck_id, model_id)
+            deck_note_type = self.deck_utils.build_deck_note_type(deck_id, model_id)
             model = self.anki_utils.get_model(model_id)
             fields = model['flds']
             for field in fields:
                 field_name = field['name']
-                deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+                deck_note_type_field = self.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
                 result.append(deck_note_type_field)
 
         return result
@@ -323,7 +199,7 @@ class LanguageTools():
         for deck_note_type_field in deck_note_type_field_list:
             deck_name = deck_note_type_field.deck_note_type.deck_name
             if deck_name not in deck_map:
-                deck_map[deck_name] = Deck()
+                deck_map[deck_name] = self.deck_utils.new_deck()
             deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
@@ -357,7 +233,7 @@ class LanguageTools():
             note = aqt.mw.col.getNote(note_id)
             if field_name not in note:
                 # field was removed
-                raise AnkiItemNotFoundError(f'field {field_name} not found')
+                raise errors.AnkiItemNotFoundError(f'field {field_name} not found')
             original_field_value = note[field_name]
             field_value = stripImagesRe.sub('', original_field_value)
             field_value = anki.utils.htmlToTextLine(field_value)
@@ -386,9 +262,9 @@ class LanguageTools():
                     if field_language_code == language_code:
                         try:
                             # found the language we need
-                            deck_note_type_field = build_deck_note_type_field_from_names(deck_name, model_name, field_name)
+                            deck_note_type_field = self.deck_utils.build_deck_note_type_field_from_names(deck_name, model_name, field_name)
                             dntf_list.append(deck_note_type_field)
-                        except AnkiItemNotFoundError as error:
+                        except errors.AnkiItemNotFoundError as error:
                             # this deck probably got deleted
                             pass
 
@@ -397,7 +273,7 @@ class LanguageTools():
             try:
                 field_samples = self.get_field_samples(dntf, sample_size)
                 all_field_samples.extend(field_samples)
-            except AnkiItemNotFoundError as error:
+            except errors.AnkiItemNotFoundError as error:
                 # might be a field missing
                 pass                
         
@@ -596,12 +472,12 @@ class LanguageTools():
         if response.status_code == 400:
             data = json.loads(response.content)
             error_text = f"Could not load translation: {data['error']}"
-            raise LanguageToolsRequestError(error_text)
+            raise errors.LanguageToolsRequestError(error_text)
         if response.status_code == 401:
             data = json.loads(response.content)
-            raise LanguageToolsRequestError(data['error'])
+            raise errors.LanguageToolsRequestError(data['error'])
         error_text = f"Could not load translation: {response.text}"
-        raise LanguageToolsRequestError(error_text)
+        raise errors.LanguageToolsRequestError(error_text)
 
     def get_translation(self, source_text, translation_option):
         return self.interpret_translation_response_async(self.get_translation_async(source_text, translation_option))
@@ -633,13 +509,13 @@ class LanguageTools():
         if response.status_code == 400:
             data = json.loads(response.content)
             error_text = f"Could not load transliteration: {data['error']}"
-            raise LanguageToolsRequestError(error_text)
+            raise errors.LanguageToolsRequestError(error_text)
             return error_text
         if response.status_code == 401:
             data = json.loads(response.content)
-            raise LanguageToolsRequestError(data['error'])
+            raise errors.LanguageToolsRequestError(data['error'])
         error_text = f"Could not load transliteration: {response.text}"
-        raise LanguageToolsRequestError(error_text)
+        raise errors.LanguageToolsRequestError(error_text)
 
     def get_transliteration(self, source_text, service, transliteration_key):
         if not self.check_api_key_valid():
@@ -714,7 +590,7 @@ class LanguageTools():
             error_msg = response_data
             if 'error' in response_data:
                 error_msg = 'Error: ' + response_data['error']
-            raise AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
+            raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
 
     def get_tts_voice_list(self):
         response = requests.get(self.base_url + '/voice_list')
@@ -753,5 +629,5 @@ class LanguageTools():
         model = aqt.mw.col.models.get(deck_note_type.model_id)
         fields = model['flds']
         field_name = fields[field_index]['name']
-        return DeckNoteTypeField(deck_note_type, field_name)
+        return self.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
 
