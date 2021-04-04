@@ -7,15 +7,7 @@ import dialogs
 import languagetools
 import constants
 import testing_utils
-
-class MockDeckNoteType(languagetools.DeckNoteType):
-    def __init__(self, deck_id, deck_name, model_id, model_name, all_fields):
-        languagetools.DeckNoteType.__init__(self, deck_id, deck_name, model_id, model_name)
-        self.all_fields = all_fields
-    
-    def get_field_names(self):
-        return self.all_fields
-
+import deck_utils
 
 def assert_combobox_items_equal(combobox, expected_items):
     combobox_items = []
@@ -28,6 +20,8 @@ def assert_combobox_items_equal(combobox, expected_items):
 
 class TestConfigGenerator():
     def __init__(self):
+        self.deck_id = 42001
+        self.model_id = 43001
         self.model_name = 'note-type'
         self.deck_name = 'deck 1'
         self.field_chinese = 'Chinese'
@@ -40,6 +34,7 @@ class TestConfigGenerator():
 
     def get_default_config(self):
         languagetools_config = {
+            'api_key': 'yoyo',
             constants.CONFIG_DECK_LANGUAGES: {
                 self.model_name: {
                     self.deck_name: {
@@ -75,8 +70,28 @@ class TestConfigGenerator():
         }
         return base_config
 
+    def get_model_map(self):
+        return {
+            self.model_id: {
+                'name': self.model_name,
+                'flds': [
+                    {'name': self.field_english},
+                    {'name': self.field_chinese},
+                    {'name': self.field_sound}
+                ]
+            }
+        }
+    
+    def get_deck_map(self):
+        return {
+            self.deck_id: {
+                'name': self.deck_name
+            }
+        }
+
+
 def test_add_audio(qtbot):
-    # pytest test_dialogs.py -rPP -k test_add_audio_regular
+    # pytest test_dialogs.py -rPP -k test_add_audio
 
     config_gen = TestConfigGenerator()
     languagetools_config = config_gen.get_default_config()
@@ -86,8 +101,13 @@ def test_add_audio(qtbot):
     # ----------------------------------------------
 
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
-    mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
-    deck_note_type = MockDeckNoteType(1, "deck 1", 2, "note-type", config_gen.all_fields) 
+    deckutils = deck_utils.DeckUtils(anki_utils)
+    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
+    mock_language_tools.initialize()
+
+    anki_utils.models = config_gen.get_model_map()
+    anki_utils.decks = config_gen.get_deck_map()
+    deck_note_type = deckutils.build_deck_note_type(config_gen.deck_id, config_gen.model_id)
 
     note_id_list = [42, 43]
     add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
@@ -103,6 +123,7 @@ def test_add_audio(qtbot):
     languagetools_config = config_gen.get_config_batch_audio()
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
     mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)    
+    mock_language_tools.initialize()
 
     add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     add_audio_dialog.setupUi()
@@ -118,6 +139,7 @@ def test_add_audio(qtbot):
     languagetools_config = config_gen.get_config_no_language_mapping()
     anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
     mock_language_tools = languagetools.LanguageTools(anki_utils, mock_cloudlanguagetools)
+    mock_language_tools.initialize()
 
     # add_audio_dialog = dialogs.AddAudioDialog(mock_language_tools, deck_note_type, note_id_list)
     testcase_instance = unittest.TestCase()

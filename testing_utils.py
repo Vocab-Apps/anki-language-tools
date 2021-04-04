@@ -23,6 +23,9 @@ class MockAnkiUtils():
         # should return a dict which has flds
         return self.models[model_id]
 
+    def get_deck(self, deck_id):
+        return self.decks[deck_id]
+
 class MockCloudLanguageTools():
     def __init__(self):
         self.language_list = {
@@ -54,3 +57,8 @@ class MockCloudLanguageTools():
 
     def get_transliteration_language_list(self):
         return self.transliteration_language_list
+
+    def api_key_validate_query(self, api_key):
+        return {
+            'key_valid': True
+        }     

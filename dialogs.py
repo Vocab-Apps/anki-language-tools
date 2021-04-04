@@ -11,10 +11,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 if hasattr(sys, '_pytest_mode'):
     import constants
     import deck_utils
-    import languagetools.LanguageTools
+    import errors
+    from languagetools import LanguageTools
 else:
     from . import constants
     from . import deck_utils
+    from . import errors
     from .languagetools import LanguageTools
 
 
@@ -520,7 +522,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.note_id_list = note_id_list
 
         # get field list
-        field_names = self.deck_note_type.get_field_names()
+        field_names = self.languagetools.deck_utils.get_field_names(self.deck_note_type)
 
         self.voice_selection_settings = languagetools.get_voice_selection_settings()
         self.batch_audio_settings = languagetools.get_batch_audio_settings(self.deck_note_type)
@@ -539,7 +541,7 @@ class AddAudioDialog(aqt.qt.QDialog):
 
         # retain fields which have a language set
         for field_name in field_names:
-            deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+            deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
             language = self.languagetools.get_language(deck_note_type_field)
 
             if self.languagetools.language_available_for_translation(language):
@@ -553,7 +555,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         # do we have any language mappings at all ? 
         if len(self.from_field_name_list) == 0:
             error_message = f'Language Mapping not done for {self.deck_note_type}'
-            raise LanguageMappingError(error_message)
+            raise errors.LanguageMappingError(error_message)
 
         
     def setupUi(self):
