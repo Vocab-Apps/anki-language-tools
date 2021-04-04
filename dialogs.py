@@ -11,11 +11,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 if hasattr(sys, '_pytest_mode'):
     from languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     import constants
-    import utils
 else:
     from .languagetools import DeckNoteType, Deck, DeckNoteTypeField, LanguageTools, build_deck_note_type_from_note_card, LanguageToolsRequestError, LanguageMappingError
     from . import constants
-    from . import utils
 
 
 def get_header_label(text):
@@ -234,7 +232,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
             constants.TransformationType.Transliteration: 'Load Transliterations'
         }        
         self.load_translations_button.setText(self.load_button_text_map[self.transformation_type])
-        self.load_translations_button.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+        self.load_translations_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         gridlayout.addWidget(self.load_translations_button, 0, 3, 1, 2)
 
         if self.transformation_type == constants.TransformationType.Translation:
@@ -278,7 +276,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         
         vlayout.addWidget(buttonBox)
@@ -473,13 +471,13 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 i += 1
                 aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
             aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
-            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface)))
+            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
         except LanguageToolsRequestError as e:
             self.to_field_data.append('')
             self.load_errors.append(e)
 
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface)))
+        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText(self.load_button_text_map[self.transformation_type]))
 
 
@@ -599,7 +597,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         vlayout.addWidget(buttonBox)
 
@@ -653,7 +651,7 @@ class AddAudioDialog(aqt.qt.QDialog):
             voice_description = self.voice['voice_description']
             self.voice_label.setText('<b>' + voice_description + '</b>')
             self.applyButton.setEnabled(True)
-            self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+            self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         else:
             language_name = self.languagetools.get_language_name(from_language)
             self.voice_label.setText(f'No Voice setup for <b>{language_name}</b>. Please go to Anki main window, ' +
@@ -976,7 +974,7 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
         self.applyButton = buttonBox.addButton("Save Settings", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
   
         # wire events
@@ -1006,7 +1004,7 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
     
     def enable_apply_button(self):
         self.applyButton.setEnabled(True)
-        self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+        self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
 
 
     def accept(self):
@@ -1061,9 +1059,9 @@ class RunRulesDialog(NoteSettingsDialogBase):
         # buttom buttons
         buttonBox = QtWidgets.QDialogButtonBox()
         self.applyButton = buttonBox.addButton("Apply Rules", QtWidgets.QDialogButtonBox.AcceptRole)
-        self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+        self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
 
         vlayout.addStretch()        
@@ -1357,7 +1355,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.applyButton = buttonBox.addButton("Save Voice Selection", QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
 
         # wire events
@@ -1416,7 +1414,7 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
                 self.voice_mapping_changes[self.language_code] = voice
                 # print(f'voice_mapping_changes: {self.voice_mapping_changes}')
                 self.applyButton.setEnabled(True)
-                self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+                self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
 
     def load_field_samples(self):
         # get sample
@@ -1541,7 +1539,7 @@ class LanguageMappingDialog_UI(object):
         self.autodetect_button = QtWidgets.QPushButton()
         self.autodetect_button.setText('Run Auto Detection\n(all decks)')
         self.autodetect_button.setFont(font2)
-        self.autodetect_button.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+        self.autodetect_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.autodetect_button.pressed.connect(self.runLanguageDetection)
         hlayout_global.addWidget(self.autodetect_button)
 
@@ -1576,7 +1574,7 @@ class LanguageMappingDialog_UI(object):
         self.applyButton = self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
         self.disableApplyButton()
         cancelButton = self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        cancelButton.setStyleSheet(utils.get_red_stylesheet(self.languagetools.anki_interface))
+        cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
         self.topLevel.addWidget(self.buttonBox)
@@ -1734,7 +1732,7 @@ class LanguageMappingDialog_UI(object):
             language_code = self.language_code_list[currentIndex]
         self.language_mapping_changes[deck_note_type_field] = language_code
         # change stylesheet of combobox
-        comboBox.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface) + "combobox-popup: 0;")
+        comboBox.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet() + "combobox-popup: 0;")
         # enable apply button
         if not self.autodetect_in_progress:
             self.enableApplyButton()
@@ -1854,7 +1852,7 @@ class LanguageMappingDialog_UI(object):
         self.applyButton.setDisabled(True)
 
     def enableApplyButton(self):
-        self.applyButton.setStyleSheet(utils.get_green_stylesheet(self.languagetools.anki_interface))
+        self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.applyButton.setDisabled(False)
 
 

@@ -16,7 +16,6 @@ import anki.models
 # addon imports
 from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError, AnkiNoteEditorError
 from . import constants
-from . import utils
 
 
 def get_field_id(deck_note_type_field: DeckNoteTypeField):
