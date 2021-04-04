@@ -123,7 +123,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         # retain fields which have a language set
         for field_name in field_names:
-            deck_note_type_field = DeckNoteTypeField(deck_note_type, field_name)
+            deck_note_type_field = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
             language = self.languagetools.get_language(deck_note_type_field)
 
             if self.languagetools.language_available_for_translation(language):
@@ -1696,7 +1696,7 @@ class LanguageMappingDialog_UI(object):
         self.setFieldLanguageIndex(fieldWidgets.field_language, language_set)
 
         # listen to events
-        def get_currentIndexChangedLambda(comboBox, deck_note_type_field: DeckNoteTypeField):
+        def get_currentIndexChangedLambda(comboBox, deck_note_type_field: deck_utils.DeckNoteTypeField):
             def callback(currentIndex):
                 self.fieldLanguageIndexChanged(comboBox, deck_note_type_field, currentIndex)
             return callback
@@ -1710,7 +1710,7 @@ class LanguageMappingDialog_UI(object):
         fieldWidgets.field_samples_button.setObjectName("field_samples_button")
         fieldWidgets.field_samples_button.setText('Show Samples')
 
-        def getShowFieldSamplesLambda(deck_note_type_field: DeckNoteTypeField):
+        def getShowFieldSamplesLambda(deck_note_type_field: deck_utils.DeckNoteTypeField):
             def callback():
                 self.showFieldSamples(deck_note_type_field)
             return callback
@@ -1806,7 +1806,7 @@ class LanguageMappingDialog_UI(object):
             self.autodetect_button.setEnabled(False)
             self.disableApplyButton()
 
-            dtnf_list: List[DeckNoteTypeField] = self.languagetools.get_populated_dntf()
+            dtnf_list: List[deck_utils.DeckNoteTypeField] = self.languagetools.get_populated_dntf()
             progress_max = 0
             for dntf in dtnf_list:
                 deck_name = dntf.deck_note_type.deck_name
