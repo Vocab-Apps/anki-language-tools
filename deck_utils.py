@@ -129,3 +129,10 @@ class DeckUtils():
         fields = model['flds']
         field_names = [x['name'] for x in fields]
         return field_names        
+
+    # given a DNT and field index, return DNTF
+    def get_dntf_from_fieldindex(self, deck_note_type: DeckNoteType, field_index) -> DeckNoteTypeField:
+        model = self.anki_utils.get_model(deck_note_type.model_id)
+        fields = model['flds']
+        field_name = fields[field_index]['name']
+        return self.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)        

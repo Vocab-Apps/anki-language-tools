@@ -14,8 +14,10 @@ import anki.notes
 import anki.models
 
 # addon imports
-from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError, AnkiNoteEditorError
+# from .languagetools import LanguageTools, DeckNoteTypeField, build_deck_note_type, build_deck_note_type_from_note, build_deck_note_type_from_note_card, build_deck_note_type_from_addcard, LanguageToolsRequestError, AnkiNoteEditorError
 from . import constants
+from . import errors
+from .languagetools import LanguageTools
 
 
 def get_field_id(deck_note_type_field: DeckNoteTypeField):
@@ -73,7 +75,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
             try:
                 result_text = interpret_response_fn(transformation_response)
                 apply_field_value(field_index, result_text)
-            except LanguageToolsRequestError as e:
+            except errors.LanguageToolsRequestError as e:
                 aqt.utils.showCritical(str(e), title=constants.ADDON_NAME)
         return apply_transformation
 
@@ -109,14 +111,14 @@ def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field
         def request_audio():
             try:
                 return languagetools.generate_audio_tag_collection(field_value, voice)
-            except LanguageToolsRequestError as err:
+            except errors.LanguageToolsRequestError as err:
                 return {'error': str(err)}
         return request_audio
 
     def interpret_response_fn(response):
         if 'error' in response:
             # just re-raise
-            raise LanguageToolsRequestError('Could not generate audio: ' + response['error'])
+            raise errors.LanguageToolsRequestError('Could not generate audio: ' + response['error'])
         sound_tag = response['sound_tag']
         full_filename = response['full_filename']
         if sound_tag == None:
@@ -134,16 +136,16 @@ def editor_get_decknotetype(editor, languagetools):
         raise languagetools.AnkiNoteEditorError(f'editor.note not found')
 
     if editor.addMode:
-        deck_note_type = build_deck_note_type_from_addcard(note, editor.parentWindow)
+        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_addcard(note, editor.parentWindow)
     else:
-        deck_note_type = build_deck_note_type_from_note_card(note, editor.card)
+        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_note_card(note, editor.card)
 
     return deck_note_type
 
 
 def editor_get_dntf(editor, languagetools, field_index):
     deck_note_type = editor_get_decknotetype(editor, languagetools)
-    deck_note_type_field = languagetools.get_deck_note_type_field_from_fieldindex(deck_note_type, field_index)
+    deck_note_type_field = languagetools.deck_utils.get_dntf_from_fieldindex(deck_note_type, field_index)
     return deck_note_type_field
 
 def init(languagetools):
@@ -170,7 +172,7 @@ def init(languagetools):
 
             field_type ='regular'
             # is this field a sound field ?
-            dntf = DeckNoteTypeField(deck_note_type, field_name)
+            dntf = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
             field_language = languagetools.get_language(dntf)
             if field_language != None:
                 if field_language == constants.SpecialLanguage.sound.name:
@@ -220,10 +222,10 @@ def init(languagetools):
                 # do we have a voice set ?
                 field_language = languagetools.get_language(from_deck_note_type_field)
                 if field_language == None:
-                    raise AnkiNoteEditorError(f'No language set for field {from_deck_note_type_field}')
+                    raise errors.AnkiNoteEditorError(f'No language set for field {from_deck_note_type_field}')
                 voice_selection_settings = languagetools.get_voice_selection_settings()
                 if field_language not in voice_selection_settings:
-                    raise AnkiNoteEditorError(f'No voice set for language {languagetools.get_language_name(field_language)}')
+                    raise errors.AnkiNoteEditorError(f'No voice set for language {languagetools.get_language_name(field_language)}')
                 voice = voice_selection_settings[field_language]
 
                 def play_audio(languagetools, source_text, voice):
@@ -234,7 +236,7 @@ def init(languagetools):
                         filename = languagetools.get_tts_audio(source_text, service, voice_key, {})
                         if filename != None:
                             aqt.sound.av_player.play_file(filename)
-                    except LanguageToolsRequestError as err:
+                    except errors.LanguageToolsRequestError as err:
                         pass
 
                 def play_audio_done(future_result):
@@ -242,7 +244,7 @@ def init(languagetools):
 
                 aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))
 
-            except AnkiNoteEditorError as e:
+            except errors.AnkiNoteEditorError as e:
                 # logging.error('Could not speak', exc_info=True)
                 aqt.utils.showCritical(repr(e))
 
@@ -278,21 +280,21 @@ def init(languagetools):
                     translation_settings = languagetools.get_batch_translation_settings(deck_note_type)
                     relevant_settings = {to_field:value for (to_field,value) in translation_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
                     for to_field, value in relevant_settings.items():
-                        to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
+                        to_deck_note_type_field = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
                         load_translation(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['translation_option'])
 
                     # do we have transliteration rules for this deck_note_type
                     transliteration_settings = languagetools.get_batch_transliteration_settings(deck_note_type)
                     relevant_settings = {to_field:value for (to_field,value) in transliteration_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
                     for to_field, value in relevant_settings.items():
-                        to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
+                        to_deck_note_type_field = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
                         load_transliteration(languagetools, editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
 
                     # do we have any audio rules for this deck_note_type
                     audio_settings = languagetools.get_batch_audio_settings(deck_note_type)
                     relevant_settings = {to_field:from_field for (to_field,from_field) in audio_settings.items() if from_field == from_deck_note_type_field.field_name}
                     for to_field, from_field in relevant_settings.items():
-                        to_deck_note_type_field = DeckNoteTypeField(deck_note_type, to_field)
+                        to_deck_note_type_field = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
                         # get the from language
                         from_language = languagetools.get_language(from_deck_note_type_field)
                         if from_language != None:

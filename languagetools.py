@@ -627,9 +627,4 @@ class LanguageTools():
         return translation_options
 
 
-    def get_deck_note_type_field_from_fieldindex(self, deck_note_type: deck_utils.DeckNoteType, field_index) -> deck_utils.DeckNoteTypeField:
-        model = aqt.mw.col.models.get(deck_note_type.model_id)
-        fields = model['flds']
-        field_name = fields[field_index]['name']
-        return self.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
 
