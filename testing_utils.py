@@ -167,5 +167,6 @@ class TestConfigGenerator():
 
         anki_utils.models = self.get_model_map()
         anki_utils.decks = self.get_deck_map()
+        anki_utils.deckid_modelid_pairs = self.get_deckid_modelid_pairs()
 
         return mock_language_tools

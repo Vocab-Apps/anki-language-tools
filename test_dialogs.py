@@ -69,17 +69,10 @@ def test_add_audio(qtbot):
 def test_add_translation_transliteration_no_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_add_translation_transliteration_no_language_mapping
 
-    config_gen = TestConfigGenerator()
-    languagetools_config = config_gen.get_config_no_language_mapping()
-
-    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
-    anki_utils.models = config_gen.get_model_map()
-    anki_utils.decks = config_gen.get_deck_map()        
-    deckutils = deck_utils.DeckUtils(anki_utils)
-    mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
-    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
     
-    deck_note_type = deckutils.build_deck_note_type(config_gen.deck_id, config_gen.model_id)
+    deck_note_type = mock_language_tools.deck_utils.build_deck_note_type(config_gen.deck_id, config_gen.model_id)
 
     note_id_list = [42, 43]
 
@@ -96,20 +89,11 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
 def test_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_language_mapping
 
-    config_gen = TestConfigGenerator()
-
-    mock_cloudlanguagetools = testing_utils.MockCloudLanguageTools()
-    languagetools_config = config_gen.get_config_no_language_mapping()
-    anki_utils = testing_utils.MockAnkiUtils(languagetools_config)
-    anki_utils.models = config_gen.get_model_map()
-    anki_utils.decks = config_gen.get_deck_map()    
-    anki_utils.deckid_modelid_pairs = config_gen.get_deckid_modelid_pairs()
-    deckutils = deck_utils.DeckUtils(anki_utils)
-    mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
-    mock_language_tools.initialize()
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
 
     mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
 
-    mapping_dialog.exec_()
+    # mapping_dialog.exec_()
 
 
