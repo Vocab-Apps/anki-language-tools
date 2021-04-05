@@ -107,12 +107,18 @@ def test_language_mapping(qtbot):
     assert note_type_label.text() == config_gen.model_name
 
     # look for labels on all 3 fields
-    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}')
-    assert field_label.text() == config_gen.field_chinese
-    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}')
-    assert field_label.text() == config_gen.field_english
-    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_sound}')
-    assert field_label.text() == config_gen.field_sound
+    for field_name in config_gen.all_fields:
+        field_label_obj_name = f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
+        field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, field_label_obj_name)
+        assert field_label.text() == field_name
+
+    # none of the languages should be set
+    for field_name in config_gen.all_fields:
+        field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
+        field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+        assert field_language != None
+        # ensure the "not set" option is selected
+        assert field_language.currentText() == 'Not Set'
 
 
     # mapping_dialog.exec_()

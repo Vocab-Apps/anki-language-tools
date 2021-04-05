@@ -1693,10 +1693,11 @@ class LanguageMappingDialog_UI(object):
         gridLayout.addWidget(fieldWidgets.field_label, row, 0, 1, 1)
 
         fieldWidgets.field_language = QtWidgets.QComboBox(self.layoutWidget)
+        field_language_obj_name = f'field_language_{str(deck_note_type_field)}'
+        fieldWidgets.field_language.setObjectName(field_language_obj_name)
         fieldWidgets.field_language.addItems(self.language_name_list)
         fieldWidgets.field_language.setMaxVisibleItems(15)
         fieldWidgets.field_language.setStyleSheet("combobox-popup: 0;")
-        fieldWidgets.field_language.setObjectName("field_language")
         self.setFieldLanguageIndex(fieldWidgets.field_language, language_set)
 
         # listen to events
