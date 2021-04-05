@@ -1577,6 +1577,7 @@ class LanguageMappingDialog_UI(object):
 
         self.buttonBox = QtWidgets.QDialogButtonBox()
         self.applyButton = self.buttonBox.addButton("Apply", QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setObjectName('apply')
         self.disableApplyButton()
         cancelButton = self.buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
         cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())

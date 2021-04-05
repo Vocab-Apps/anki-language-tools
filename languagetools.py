@@ -318,7 +318,7 @@ class LanguageTools():
                 self.config[constants.CONFIG_WANTED_LANGUAGES] = {}
             self.config[constants.CONFIG_WANTED_LANGUAGES][language] = True
 
-        aqt.mw.addonManager.writeConfig(__name__, self.config)
+        self.anki_utils.write_config(self.config)
 
         if tooltip:
             aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')

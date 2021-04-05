@@ -9,6 +9,9 @@ class MockAnkiUtils():
     def get_config(self):
         return self.config
 
+    def write_config(self, config):
+        self.written_config = config
+
     def get_green_stylesheet(self):
         return constants.GREEN_STYLESHEET
 

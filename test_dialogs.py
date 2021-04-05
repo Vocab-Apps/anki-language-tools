@@ -120,6 +120,25 @@ def test_language_mapping(qtbot):
         # ensure the "not set" option is selected
         assert field_language.currentText() == 'Not Set'
 
+    # now, set languages manually
+    # ---------------------------
+
+    field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
+    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    qtbot.keyClicks(field_language_combobox, 'Chinese')
+    field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
+    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    qtbot.keyClicks(field_language_combobox, 'English')
+
+    apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # ensure configuration has been modified
+    model_name = config_gen.model_name
+    deck_name = config_gen.deck_name
+    assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_chinese] == 'zh_cn'
+    assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_english] == 'en'
+    
 
     # mapping_dialog.exec_()
 
