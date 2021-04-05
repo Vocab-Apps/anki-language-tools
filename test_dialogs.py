@@ -20,7 +20,7 @@ def assert_combobox_items_equal(combobox, expected_items):
     expected_items.sort()
     assert combobox_items == expected_items
 
-
+# https://pytest-qt.readthedocs.io/en/latest/tutorial.html
 
 
 def test_add_audio(qtbot):
@@ -91,6 +91,7 @@ def test_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_language_mapping
 
     # test 1: make sure our deck appears
+    # ----------------------------------
 
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
@@ -102,6 +103,8 @@ def test_language_mapping(qtbot):
     assert deck_frame != None
     deck_name_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'deck_name_{config_gen.deck_name}')
     assert deck_name_label.text() == config_gen.deck_name
+    note_type_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'note_type_name_{config_gen.deck_name}_{config_gen.model_name}')
+    assert note_type_label.text() == config_gen.model_name
 
 
 

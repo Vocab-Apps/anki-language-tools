@@ -1654,7 +1654,7 @@ class LanguageMappingDialog_UI(object):
         font2 = QtGui.QFont()
         font2.setPointSize(fontSize)
         noteTypeWidgets.note_type_name = QtWidgets.QLabel(self.layoutWidget)
-        noteTypeWidgets.note_type_name.setObjectName("note_type_name")
+        noteTypeWidgets.note_type_name.setObjectName(f"note_type_name_{deck_name}_{note_type_name}")
         noteTypeWidgets.note_type_name.setText(note_type_name)
         noteTypeWidgets.note_type_name.setFont(font2)
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_name)
