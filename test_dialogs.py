@@ -2,6 +2,7 @@ import unittest
 import pytest
 import pprint
 import logging
+import PyQt5
 
 import dialogs
 import languagetools
@@ -89,10 +90,20 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
 def test_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_language_mapping
 
+    # test 1: make sure our deck appears
+
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
 
     mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
+    
+    # assert deck name, note type, and 3 fields
+    deck_frame = mapping_dialog.findChild(PyQt5.QtWidgets.QFrame, f'frame_{config_gen.deck_name}')
+    assert deck_frame != None
+    deck_name_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'deck_name_{config_gen.deck_name}')
+    assert deck_name_label.text() == config_gen.deck_name
+
+
 
     # mapping_dialog.exec_()
 

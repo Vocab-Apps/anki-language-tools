@@ -1566,6 +1566,7 @@ class LanguageMappingDialog_UI(object):
         for deck_name, deck in deck_map.items():
             deck_layout = self.layoutDecks(deck_name, deck)
             frame = QtWidgets.QFrame()
+            frame.setObjectName(f'frame_{deck_name}')
             frame.setLayout(deck_layout)
             self.deck_name_widget_map[deck_name] = frame
             all_decks.addWidget(frame)
@@ -1609,7 +1610,7 @@ class LanguageMappingDialog_UI(object):
         font2 = QtGui.QFont()
         font2.setPointSize(fontSize)
         deckWidgets.deck_name = QtWidgets.QLabel(self.layoutWidget)
-        deckWidgets.deck_name.setObjectName("deck_name")
+        deckWidgets.deck_name.setObjectName(f'deck_name_{deck_name}')
         deckWidgets.deck_name.setText(deck_name)
         deckWidgets.deck_name.setFont(font2)
         deckWidgets.deck_info.addWidget(deckWidgets.deck_name)
