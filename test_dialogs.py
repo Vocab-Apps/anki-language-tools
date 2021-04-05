@@ -106,6 +106,13 @@ def test_language_mapping(qtbot):
     note_type_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'note_type_name_{config_gen.deck_name}_{config_gen.model_name}')
     assert note_type_label.text() == config_gen.model_name
 
+    # look for labels on all 3 fields
+    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}')
+    assert field_label.text() == config_gen.field_chinese
+    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}')
+    assert field_label.text() == config_gen.field_english
+    field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_sound}')
+    assert field_label.text() == config_gen.field_sound
 
 
     # mapping_dialog.exec_()

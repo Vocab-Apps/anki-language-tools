@@ -1687,7 +1687,8 @@ class LanguageMappingDialog_UI(object):
         language_set = self.languagetools.get_language(deck_note_type_field)
 
         fieldWidgets.field_label = QtWidgets.QLabel(self.layoutWidget)
-        fieldWidgets.field_label.setObjectName("field_label")
+        field_label_obj_name = f'field_label_{str(deck_note_type_field)}'
+        fieldWidgets.field_label.setObjectName(field_label_obj_name)
         fieldWidgets.field_label.setText(deck_note_type_field.field_name)
         gridLayout.addWidget(fieldWidgets.field_label, row, 0, 1, 1)
 
