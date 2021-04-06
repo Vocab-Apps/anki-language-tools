@@ -1,3 +1,5 @@
+import logging
+
 import constants
 import deck_utils
 import languagetools
@@ -30,6 +32,19 @@ class MockAnkiUtils():
 
     def get_deck(self, deck_id):
         return self.decks[deck_id]
+
+    def run_in_background(self, task_fn, task_done_fn):
+        # just run the two tasks immediately
+        result = task_fn()
+        task_done_fn(result)
+
+    def run_on_main(self, task_fn):
+        # just run the task immediately
+        task_fn()
+
+    def critical_message(self, message, parent):
+        logging.info(f'critical error message: {message}')
+        self.critical_message = message
 
 class MockCloudLanguageTools():
     def __init__(self):

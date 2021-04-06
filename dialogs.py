@@ -1542,6 +1542,7 @@ class LanguageMappingDialog_UI(object):
         font2.setPointSize(14)
         self.autodetect_button = QtWidgets.QPushButton()
         self.autodetect_button.setText('Run Auto Detection\n(all decks)')
+        self.autodetect_button.setObjectName('run_autodetect')
         self.autodetect_button.setFont(font2)
         self.autodetect_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.autodetect_button.pressed.connect(self.runLanguageDetection)
@@ -1804,7 +1805,7 @@ class LanguageMappingDialog_UI(object):
         if self.languagetools.check_api_key_valid() == False:
             return
 
-        aqt.mw.taskman.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
+        self.languagetools.anki_utils.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)
 
     def runLanguageDetectionBackground(self):
         try:
@@ -1836,18 +1837,19 @@ class LanguageMappingDialog_UI(object):
             
             self.setProgressValue(progress_max)
         except:
+            logging.exception('could not run language detection')
             error_message = str(sys.exc_info())
             self.displayErrorMessage(error_message)
 
 
     def setProgressBarMax(self, progress_max):
-        aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setMaximum(progress_max))
+        self.languagetools.anki_utils.run_on_main(lambda: self.autodetect_progressbar.setMaximum(progress_max))
 
     def setProgressValue(self, progress):
-        aqt.mw.taskman.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
+        self.languagetools.anki_utils.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
 
     def displayErrorMessage(self, message):
-        aqt.mw.taskman.run_on_main(lambda: aqt.utils.showCritical(f"Could not run language detection: {message}", title=constants.ADDON_NAME))
+        self.languagetools.anki_utils.run_on_main(lambda: self.languagetools.anki_utils.critical_message(message, self))
 
     def runLanguageDetectionDone(self, future_result):
         self.autodetect_in_progress = False

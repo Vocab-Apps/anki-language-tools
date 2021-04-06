@@ -56,3 +56,12 @@ class AnkiUtils():
 
     def get_deck_id(self, deck_name):
         return aqt.mw.col.decks.id_for_name(deck_name)
+
+    def run_in_background(self, task_fn, task_done_fn):
+        aqt.mw.taskman.run_in_background(task_fn, task_done_fn)
+
+    def run_on_main(self, task_fn):
+        aqt.mw.taskman.run_on_main(task_fn)
+
+    def critical_message(self, message, parent):
+        aqt.utils.showCritical(message, title=constants.ADDON_NAME, parent=parent)

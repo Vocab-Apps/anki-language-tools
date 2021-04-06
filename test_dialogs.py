@@ -90,8 +90,8 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
 def test_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_language_mapping
 
-    # test 1: make sure our deck appears
-    # ----------------------------------
+    # make sure our deck appears
+    # --------------------------
 
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
@@ -138,6 +138,13 @@ def test_language_mapping(qtbot):
     deck_name = config_gen.deck_name
     assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_chinese] == 'zh_cn'
     assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_english] == 'en'
+
+    # run automatic detection
+    # -----------------------
+
+    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
+    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'run_autodetect')
+    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
     
 
     # mapping_dialog.exec_()
