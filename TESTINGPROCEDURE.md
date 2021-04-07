@@ -18,3 +18,5 @@ error situations
 automated tests:
 coverage run -m pytest
 coverage html
+
+coverage erase
