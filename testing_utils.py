@@ -93,6 +93,9 @@ class MockCloudLanguageTools():
             'key_valid': True
         }     
 
+    def language_detection(self, api_key, field_sample):
+        return self.language_detection_result[field_sample[0]]
+
 class TestConfigGenerator():
     def __init__(self):
         self.deck_id = 42001
@@ -176,6 +179,14 @@ class TestConfigGenerator():
             }
         }
     
+    def get_language_detection_result(self):
+        return {
+            '老人家': 'zh_cn',
+            'old people': 'en',
+            '你好': 'zh_cn',
+            'hello': 'en'
+        }
+
     def get_deck_map(self):
         return {
             self.deck_id: {
@@ -192,11 +203,13 @@ class TestConfigGenerator():
         notes_by_id = {
             self.note_id_1: {
                 self.field_chinese: '老人家',
-                self.field_english: 'old people'
+                self.field_english: 'old people',
+                self.field_sound: ''
             },
             self.note_id_2: {
                 self.field_chinese: '你好',
-                self.field_english: 'hello'
+                self.field_english: 'hello',
+                self.field_sound: ''
             }
         }
         notes = {
@@ -220,5 +233,6 @@ class TestConfigGenerator():
         anki_utils.decks = self.get_deck_map()
         anki_utils.deckid_modelid_pairs = self.get_deckid_modelid_pairs()
         anki_utils.notes_by_id, anki_utils.notes = self.get_notes()
+        mock_cloudlanguagetools.language_detection_result = self.get_language_detection_result()
 
         return mock_language_tools

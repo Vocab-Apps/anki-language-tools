@@ -214,7 +214,6 @@ class LanguageTools():
         stripImagesRe = re.compile("(?i)<img[^>]+src=[\"']?([^\"'>]+)[\"']?[^>]*>")
         
         def process_field_value(note_id, field_name):
-            # note = aqt.mw.col.getNote(note_id)
             note = self.anki_utils.get_note_by_id(note_id)
             if field_name not in note:
                 # field was removed
