@@ -141,11 +141,35 @@ def test_language_mapping(qtbot):
 
     # run automatic detection
     # -----------------------
-
+    
     mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
+    # apply button should be disabled
+    apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    assert apply_button.isEnabled() == False
+
     autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'run_autodetect')
     qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
     
+    # assert languages detected
+    field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
+    field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    assert field_language.currentText() == 'Chinese'
+
+    field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
+    field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    assert field_language.currentText() == 'English'
+
+    # apply button should be enabled
+    assert apply_button.isEnabled() == True
+
+    # now , click the apply button
+    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # ensure configuration has been modified
+    model_name = config_gen.model_name
+    deck_name = config_gen.deck_name
+    assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_chinese] == 'zh_cn'
+    assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_english] == 'en'    
 
     # mapping_dialog.exec_()
 
