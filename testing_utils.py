@@ -26,6 +26,16 @@ class MockAnkiUtils():
     def get_deckid_modelid_pairs(self):
         return self.deckid_modelid_pairs
 
+    def get_noteids_for_deck_note_type(self, deck_id, model_id, sample_size):
+
+        note_id_list = self.notes[deck_id][model_id].keys()
+
+        return note_id_list
+
+    def get_note_by_id(self, note_id):
+        return self.notes_by_id[note_id]
+
+
     def get_model(self, model_id):
         # should return a dict which has flds
         return self.models[model_id]
@@ -92,6 +102,10 @@ class TestConfigGenerator():
         self.field_chinese = 'Chinese'
         self.field_english = 'English'
         self.field_sound = 'Sound'
+
+        self.note_id_1 = 42005
+        self.note_id_2 = 43005
+
         self.all_fields = [self.field_chinese, self.field_english, self.field_sound]
 
         self.chinese_voice_key = 'chinese voice'
@@ -174,6 +188,25 @@ class TestConfigGenerator():
             [self.deck_id, self.model_id]
         ]        
 
+    def get_notes(self):
+        notes_by_id = {
+            self.note_id_1: {
+                self.field_chinese: '老人家',
+                self.field_english: 'old people'
+            },
+            self.note_id_2: {
+                self.field_chinese: '你好',
+                self.field_english: 'hello'
+            }
+        }
+        notes = {
+            self.deck_id: {
+                self.model_id: notes_by_id
+            }
+        }
+        return notes_by_id, notes
+
+
     def build_languagetools_instance(self, scenario):
         languagetools_config = self.get_languagetools_config(scenario)
         mock_cloudlanguagetools = MockCloudLanguageTools()
@@ -186,5 +219,6 @@ class TestConfigGenerator():
         anki_utils.models = self.get_model_map()
         anki_utils.decks = self.get_deck_map()
         anki_utils.deckid_modelid_pairs = self.get_deckid_modelid_pairs()
+        anki_utils.notes_by_id, anki_utils.notes = self.get_notes()
 
         return mock_language_tools

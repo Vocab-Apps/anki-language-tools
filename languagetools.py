@@ -199,34 +199,23 @@ class LanguageTools():
             deck_map[deck_name].add_deck_note_type_field(deck_note_type_field)
         return deck_map
             
-    def get_notes_for_deck_note_type(self, deck_note_type: deck_utils.DeckNoteType, sample_size):
+    def get_noteids_for_deck_note_type(self, deck_note_type: deck_utils.DeckNoteType, sample_size):
         deck_id = deck_note_type.deck_id
         model_id = deck_note_type.model_id
-        sql_query = f'SELECT notes.id FROM notes INNER JOIN cards ON notes.id = cards.nid WHERE notes.mid={model_id} AND cards.did={deck_id} ORDER BY RANDOM() LIMIT {sample_size}'
-
-        note_ids = aqt.mw.col.db.all(sql_query)
-        query_strings = []
-        for entry in note_ids:
-            note_id = entry[0]
-            query_string = f'nid:{note_id}'
-            query_strings.append(query_string)
-        
-        final_query_string = ' OR '.join(query_strings)
-
-        notes = aqt.mw.col.find_notes(final_query_string)
-        return notes
+        return self.anki_utils.get_noteids_for_deck_note_type(deck_id, model_id, sample_size)
 
     def field_empty(self, field_value: str) -> bool:
         stripped_field_value = anki.utils.htmlToTextLine(field_value)
         return len(stripped_field_value) == 0
 
     def get_field_samples(self, deck_note_type_field: deck_utils.DeckNoteTypeField, sample_size: int) -> List[str]:
-        notes = self.get_notes_for_deck_note_type(deck_note_type_field.deck_note_type, sample_size)
+        note_ids = self.get_noteids_for_deck_note_type(deck_note_type_field.deck_note_type, sample_size)
 
         stripImagesRe = re.compile("(?i)<img[^>]+src=[\"']?([^\"'>]+)[\"']?[^>]*>")
         
         def process_field_value(note_id, field_name):
-            note = aqt.mw.col.getNote(note_id)
+            # note = aqt.mw.col.getNote(note_id)
+            note = self.anki_utils.get_note_by_id(note_id)
             if field_name not in note:
                 # field was removed
                 raise errors.AnkiItemNotFoundError(f'field {field_name} not found')
@@ -238,7 +227,7 @@ class LanguageTools():
                 field_value = original_field_value[:max_len]
             return field_value
 
-        all_field_values = [process_field_value(x, deck_note_type_field.field_name) for x in notes]
+        all_field_values = [process_field_value(x, deck_note_type_field.field_name) for x in note_ids]
         non_empty_fields = [x for x in all_field_values if len(x) > 0]
 
         if len(non_empty_fields) < sample_size:
