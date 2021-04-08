@@ -185,8 +185,14 @@ def test_language_mapping(qtbot):
     autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, field_samples_button_obj_name)
     qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
 
-    assert 'old people' in mock_language_tools.anki_utils.info_message
-    assert 'hello' in mock_language_tools.anki_utils.info_message
+    assert 'old people' in mock_language_tools.anki_utils.info_message_received
+    assert 'hello' in mock_language_tools.anki_utils.info_message_received
+
+    field_samples_button_obj_name = f'field_samples_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_sound}'
+    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, field_samples_button_obj_name)
+    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)    
+
+    assert 'No usable field data found' in mock_language_tools.anki_utils.info_message_received
 
     # set one language manually
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'

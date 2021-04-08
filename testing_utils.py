@@ -55,11 +55,11 @@ class MockAnkiUtils():
 
     def info_message(self, message, parent):
         logging.info(f'info message: {message}')
-        self.info_message = message
+        self.info_message_received = message
 
     def critical_message(self, message, parent):
         logging.info(f'critical error message: {message}')
-        self.critical_message = message
+        self.critical_message_received = message
 
 class MockCloudLanguageTools():
     def __init__(self):
