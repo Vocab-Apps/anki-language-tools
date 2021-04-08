@@ -7,6 +7,7 @@ import languagetools
 class MockAnkiUtils():
     def __init__(self, config):
         self.config = config
+        self.written_config = None
 
     def get_config(self):
         return self.config

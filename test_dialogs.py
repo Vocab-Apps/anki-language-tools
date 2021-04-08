@@ -177,6 +177,8 @@ def test_language_mapping(qtbot):
     # show field samples
     # ==================
 
+    # reset this
+    mock_language_tools.anki_utils.written_config = None
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
 
     field_samples_button_obj_name = f'field_samples_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
@@ -185,3 +187,14 @@ def test_language_mapping(qtbot):
 
     assert 'old people' in mock_language_tools.anki_utils.info_message
     assert 'hello' in mock_language_tools.anki_utils.info_message
+
+    # set one language manually
+    field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
+    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    qtbot.keyClicks(field_language_combobox, 'Sound')
+
+    # hit cancel
+    cancel_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'cancel')
+    qtbot.mouseClick(cancel_button, PyQt5.QtCore.Qt.LeftButton)
+    # there should not be any config change
+    assert mock_language_tools.anki_utils.written_config == None

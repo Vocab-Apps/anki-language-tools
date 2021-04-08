@@ -124,6 +124,7 @@ class LanguageMappingDialog_UI(object):
         self.applyButton.setObjectName('apply')
         self.disableApplyButton()
         cancelButton = self.buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        cancelButton.setObjectName('cancel')
         cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
