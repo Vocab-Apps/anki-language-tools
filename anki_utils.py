@@ -84,3 +84,6 @@ class AnkiUtils():
 
     def critical_message(self, message, parent):
         aqt.utils.showCritical(message, title=constants.ADDON_NAME, parent=parent)
+
+    def play_sound(self, filename):
+        aqt.sound.av_player.play_file(filename)

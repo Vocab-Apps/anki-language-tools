@@ -568,9 +568,7 @@ class LanguageTools():
             raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
 
     def get_tts_voice_list(self):
-        response = requests.get(self.base_url + '/voice_list')
-        data = json.loads(response.content)
-        return data
+        return self.cloud_language_tools.get_tts_voice_list(self.config['api_key'])
 
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]

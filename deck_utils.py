@@ -86,7 +86,7 @@ class DeckUtils():
     def build_deck_note_type_from_addcard(self, note, add_cards) -> DeckNoteType:
         model_id = note.mid
         deck_id = add_cards.deckChooser.selectedId()
-        deck_note_type = build_deck_note_type(deck_id, model_id)
+        deck_note_type = self.build_deck_note_type(deck_id, model_id)
         return deck_note_type    
 
     # given deck id, model id, build DNT
@@ -120,7 +120,7 @@ class DeckUtils():
         if deck_id == None:
             raise errors.AnkiItemNotFoundError(f'Deck {deck_name} not found')
 
-        deck_note_type = build_deck_note_type(deck_id, model_id)
+        deck_note_type = self.build_deck_note_type(deck_id, model_id)
         return DeckNoteTypeField(deck_note_type, field_name)    
 
     # given a DNT, get field names

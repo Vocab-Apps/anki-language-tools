@@ -44,3 +44,8 @@ class CloudLanguageTools():
             # error occured, return none
             logging.error(f'could not perform language detection: (status code {response.status_code}) {response.content}')
             return None        
+
+    def get_tts_voice_list(self, api_key):
+        response = requests.get(self.base_url + '/voice_list')
+        data = json.loads(response.content)
+        return data
