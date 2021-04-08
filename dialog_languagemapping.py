@@ -49,6 +49,7 @@ class LanguageMappingDialog_UI(object):
         self.dntfComboxBoxMap = {}
 
         self.autodetect_in_progress = False
+        self.interrupt_autodetect = False
 
     def setupUi(self, Dialog, deck_map: Dict[str, deck_utils.Deck]):
         Dialog.setObjectName("Dialog")
@@ -306,6 +307,7 @@ class LanguageMappingDialog_UI(object):
         self.Dialog.close()
 
     def reject(self):
+        self.interrupt_autodetect = True
         self.Dialog.close()
 
     def filterEmpty(self, filter_text):
@@ -369,6 +371,9 @@ class LanguageMappingDialog_UI(object):
 
             progress = 0
             for dntf in dtnf_list:
+                if self.interrupt_autodetect == True:
+                    return
+
                 deck_name = dntf.deck_note_type.deck_name
                 if self.matchFilter(self.filter_text, deck_name):
                     language = self.languagetools.perform_language_detection_deck_note_type_field(dntf)
