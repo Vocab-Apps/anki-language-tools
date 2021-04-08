@@ -5,6 +5,7 @@ import logging
 import PyQt5
 
 import dialogs
+import dialog_languagemapping
 import languagetools
 import constants
 import testing_utils
@@ -96,7 +97,7 @@ def test_language_mapping(qtbot):
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
 
-    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
+    mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
     
     # assert deck name, note type, and 3 fields
     deck_frame = mapping_dialog.findChild(PyQt5.QtWidgets.QFrame, f'frame_{config_gen.deck_name}')
@@ -142,7 +143,7 @@ def test_language_mapping(qtbot):
     # run automatic detection
     # -----------------------
     
-    mapping_dialog = dialogs.prepare_language_mapping_dialogue(mock_language_tools)
+    mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
     # apply button should be disabled
     apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
     assert apply_button.isEnabled() == False
