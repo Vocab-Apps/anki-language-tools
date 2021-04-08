@@ -52,6 +52,10 @@ class MockAnkiUtils():
         # just run the task immediately
         task_fn()
 
+    def info_message(self, message, parent):
+        logging.info(f'info message: {message}')
+        self.info_message = message
+
     def critical_message(self, message, parent):
         logging.info(f'critical error message: {message}')
         self.critical_message = message

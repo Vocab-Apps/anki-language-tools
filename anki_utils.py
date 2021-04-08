@@ -79,5 +79,8 @@ class AnkiUtils():
     def run_on_main(self, task_fn):
         aqt.mw.taskman.run_on_main(task_fn)
 
+    def info_message(self, message, parent):
+        aqt.utils.showInfo(message, title=constants.ADDON_NAME, textFormat='rich', parent=parent)
+
     def critical_message(self, message, parent):
         aqt.utils.showCritical(message, title=constants.ADDON_NAME, parent=parent)

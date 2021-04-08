@@ -257,7 +257,8 @@ class LanguageMappingDialog_UI(object):
         gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
 
         fieldWidgets.field_samples_button = PyQt5.QtWidgets.QPushButton(self.layoutWidget)
-        fieldWidgets.field_samples_button.setObjectName("field_samples_button")
+        field_samples_button_obj_name = f'field_samples_{str(deck_note_type_field)}'
+        fieldWidgets.field_samples_button.setObjectName(field_samples_button_obj_name)
         fieldWidgets.field_samples_button.setText('Show Samples')
 
         def getShowFieldSamplesLambda(deck_note_type_field: deck_utils.DeckNoteTypeField):
@@ -292,11 +293,11 @@ class LanguageMappingDialog_UI(object):
     def showFieldSamples(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
         if len(field_samples) == 0:
-            aqt.utils.showInfo('No usable field data found', title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich', parent=self.dialog)
+            self.languagetools.anki_utils.info_message('No usable field data found', self)
         else:
             joined_text = ', '.join(field_samples)
             text = f'<b>Samples</b>: {joined_text}'
-            aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Field Samples', textFormat='rich', parent=self.dialog)
+            self.languagetools.anki_utils.info_message(text, self)
 
     def accept(self):
         self.saveLanguageMappingChanges()

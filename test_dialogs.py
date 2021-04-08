@@ -174,4 +174,14 @@ def test_language_mapping(qtbot):
 
     # mapping_dialog.exec_()
 
+    # show field samples
+    # ==================
 
+    mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
+
+    field_samples_button_obj_name = f'field_samples_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
+    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, field_samples_button_obj_name)
+    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
+
+    assert 'old people' in mock_language_tools.anki_utils.info_message
+    assert 'hello' in mock_language_tools.anki_utils.info_message
