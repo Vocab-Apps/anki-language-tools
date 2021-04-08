@@ -1,4 +1,5 @@
 import sys
+import logging
 from typing import List, Dict
 import PyQt5
 
@@ -394,7 +395,7 @@ class LanguageMappingDialog_UI(object):
         self.languagetools.anki_utils.run_on_main(lambda: self.autodetect_progressbar.setValue(progress))
 
     def displayErrorMessage(self, message):
-        self.languagetools.anki_utils.run_on_main(lambda: self.languagetools.anki_utils.critical_message(message, self))
+        self.languagetools.anki_utils.run_on_main(lambda: self.languagetools.anki_utils.critical_message(message, self.dialog))
 
     def runLanguageDetectionDone(self, future_result):
         self.autodetect_in_progress = False
