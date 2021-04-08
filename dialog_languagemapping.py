@@ -294,11 +294,11 @@ class LanguageMappingDialog_UI(object):
     def showFieldSamples(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         field_samples = self.languagetools.get_field_samples(deck_note_type_field, 20)
         if len(field_samples) == 0:
-            self.languagetools.anki_utils.info_message('No usable field data found', self)
+            self.languagetools.anki_utils.info_message('No usable field data found', self.dialog)
         else:
             joined_text = ', '.join(field_samples)
             text = f'<b>Samples</b>: {joined_text}'
-            self.languagetools.anki_utils.info_message(text, self)
+            self.languagetools.anki_utils.info_message(text, self.dialog)
 
     def accept(self):
         self.saveLanguageMappingChanges()
