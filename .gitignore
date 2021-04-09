@@ -3,3 +3,4 @@ __pycache__/
 temp/
 .coverage
 htmlcov/
+user_files/*.mp3
