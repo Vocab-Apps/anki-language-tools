@@ -453,9 +453,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 if self.transformation_type == constants.TransformationType.Translation:
                     translation_result = self.languagetools.get_translation(field_data, self.translation_option)
                 elif self.transformation_type == constants.TransformationType.Transliteration:
-                    translation_result = self.languagetools.get_transliteration(field_data, 
-                                                                                self.transliteration_option['service'],
-                                                                                self.transliteration_option['transliteration_key'])
+                    translation_result = self.languagetools.get_transliteration(field_data, self.transliteration_option)
                 self.to_field_data.append(translation_result)
                 aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
                 i += 1

@@ -432,13 +432,7 @@ class LanguageTools():
         return self.config[constants.CONFIG_WANTED_LANGUAGES].keys()
 
     def get_translation_async(self, source_text, translation_option):
-        response = requests.post(self.base_url + '/translate', json={
-            'text': source_text,
-            'service': translation_option['service'],
-            'from_language_key': translation_option['source_language_id'],
-            'to_language_key': translation_option['target_language_id']
-        }, headers={'api_key': self.config['api_key']})
-        return response
+        return self.cloud_language_tools.get_translation(self.config['api_key'], source_text, translation_option)
 
     def interpret_translation_response_async(self, response):
         # print(response.status_code)
@@ -471,12 +465,7 @@ class LanguageTools():
         return data
     
     def get_transliteration_async(self, source_text, transliteration_option):
-        response = requests.post(self.base_url + '/transliterate', json={
-                'text': source_text,
-                'service': transliteration_option['service'],
-                'transliteration_key': transliteration_option['transliteration_key']
-        }, headers={'api_key': self.config['api_key']})        
-        return response
+        return self.cloud_language_tools.get_transliteration(self.config['api_key'], source_text, transliteration_option)
 
     def interpret_transliteration_response_async(self, response):
         if response.status_code == 200:
@@ -493,17 +482,8 @@ class LanguageTools():
         error_text = f"Could not load transliteration: {response.text}"
         raise errors.LanguageToolsRequestError(error_text)
 
-    def get_transliteration(self, source_text, service, transliteration_key):
-        if not self.check_api_key_valid():
-            return
-
-        response = requests.post(self.base_url + '/transliterate', json={
-                'text': source_text,
-                'service': service,
-                'transliteration_key': transliteration_key
-        }, headers={'api_key': self.config['api_key']})
-        data = json.loads(response.content)
-        return data['transliterated_text']
+    def get_transliteration(self, source_text, transliteration_option):
+        return self.interpret_transliteration_response_async(self.get_transliteration_async(source_text, transliteration_option))
 
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = aqt.mw.col.getNote(note_id)

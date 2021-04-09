@@ -70,4 +70,19 @@ class CloudLanguageTools():
                 error_msg = 'Error: ' + response_data['error']
             raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
 
-            
+    def get_translation(self, api_key, source_text, translation_option):
+        response = requests.post(self.base_url + '/translate', json={
+            'text': source_text,
+            'service': translation_option['service'],
+            'from_language_key': translation_option['source_language_id'],
+            'to_language_key': translation_option['target_language_id']
+        }, headers={'api_key': api_key})
+        return response
+
+    def get_transliteration(self, api_key, source_text, transliteration_option):
+        response = requests.post(self.base_url + '/transliterate', json={
+                'text': source_text,
+                'service': transliteration_option['service'],
+                'transliteration_key': transliteration_option['transliteration_key']
+        }, headers={'api_key': api_key})
+        return response        
