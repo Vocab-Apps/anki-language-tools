@@ -264,4 +264,32 @@ def test_voice_selection(qtbot):
     assert 'en' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]
     assert 'Guy' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
 
+    # use the written config as the new config
+    mock_language_tools.config =  mock_language_tools.anki_utils.written_config
+
+    # open the dialog box again
+    # =========================
+
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+    apply_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    assert apply_button.isEnabled() == False # should be disabled
+
+    # switch language to english
+    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    qtbot.keyClicks(languages_combobox, 'English')
+
+    # choose different voice
+    voices_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'voices_combobox')
+    current_index = voices_combobox.currentIndex()
+    assert voices_combobox.count() == 2
+    assert 'Guy' in voices_combobox.itemText(current_index)  # check current english voice
+    voice_wanted = voices_combobox.itemText(0)
+    qtbot.keyClicks(voices_combobox, voice_wanted)
+
+    assert apply_button.isEnabled() == True
+    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+
+    assert 'Aria' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
+
+
     # voice_selection_dialog.exec_()
