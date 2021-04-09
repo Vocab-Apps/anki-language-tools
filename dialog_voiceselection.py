@@ -211,9 +211,7 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         service = voice['service']
 
         try:
-            filename = self.languagetools.get_tts_audio(source_text, service, voice_key, {})
-            if filename != None:
-                self.languagetools.anki_utils.play_sound(filename)
+            self.languagetools.play_tts_audio(source_text, service, voice_key, {})
         except errors.LanguageToolsRequestError as err:
             self.play_audio_error = str(err)
 

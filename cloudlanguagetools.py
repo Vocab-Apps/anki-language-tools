@@ -4,6 +4,7 @@ import json
 import logging
 
 from . import constants
+from . import errors
 
 class CloudLanguageTools():
     def __init__(self):
@@ -49,3 +50,24 @@ class CloudLanguageTools():
         response = requests.get(self.base_url + '/voice_list')
         data = json.loads(response.content)
         return data
+
+    def get_tts_audio(self, api_key, source_text, service, voice_key, options):
+        url_path = '/audio'
+        data = {
+            'text': source_text,
+            'service': service,
+            'voice_key': voice_key,
+            'options': options
+        }
+        response = requests.post(self.base_url + url_path, json=data, headers={'api_key': api_key})
+
+        if response.status_code == 200:
+            return response.content
+        else:
+            response_data = json.loads(response.content)
+            error_msg = response_data
+            if 'error' in response_data:
+                error_msg = 'Error: ' + response_data['error']
+            raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
+
+            

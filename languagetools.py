@@ -540,32 +540,36 @@ class LanguageTools():
         }
         return hashlib.sha224(str(combined_data).encode('utf-8')).hexdigest()
 
-    def get_audio_collection_filename(self, url_path, data):
-        return f'languagetools-{self.get_hash_for_request(url_path, data)}'
-
-    def get_tts_audio(self, source_text, service, voice_key, options):
-        url_path = '/audio'
-        data = {
-            'text': source_text,
+    def get_hash_for_audio_request(self, source_text, service, voice_key, options):
+        combined_data = {
+            'source_text': source_text,
             'service': service,
             'voice_key': voice_key,
             'options': options
         }
-        file_name = self.get_audio_collection_filename(url_path, data)
-        response = requests.post(self.base_url + url_path, json=data, headers={'api_key': self.config['api_key']})
+        return hashlib.sha224(str(combined_data).encode('utf-8')).hexdigest()
 
-        if response.status_code == 200:
-            output_temp_file = tempfile.NamedTemporaryFile(prefix=file_name, suffix='.mp3', delete=False)
-            with open(output_temp_file.name, 'wb') as f:
-                f.write(response.content)
-            f.close()
-            return output_temp_file.name
-        else:
-            response_data = json.loads(response.content)
-            error_msg = response_data
-            if 'error' in response_data:
-                error_msg = 'Error: ' + response_data['error']
-            raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
+    def get_audio_filename(self, source_text, service, voice_key, options):
+        addon_dir = os.path.dirname(os.path.realpath(__file__))
+        user_files_dir = os.path.join(addon_dir, 'user_files')
+        hash_str = self.get_hash_for_audio_request(source_text, service, voice_key, options)
+        filename = f'languagetools-{hash_str}.mp3'
+        return os.path.join(user_files_dir, filename)
+
+    def get_tts_audio(self, source_text, service, voice_key, options):
+        filename = self.get_audio_filename(source_text, service, voice_key, options)
+        if os.path.isfile(filename):
+            return filename
+        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], source_text, service, voice_key, options)
+        with open(filename, 'wb') as f:
+            f.write(audio_content)
+        f.close()
+        logging.info(f'wrote audio filename {filename}')
+        return filename
+
+    def play_tts_audio(self, source_text, service, voice_key, options):
+        audio_filename = self.get_tts_audio(source_text, service, voice_key, options)
+        self.anki_utils.play_sound(audio_filename)
 
     def get_tts_voice_list(self):
         return self.cloud_language_tools.get_tts_voice_list(self.config['api_key'])
