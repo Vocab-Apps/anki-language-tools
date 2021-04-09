@@ -671,7 +671,7 @@ class AddAudioDialog(aqt.qt.QDialog):
 
         self.progress_bar.setMaximum(len(self.note_id_list))
 
-        deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
+        deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, self.to_field)
         self.languagetools.store_batch_audio_setting(deck_note_type_field, self.from_field)
 
         self.success_count = 0
@@ -689,7 +689,7 @@ class AddAudioDialog(aqt.qt.QDialog):
                 result = self.languagetools.generate_audio_for_field(note_id, self.from_field, self.to_field, self.voice)
                 if result == True:
                     self.success_count += 1
-            except LanguageToolsRequestError as err:
+            except errors.LanguageToolsRequestError as err:
                 self.generate_audio_errors.append(str(err))
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
