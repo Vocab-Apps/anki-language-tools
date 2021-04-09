@@ -232,5 +232,16 @@ def test_voice_selection(qtbot):
     assert 'Xiaoxiao' in voices_combobox.itemText(0)
     assert 'Yunyang' in voices_combobox.itemText(1)
 
+    # check samples
+    assert voice_selection_dialog.sample_labels[0].text() == '老人家'
+    assert voice_selection_dialog.sample_labels[1].text() == '你好'
+
+    # now, select English
+    qtbot.keyClicks(languages_combobox, 'English')
+
+    assert voices_combobox.count() == 2
+    assert 'Aria' in voices_combobox.itemText(0)
+    assert 'Guy' in voices_combobox.itemText(1)
+
 
     # voice_selection_dialog.exec_()
