@@ -1,6 +1,7 @@
 # python imports
 import sys
 import os
+import glob
 import re
 import random
 import requests
@@ -408,7 +409,7 @@ class LanguageTools():
 
     def store_voice_selection(self, language_code, voice_mapping):
         self.config[constants.CONFIG_VOICE_SELECTION][language_code] = voice_mapping
-        aqt.mw.addonManager.writeConfig(__name__, self.config)
+        self.anki_utils.write_config(self.config)
 
     def get_voice_selection_settings(self):
         return self.config.get(constants.CONFIG_VOICE_SELECTION, {})
@@ -549,9 +550,19 @@ class LanguageTools():
         }
         return hashlib.sha224(str(combined_data).encode('utf-8')).hexdigest()
 
-    def get_audio_filename(self, source_text, service, voice_key, options):
+    def get_user_files_dir(self):
         addon_dir = os.path.dirname(os.path.realpath(__file__))
         user_files_dir = os.path.join(addon_dir, 'user_files')
+        return user_files_dir        
+
+    def clean_user_files_audio(self):
+        user_files_dir = self.get_user_files_dir()
+        files = glob.glob(f'{user_files_dir}/*.mp3')
+        for f in files:
+            os.remove(f)
+
+    def get_audio_filename(self, source_text, service, voice_key, options):
+        user_files_dir = self.get_user_files_dir()
         hash_str = self.get_hash_for_audio_request(source_text, service, voice_key, options)
         filename = f'languagetools-{hash_str}.mp3'
         return os.path.join(user_files_dir, filename)

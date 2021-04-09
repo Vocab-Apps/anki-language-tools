@@ -243,5 +243,25 @@ def test_voice_selection(qtbot):
     assert 'Aria' in voices_combobox.itemText(0)
     assert 'Guy' in voices_combobox.itemText(1)
 
+    # check samples
+    assert voice_selection_dialog.sample_labels[0].text() == 'old people'
+    assert voice_selection_dialog.sample_labels[1].text() == 'hello'
+
+    # pick the Guy voice
+    guy_voice = voices_combobox.itemText(1)
+    qtbot.keyClicks(voices_combobox, guy_voice)
+
+    # listen to samples
+    play_sample_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, f'play_sample_0')
+    qtbot.mouseClick(play_sample_button, PyQt5.QtCore.Qt.LeftButton)
+    # check that sample has been played
+    assert mock_language_tools.anki_utils.played_sound['text'] == 'old people'
+    assert 'Guy' in mock_language_tools.anki_utils.played_sound['voice_key']['name']
+
+    apply_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+
+    assert 'en' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]
+    assert 'Guy' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
 
     # voice_selection_dialog.exec_()

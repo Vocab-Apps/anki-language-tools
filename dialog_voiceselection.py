@@ -99,6 +99,7 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
             self.sample_labels.append(sample_label)
             sample_button = PyQt5.QtWidgets.QPushButton()
             sample_button.setText('Play Audio')
+            sample_button.setObjectName(f'play_sample_{i}')
             def get_play_lambda(i):
                 def play():
                     self.play_sample(i)
@@ -117,8 +118,10 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         # buttom buttons
         buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
         self.applyButton = buttonBox.addButton("Save Voice Selection", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
         self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
 

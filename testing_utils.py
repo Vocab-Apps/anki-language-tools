@@ -1,4 +1,5 @@
 import logging
+import json
 
 import constants
 import deck_utils
@@ -66,6 +67,11 @@ class MockAnkiUtils():
     def critical_message(self, message, parent):
         logging.info(f'critical error message: {message}')
         self.critical_message_received = message
+
+    def play_sound(self, filename):
+        # load the json inside the file
+        with open(filename) as json_file:
+            self.played_sound = json.load(json_file)
 
 class MockCloudLanguageTools():
     def __init__(self):
@@ -213,6 +219,17 @@ class MockCloudLanguageTools():
     def language_detection(self, api_key, field_sample):
         return self.language_detection_result[field_sample[0]]
 
+    def get_tts_audio(self, api_key, source_text, service, voice_key, options):
+        self.requested_audio = {
+            'text': source_text,
+            'service': service,
+            'voice_key': voice_key,
+            'options': options
+        }
+        encoded_dict = json.dumps(self.requested_audio, indent=2).encode('utf-8')
+        return encoded_dict
+
+
 class TestConfigGenerator():
     def __init__(self):
         self.deck_id = 42001
@@ -359,6 +376,7 @@ class TestConfigGenerator():
         deckutils = deck_utils.DeckUtils(anki_utils)
         mock_language_tools = languagetools.LanguageTools(anki_utils, deckutils, mock_cloudlanguagetools)
         mock_language_tools.initialize()
+        mock_language_tools.clean_user_files_audio()
 
         anki_utils.models = self.get_model_map()
         anki_utils.decks = self.get_deck_map()
