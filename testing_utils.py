@@ -44,6 +44,12 @@ class MockAnkiUtils():
     def get_deck(self, deck_id):
         return self.decks[deck_id]
 
+    def get_model_id(self, model_name):
+        return self.model_by_name[model_name]
+
+    def get_deck_id(self, deck_name):
+        return self.deck_by_name[deck_name]
+
     def run_in_background(self, task_fn, task_done_fn):
         # just run the two tasks immediately
         result = task_fn()
@@ -83,6 +89,109 @@ class MockCloudLanguageTools():
         ]
         self.transliteration_language_list = [] # todo fill this out
 
+        self.voice_list = [
+            {
+                "audio_language_code": "en_US",
+                "audio_language_name": "English (US)",
+                "gender": "Male",
+                "language_code": "en",
+                "options": {
+                    "pitch": {
+                        "default": 0,
+                        "max": 100,
+                        "min": -100,
+                        "type": "number"
+                    },
+                    "rate": {
+                        "default": 1.0,
+                        "max": 3.0,
+                        "min": 0.5,
+                        "type": "number"
+                    }
+                },
+                "service": "Azure",
+                "voice_description": "English (US), Male, Guy (Neural), Azure",
+                "voice_key": {
+                    "name": "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)"
+                }
+            },            
+            {
+                "audio_language_code": "en_US",
+                "audio_language_name": "English (US)",
+                "gender": "Female",
+                "language_code": "en",
+                "options": {
+                    "pitch": {
+                        "default": 0,
+                        "max": 100,
+                        "min": -100,
+                        "type": "number"
+                    },
+                    "rate": {
+                        "default": 1.0,
+                        "max": 3.0,
+                        "min": 0.5,
+                        "type": "number"
+                    }
+                },
+                "service": "Azure",
+                "voice_description": "English (US), Female, Aria (Neural), Azure",
+                "voice_key": {
+                    "name": "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
+                }
+            },
+            {
+                "audio_language_code": "zh_CN",
+                "audio_language_name": "Chinese (Mandarin, Simplified)",
+                "gender": "Female",
+                "language_code": "zh_cn",
+                "options": {
+                    "pitch": {
+                        "default": 0,
+                        "max": 100,
+                        "min": -100,
+                        "type": "number"
+                    },
+                    "rate": {
+                        "default": 1.0,
+                        "max": 3.0,
+                        "min": 0.5,
+                        "type": "number"
+                    }
+                },
+                "service": "Azure",
+                "voice_description": "Chinese (Mandarin, Simplified), Female, Xiaoxiao 晓晓 (Neural), Azure",
+                "voice_key": {
+                    "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)"
+                }
+            },
+            {
+                "audio_language_code": "zh_CN",
+                "audio_language_name": "Chinese (Mandarin, Simplified)",
+                "gender": "Male",
+                "language_code": "zh_cn",
+                "options": {
+                    "pitch": {
+                        "default": 0,
+                        "max": 100,
+                        "min": -100,
+                        "type": "number"
+                    },
+                    "rate": {
+                        "default": 1.0,
+                        "max": 3.0,
+                        "min": 0.5,
+                        "type": "number"
+                    }
+                },
+                "service": "Azure",
+                "voice_description": "Chinese (Mandarin, Simplified), Male, Yunyang 云扬 (Neural), Azure",
+                "voice_key": {
+                    "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunyangNeural)"
+                }
+            }
+        ]
+
 
     def get_language_list(self):
         return self.language_list
@@ -92,6 +201,9 @@ class MockCloudLanguageTools():
 
     def get_transliteration_language_list(self):
         return self.transliteration_language_list
+
+    def get_tts_voice_list(self, api_key):
+        return self.voice_list
 
     def api_key_validate_query(self, api_key):
         return {
@@ -139,6 +251,10 @@ class TestConfigGenerator():
                     'voice_key': self.chinese_voice_key,
                     'voice_description': self.chinese_voice_description
                 }
+            },
+            constants.CONFIG_WANTED_LANGUAGES: {
+                'en': True,
+                'zh_cn': True
             }
 
         }
@@ -199,6 +315,16 @@ class TestConfigGenerator():
             }
         }
 
+    def get_deck_by_name(self):
+        return {
+            self.deck_name: self.deck_id
+        }
+
+    def get_model_by_name(self):
+        return {
+            self.model_name: self.model_id
+        }
+
     def get_deckid_modelid_pairs(self):
         return [
             [self.deck_id, self.model_id]
@@ -236,6 +362,8 @@ class TestConfigGenerator():
 
         anki_utils.models = self.get_model_map()
         anki_utils.decks = self.get_deck_map()
+        anki_utils.model_by_name = self.get_model_by_name()
+        anki_utils.deck_by_name = self.get_deck_by_name()
         anki_utils.deckid_modelid_pairs = self.get_deckid_modelid_pairs()
         anki_utils.notes_by_id, anki_utils.notes = self.get_notes()
         mock_cloudlanguagetools.language_detection_result = self.get_language_detection_result()

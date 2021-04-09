@@ -6,6 +6,7 @@ import PyQt5
 
 import dialogs
 import dialog_languagemapping
+import dialog_voiceselection
 import languagetools
 import constants
 import testing_utils
@@ -204,3 +205,17 @@ def test_language_mapping(qtbot):
     qtbot.mouseClick(cancel_button, PyQt5.QtCore.Qt.LeftButton)
     # there should not be any config change
     assert mock_language_tools.anki_utils.written_config == None
+
+def test_voice_selection(qtbot):
+    # pytest test_dialogs.py -rPP -k test_voice_selection
+
+    # make sure our deck appears
+    # --------------------------
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+
+    voice_selection_dialog.exec_()
