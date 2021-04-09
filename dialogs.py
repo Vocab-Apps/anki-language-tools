@@ -144,7 +144,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
             constants.TransformationType.Transliteration: 'Add Transliteration'
         }
 
-        vlayout.addWidget(get_header_label(header_label_text_map[self.transformation_type]))
+        vlayout.addWidget(gui_utils.get_header_label(header_label_text_map[self.transformation_type]))
 
         description_label = aqt.qt.QLabel(f'After adding {self.transformation_type.name.lower()} to notes, the setting will be memorized.')
         vlayout.addWidget(description_label)
@@ -462,7 +462,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
                 aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
             aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
             aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
-        except LanguageToolsRequestError as e:
+        except errors.LanguageToolsRequestError as e:
             self.to_field_data.append('')
             self.load_errors.append(e)
 
@@ -493,7 +493,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
             note.flush()
         self.close()
         # memorize this setting
-        deck_note_type_field = DeckNoteTypeField(self.deck_note_type, self.to_field)
+        deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, self.to_field)
         if self.transformation_type == constants.TransformationType.Translation:
             self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
         elif self.transformation_type == constants.TransformationType.Transliteration:
@@ -733,13 +733,13 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         # do we have translation rules for this deck_note_type
         translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
         if len(translation_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Translation Rules'))
+            vlayout.addWidget(gui_utils.get_medium_label(f'Translation Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, setting in translation_settings.items():
                 from_field = setting['from_field']
-                from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 to_language_name = self.languagetools.get_language_name(self.languagetools.get_language(to_dntf))
 
@@ -796,13 +796,13 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         # do we have transliteration rules for this deck_note_type
         transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
         if len(transliteration_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Transliteration Rules'))
+            vlayout.addWidget(gui_utils.get_medium_label(f'Transliteration Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, setting in transliteration_settings.items():
                 from_field = setting['from_field']
-                from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 transliteration_name = setting['transliteration_option']['transliteration_name']
 
@@ -859,12 +859,12 @@ class NoteSettingsDialogBase(aqt.qt.QDialog):
         # do we have any audio rules for this deck_note_type
         audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
         if len(audio_settings) > 0:
-            vlayout.addWidget(get_medium_label(f'Audio Rules'))
+            vlayout.addWidget(gui_utils.get_medium_label(f'Audio Rules'))
             gridlayout = QtWidgets.QGridLayout()
             i = 0
             for to_field, from_field in audio_settings.items():
-                from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                 from_language_code = self.languagetools.get_language(from_dntf)
                 from_language_name = self.languagetools.get_language_name(from_language_code)
                 # get the assigned voice for this langugae
@@ -945,13 +945,13 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label(self.get_header_text()))
+        vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
 
         vlayout.addWidget(aqt.qt.QLabel('You can visualize and remove Audio / Translation / Transliteration rules from here.'))
 
         self.layout_rules(vlayout)
 
-        vlayout.addWidget(get_medium_label(f'Apply Changes While Typing'))
+        vlayout.addWidget(gui_utils.get_medium_label(f'Apply Changes While Typing'))
         self.checkbox = QtWidgets.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
         self.checkbox.setChecked(self.languagetools.get_apply_updates_automatically())
         self.checkbox.setContentsMargins(10, 0, 10, 0)
@@ -1033,7 +1033,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label(self.get_header_text()))
+        vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
 
         vlayout.addWidget(aqt.qt.QLabel('Select the rules you want to run, then click Apply Rules.'))
 
@@ -1096,8 +1096,8 @@ class RunRulesDialog(NoteSettingsDialogBase):
                         try:
                             self.attempt_count += 1
                             from_field = setting['from_field']
-                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                             logging.info(f'generating translation from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -1115,8 +1115,8 @@ class RunRulesDialog(NoteSettingsDialogBase):
                         try:
                             self.attempt_count += 1
                             from_field = setting['from_field']
-                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                             logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -1135,8 +1135,8 @@ class RunRulesDialog(NoteSettingsDialogBase):
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
                             self.attempt_count += 1
-                            from_dntf = DeckNoteTypeField(self.deck_note_type, from_field)
-                            to_dntf = DeckNoteTypeField(self.deck_note_type, to_field)
+                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
                             logging.info(f'generating audio from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -1190,7 +1190,7 @@ class YomichanDialog(aqt.qt.QDialog):
 
         vlayout = QtWidgets.QVBoxLayout(self)
 
-        vlayout.addWidget(get_header_label('Yomichan Integration'))
+        vlayout.addWidget(gui_utils.get_header_label('Yomichan Integration'))
 
         voice_name = self.japanese_voice['voice_description']
 
