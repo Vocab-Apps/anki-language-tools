@@ -209,8 +209,8 @@ def test_language_mapping(qtbot):
 def test_voice_selection(qtbot):
     # pytest test_dialogs.py -rPP -k test_voice_selection
 
-    # make sure our deck appears
-    # --------------------------
+    # make sure the dialog comes up
+    # -----------------------------
 
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('default')
@@ -218,4 +218,19 @@ def test_voice_selection(qtbot):
     voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
     voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
 
-    voice_selection_dialog.exec_()
+    # there should be two languages. English And Chinese
+    # for each language, there should be two voices
+    # they should both have two samples each
+
+    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    assert languages_combobox.count() == 2
+    assert languages_combobox.itemText(0) == 'Chinese'
+    assert languages_combobox.itemText(1) == 'English'
+
+    voices_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'voices_combobox')
+    assert voices_combobox.count() == 2
+    assert 'Xiaoxiao' in voices_combobox.itemText(0)
+    assert 'Yunyang' in voices_combobox.itemText(1)
+
+
+    # voice_selection_dialog.exec_()

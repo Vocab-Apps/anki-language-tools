@@ -60,6 +60,7 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
 
         language_combobox = PyQt5.QtWidgets.QComboBox()
         language_combobox.addItems(self.language_name_list)
+        language_combobox.setObjectName('languages_combobox')
         gridlayout.addWidget(language_combobox, 0, 1, 1, 1)
 
         # voices
@@ -72,6 +73,7 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         self.voice_combobox = PyQt5.QtWidgets.QComboBox()
         self.voice_combobox.setMaxVisibleItems(15)
         self.voice_combobox.setStyleSheet("combobox-popup: 0;")        
+        self.voice_combobox.setObjectName('voices_combobox')
         gridlayout.addWidget(self.voice_combobox, 1, 1, 1, 1)
 
         # button to refresh samples
