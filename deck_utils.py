@@ -77,7 +77,7 @@ class DeckUtils():
     def build_deck_note_type_from_note_card(self, note, card) -> DeckNoteType:
         model_id = note.mid
         deck_id = card.did
-        deck_note_type = build_deck_note_type(deck_id, model_id)
+        deck_note_type = self.build_deck_note_type(deck_id, model_id)
         return deck_note_type
 
     # given a note being edited and the AddCards dialog, build DNT (used when adding a new note)
@@ -135,4 +135,4 @@ class DeckUtils():
         model = self.anki_utils.get_model(deck_note_type.model_id)
         fields = model['flds']
         field_name = fields[field_index]['name']
-        return self.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)        
+        return self.build_dntf_from_dnt(deck_note_type, field_name)        

@@ -1279,7 +1279,7 @@ def yomichan_dialog(languagetools):
     yomichan_dialog.exec_()
 
 
-def verify_deck_note_type_consistent(note_id_list):
+def verify_deck_note_type_consistent(note_id_list, deck_utils):
     if len(note_id_list) == 0:
         aqt.utils.showCritical(f'You must select notes before opening this dialog.', title=constants.ADDON_NAME)
         return None
@@ -1291,7 +1291,7 @@ def verify_deck_note_type_consistent(note_id_list):
         note = aqt.mw.col.getNote(note_id)
         cards = note.cards()
         for card in cards:
-            deck_note_type = build_deck_note_type_from_note_card(note, card)
+            deck_note_type = deck_utils.build_deck_note_type_from_note_card(note, card)
             if deck_note_type not in deck_note_type_map:
                 deck_note_type_map[deck_note_type] = 0
             deck_note_type_map[deck_note_type] += 1
@@ -1314,7 +1314,7 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
         aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
         return
 
-    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
     if deck_note_type == None:
         return
 
@@ -1325,7 +1325,7 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
 
         # force browser to reload notes
         browser.model.reset()
-    except LanguageMappingError as exception:
+    except errors.LanguageMappingError as exception:
         original_message = str(exception)
         final_message = original_message + '<br/>' + constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING
         aqt.utils.showCritical(final_message, title=constants.ADDON_NAME)
@@ -1343,7 +1343,7 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
         aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
         return
 
-    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
     if deck_note_type == None:
         return
 
@@ -1355,13 +1355,13 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
         # force browser to reload notes
         browser.model.reset()    
 
-    except LanguageMappingError as exception:
+    except errors.LanguageMappingError as exception:
         original_message = str(exception)
         final_message = original_message + '<br/>' + constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING
         aqt.utils.showCritical(final_message, title=constants.ADDON_NAME)
 
 def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
-    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
     if deck_note_type == None:
         return
 
@@ -1373,7 +1373,7 @@ def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     browser.model.reset()        
 
 def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
-    deck_note_type = verify_deck_note_type_consistent(note_id_list)
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
     if deck_note_type == None:
         return
 
