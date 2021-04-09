@@ -293,3 +293,31 @@ def test_voice_selection(qtbot):
 
 
     # voice_selection_dialog.exec_()
+
+def test_voice_selection_no_voices(qtbot):
+    # pytest test_dialogs.py -rPP -k test_voice_selection_no_voices
+
+    # make sure the dialog comes up
+    # -----------------------------
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('get_config_language_no_voices')
+
+    voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+
+    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    assert languages_combobox.count() == 3
+    assert languages_combobox.itemText(2) == 'Malagasy'
+
+    qtbot.keyClicks(languages_combobox, 'Malagasy')
+
+    # try to play audio
+    play_sample_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, f'play_sample_0')
+    qtbot.mouseClick(play_sample_button, PyQt5.QtCore.Qt.LeftButton)    
+
+    # should have been a critical messages
+    assert mock_language_tools.anki_utils.critical_message_received == 'No voice available for Malagasy'
+
+
+    # voice_selection_dialog.exec_()

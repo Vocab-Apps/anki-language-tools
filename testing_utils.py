@@ -77,7 +77,8 @@ class MockCloudLanguageTools():
     def __init__(self):
         self.language_list = {
             'en': 'English',
-            'zh_cn': 'Chinese'
+            'zh_cn': 'Chinese',
+            'mg': 'Malagasy'
         }
         self.translation_language_list = [
             {
@@ -293,12 +294,19 @@ class TestConfigGenerator():
         }
         return base_config
 
+    def get_config_language_no_voices(self):
+        base_config = self.get_default_config()
+        base_config[constants.CONFIG_WANTED_LANGUAGES]['mg'] = True
+        base_config[constants.CONFIG_DECK_LANGUAGES][self.model_name][self.deck_name][self.field_english] = 'mg'
+        return base_config    
+
     def get_languagetools_config(self, scenario):
 
         fn_map = {
             'default': self.get_default_config,
             'no_language_mapping': self.get_config_no_language_mapping,
-            'batch_audio': self.get_config_batch_audio
+            'batch_audio': self.get_config_batch_audio,
+            'get_config_language_no_voices': self.get_config_language_no_voices
         }
 
         fn_instance = fn_map[scenario]
