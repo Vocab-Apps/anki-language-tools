@@ -86,3 +86,12 @@ class CloudLanguageTools():
                 'transliteration_key': transliteration_option['transliteration_key']
         }, headers={'api_key': api_key})
         return response        
+
+    def get_translation_all(self, api_key, source_text, from_language, to_language):
+        response = requests.post(self.base_url + '/translate_all', json={
+                'text': source_text,
+                'from_language': from_language,
+                'to_language': to_language
+        }, headers={'api_key': api_key})
+        data = json.loads(response.content)        
+        return data

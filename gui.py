@@ -62,8 +62,8 @@ def init(languagetools):
         """
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Translation', textFormat="rich")
 
-    def show_transliteration(selected_text, service, transliteration_key):
-        result = languagetools.get_transliteration(selected_text, service, transliteration_key)
+    def show_transliteration(selected_text, transliteration_option):
+        result = languagetools.get_transliteration(selected_text, transliteration_option)
         text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Transliteration', textFormat="rich")
 
@@ -150,17 +150,13 @@ def init(languagetools):
                     submenu = aqt.qt.QMenu(menu_text, menu)
                     for transliteration_option in transliteration_options:
                         menu_text = transliteration_option['transliteration_name']
-                        def get_transliterate_lambda(selected_text, service, transliteration_key):
+                        def get_transliterate_lambda(selected_text, transliteration_option):
                             def transliterate():
-                                show_transliteration(selected_text, service, transliteration_key)
+                                show_transliteration(selected_text, transliteration_option)
                             return transliterate
-                        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option['service'], transliteration_option['transliteration_key']))
+                        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option))
                     menu.addMenu(submenu)
 
-            # these options don't require text to be selected
-            # nothing for now
-           
-            menu.addMenu(submenu)
 
         # was language detection run ?
         # ============================

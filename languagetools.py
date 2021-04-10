@@ -453,16 +453,7 @@ class LanguageTools():
         return self.interpret_translation_response_async(self.get_translation_async(source_text, translation_option))
 
     def get_translation_all(self, source_text, from_language, to_language):
-        if not self.check_api_key_valid():
-            return
-
-        response = requests.post(self.base_url + '/translate_all', json={
-                'text': source_text,
-                'from_language': from_language,
-                'to_language': to_language
-        }, headers={'api_key': self.config['api_key']})
-        data = json.loads(response.content)        
-        return data
+        return self.cloud_language_tools.get_translation_all(self.config['api_key'], source_text, from_language, to_language)
     
     def get_transliteration_async(self, source_text, transliteration_option):
         return self.cloud_language_tools.get_transliteration(self.config['api_key'], source_text, transliteration_option)

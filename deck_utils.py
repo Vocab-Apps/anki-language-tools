@@ -104,7 +104,7 @@ class DeckUtils():
 
     # given a deck id, model id and field name, build DNTF
     def build_deck_note_type_field(self, deck_id, model_id, field_name) -> DeckNoteTypeField:
-        deck_note_type = build_deck_note_type(deck_id, model_id)
+        deck_note_type = self.build_deck_note_type(deck_id, model_id)
         return DeckNoteTypeField(deck_note_type, field_name)
 
     # given a deck name, model name and field name, build the DNTF
