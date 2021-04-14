@@ -369,6 +369,9 @@ class LanguageTools():
 
         return self.config.get(constants.CONFIG_BATCH_TRANSLATION, {}).get(model_name, {}).get(deck_name, {})
 
+    def get_batch_translation_setting_field(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
+        return self.get_batch_translation_settings(deck_note_type_field.deck_note_type).get(deck_note_type_field.field_name, None)
+
     def get_batch_transliteration_settings(self, deck_note_type: deck_utils.DeckNoteType):
         model_name = deck_note_type.model_name
         deck_name = deck_note_type.deck_name

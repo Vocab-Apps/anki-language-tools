@@ -19,6 +19,7 @@ from . import constants
 from . import errors
 from . import deck_utils
 from .languagetools import LanguageTools
+from . import editor_processing
 
 
 def get_field_id(deck_note_type_field: deck_utils.DeckNoteTypeField):
@@ -85,6 +86,8 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
     aqt.mw.taskman.run_in_background(request_transformation_fn, 
                                      get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, field_value, interpret_response_fn))
 
+def load_choose_translation(languagetools, editor: aqt.editor.Editor, field_value: str):
+    pass
 
 
 def load_translation(languagetools, editor: aqt.editor.Editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, translation_option: Dict):
@@ -130,22 +133,8 @@ def load_audio(languagetools, editor: aqt.editor.Editor, original_note_id, field
 
     load_transformation(languagetools, editor, original_note_id, field_value, to_deck_note_type_field, get_request_audio_lambda(languagetools, field_value, voice), interpret_response_fn)
 
-
-def editor_get_decknotetype(editor, languagetools):
-    note = editor.note
-    if note == None:
-        raise languagetools.AnkiNoteEditorError(f'editor.note not found')
-
-    if editor.addMode:
-        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_addcard(note, editor.parentWindow)
-    else:
-        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_note_card(note, editor.card)
-
-    return deck_note_type
-
-
 def editor_get_dntf(editor, languagetools, field_index):
-    deck_note_type = editor_get_decknotetype(editor, languagetools)
+    deck_note_type = languagetools.deck_utils.build_deck_note_type_from_editor(editor)
     deck_note_type_field = languagetools.deck_utils.get_dntf_from_fieldindex(deck_note_type, field_index)
     return deck_note_type_field
 
@@ -163,7 +152,7 @@ def init(languagetools):
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
-        deck_note_type = editor_get_decknotetype(editor, languagetools)
+        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_editor(editor)
 
         model = note.model()
         fields = model['flds']
@@ -176,7 +165,10 @@ def init(languagetools):
             dntf = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
             field_language = languagetools.get_language(dntf)
             if field_language != None:
-                if field_language == constants.SpecialLanguage.sound.name:
+                if languagetools.get_batch_translation_setting_field(dntf) != None:
+                    # add translation settings
+                    field_type = 'translation'
+                elif field_language == constants.SpecialLanguage.sound.name:
                     # add_play_sound_collection(editor, index, field_name)
                     field_type = 'sound'
                 elif field_language in languagetools.get_voice_selection_settings(): # is there a voice associated with this language ?
@@ -205,6 +197,10 @@ def init(languagetools):
 
             languagetools.anki_utils.play_anki_sound_tag(sound_tag)
             return handled
+
+        if str.startswith('choosetranslation:'):
+            editor_processing.process_choosetranslation(editor, languagetools, str)
+            return True, None
 
         if str.startswith('ttsspeak:'):
             logging.debug(f'ttsspeak command: [{str}]')

@@ -45,6 +45,13 @@ function configure_languagetools_fields(options) {
                 elements[0].remove();
             }
 
+            if(old_field_type == "translation") {
+                var elements = field.getElementsByClassName("class-language-field");
+                elements[0].remove();
+                elements = field.getElementsByClassName("class-translation-field");
+                elements[0].remove();                
+            }
+
             if(old_field_type == "sound") {
                 var elements = field.getElementsByClassName("class-sound-field");
                 elements[0].remove();
@@ -64,6 +71,34 @@ function configure_languagetools_fields(options) {
                 );
                 field.labelContainer.appendChild(speakButton);
             }
+
+            if( field_type == 'translation') {
+                // speak button
+                const speakButton = document.createElement('button');
+                speakButton.classList.add('field-label-element');
+                speakButton.classList.add('class-language-field');
+                speakButton.innerText = 'Speak';
+                speakButton.addEventListener(
+                    'click',
+                    (() => {
+                        pycmd('ttsspeak:' + field_id)
+                    }),
+                );
+                field.labelContainer.appendChild(speakButton);
+
+                // choose translation button
+                const translationButton = document.createElement('button');
+                translationButton.classList.add('field-label-element');
+                translationButton.classList.add('class-translation-field');
+                translationButton.innerText = 'Choose Translation';
+                translationButton.addEventListener(
+                    'click',
+                    (() => {
+                        pycmd('choosetranslation:' + field_id)
+                    }),
+                );
+                field.labelContainer.appendChild(translationButton);
+            }            
 
             if( field_type == 'sound') {
                 const speakButton = document.createElement('button');

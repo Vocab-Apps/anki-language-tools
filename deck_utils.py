@@ -89,6 +89,18 @@ class DeckUtils():
         deck_note_type = self.build_deck_note_type(deck_id, model_id)
         return deck_note_type    
 
+    def build_deck_note_type_from_editor(self, editor):
+        note = editor.note
+        if note == None:
+            raise errors.AnkiNoteEditorError(f'editor.note not found')
+
+        if editor.addMode:
+            deck_note_type = self.build_deck_note_type_from_addcard(note, editor.parentWindow)
+        else:
+            deck_note_type = self.build_deck_note_type_from_note_card(note, editor.card)
+
+        return deck_note_type
+
     # given deck id, model id, build DNT
     def build_deck_note_type(self, deck_id, model_id) -> DeckNoteType:
         model = self.anki_utils.get_model(model_id)
