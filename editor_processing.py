@@ -37,8 +37,9 @@ def process_choosetranslation(editor, languagetools, str):
         return languagetools.get_translation_all(from_text, from_language, to_language)
 
     def load_translation_all_done(fut):
+        languagetools.anki_utils.stop_progress_bar()
         data = fut.result()
         logging.debug(f'all translations: {data}')
 
-
+    languagetools.anki_utils.show_progress_bar("retrieving all translations")
     languagetools.anki_utils.run_in_background(load_translation_all, load_translation_all_done)

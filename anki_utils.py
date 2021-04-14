@@ -87,3 +87,9 @@ class AnkiUtils():
 
     def play_sound(self, filename):
         aqt.sound.av_player.play_file(filename)
+
+    def show_progress_bar(self, message):
+        aqt.mw.progress.start(immediate=True, label=f'{constants.MENU_PREFIX} {message}')
+
+    def stop_progress_bar(self):
+        aqt.mw.progress.finish()
