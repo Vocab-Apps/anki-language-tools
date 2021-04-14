@@ -1,4 +1,10 @@
 import logging
+import sys
+
+if hasattr(sys, '_pytest_mode'):
+    import errors
+else:
+    from . import errors
 
 def process_choosetranslation(editor, languagetools, str):
     logging.debug(f'choosetranslation command: [{str}]')
@@ -7,8 +13,7 @@ def process_choosetranslation(editor, languagetools, str):
     field_index = int(field_index_str)
 
     note = editor.note
-    source_text = note.fields[field_index]
-    logging.debug(f'source_text: {source_text}')
+    current_translation_text = note.fields[field_index]
 
     deck_note_type = languagetools.deck_utils.build_deck_note_type_from_editor(editor)
 
@@ -16,5 +21,24 @@ def process_choosetranslation(editor, languagetools, str):
     translation_from_field = languagetools.get_batch_translation_setting_field(target_dntf)
     from_field = translation_from_field['from_field']
     from_dntf = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, from_field)
+    from_text = note[from_field]
 
     logging.debug(f'from field: {from_dntf} target field: {target_dntf}')
+
+    # get to and from languages
+    from_language = languagetools.get_language(from_dntf)
+    to_language = languagetools.get_language(target_dntf)
+    if from_language == None:
+        raise errors.FieldLanguageMappingError(from_dntf)
+    if to_language == None:
+        raise errors.FieldLanguageMappingError(target_dntf)
+
+    def load_translation_all():
+        return languagetools.get_translation_all(from_text, from_language, to_language)
+
+    def load_translation_all_done(fut):
+        data = fut.result()
+        logging.debug(f'all translations: {data}')
+
+
+    languagetools.anki_utils.run_in_background(load_translation_all, load_translation_all_done)
