@@ -13,6 +13,7 @@ git push origin ${GIT_TAG}
 # remove meta.json, which contains private key
 rm meta.json
 rm -rf __pycache__
+rm user_files/*.mp3
 ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION_NUMBER}.ankiaddon
 zip -r ${ADDON_FILENAME} *
 
