@@ -34,6 +34,12 @@ class NoteTableModel(QtCore.QAbstractTableModel):
         self.from_field = 'From'
         self.to_field = 'To'
 
+    def flags(self, index):
+        if index.column() == 1: # second column is editable
+            return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+        # return default
+        return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+
     def setFromField(self, field_name):
         self.from_field = field_name
         self.headerDataChanged.emit(QtCore.Qt.Horizontal, 0, 1)
@@ -66,15 +72,29 @@ class NoteTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return QtCore.QVariant()
-        elif role != QtCore.Qt.DisplayRole:
-            return QtCore.QVariant()
+        elif role != QtCore.Qt.DisplayRole and role != QtCore.Qt.EditRole: # only support display and edit
+           return QtCore.QVariant()
         if index.column() == 0:
             # from field
             return QtCore.QVariant(self.from_field_data[index.row()])
         else:
             # result field
             return QtCore.QVariant(self.to_field_data[index.row()])
-            return QtCore.QVariant('')
+
+    def setData(self, index, value, role):
+        if index.column() != 1:
+            return False
+        if index.isValid() and role == QtCore.Qt.EditRole:
+            # memorize the value
+            row = index.row()
+            self.to_field_data[row] = value
+            # emit change signal
+            start_index = self.createIndex(row, 1)
+            end_index = self.createIndex(row, 1)
+            self.dataChanged.emit(start_index, end_index)            
+            return True
+        else:
+            return False
 
     def headerData(self, col, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
@@ -448,20 +468,17 @@ class BatchConversionDialog(aqt.qt.QDialog):
 
         try:
             i = 0
-            self.to_field_data = []
             for field_data in self.from_field_data:
                 if self.transformation_type == constants.TransformationType.Translation:
                     translation_result = self.languagetools.get_translation(field_data, self.translation_option)
                 elif self.transformation_type == constants.TransformationType.Transliteration:
                     translation_result = self.languagetools.get_transliteration(field_data, self.transliteration_option)
-                self.to_field_data.append(translation_result)
                 aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
                 i += 1
                 aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
             aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
             aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
         except errors.LanguageToolsRequestError as e:
-            self.to_field_data.append('')
             self.load_errors.append(e)
 
         aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
@@ -486,7 +503,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         for (note_id, i) in zip(self.note_id_list, range(len(self.note_id_list))):
             #print(f'note_id: {note_id} i: {i}')
             note = aqt.mw.col.getNote(note_id)
-            note[self.to_field] = self.to_field_data[i]
+            note[self.to_field] = self.noteTableModel.to_field_data[i]
             # print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
             note.flush()
         self.close()
