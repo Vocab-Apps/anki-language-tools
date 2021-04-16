@@ -44,7 +44,10 @@ def process_choosetranslation(editor, languagetools, str):
             data = fut.result()
             # logging.debug(f'all translations: {data}')
             dialog = dialog_choosetranslation.prepare_dialog(languagetools, from_text, from_language, to_language, data)
-            dialog.exec_()
+            retval = dialog.exec_()
+            if retval == True:
+                chosen_translation = dialog.selected_translation
+                logging.debug(f'chosen translation: {chosen_translation}')
         return load_translation_all_done
 
     languagetools.anki_utils.show_progress_bar("retrieving all translations")

@@ -91,8 +91,11 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
     def on_translation_selected(self):
         radio_button = self.sender()
         if radio_button.isChecked():
+            self.applyButton.setEnabled(True)
+            self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
             selected_service = radio_button.service
             logging.debug(f'selected service: {selected_service}')
+            self.selected_translation = self.all_translations[selected_service]
 
 
 
