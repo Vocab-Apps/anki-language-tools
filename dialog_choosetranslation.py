@@ -1,4 +1,5 @@
 import sys
+import logging
 import PyQt5
 
 if hasattr(sys, '_pytest_mode'):
@@ -23,7 +24,7 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
 
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 500)
+        self.resize(500, 350)
 
         vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
 
@@ -34,14 +35,23 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
 
         i = 0
         for key, value in self.all_translations.items():
+            service_radio_button = PyQt5.QtWidgets.QRadioButton()
+            service_radio_button.service = key
+            service_radio_button.toggled.connect(self.on_translation_selected)
             service_label = PyQt5.QtWidgets.QLabel()
             service_label.setText(f'<b>{key}</b>')
             translation_label = PyQt5.QtWidgets.QLabel()
-            translation_label.setText(f'<b>{value}</b>')
-            translation_gridlayout.addWidget(service_label, i, 0, 1, 1)
-            translation_gridlayout.addWidget(translation_label, i, 1, 1, 1)
+            translation_label.setText(f'{value}')
+            translation_gridlayout.addWidget(service_radio_button, i, 0, 1, 1)
+            translation_gridlayout.addWidget(service_label, i, 1, 1, 1)
+            translation_gridlayout.addWidget(translation_label, i, 2, 1, 1)
             i += 1
+        translation_gridlayout.setColumnStretch(0, 5)
+        translation_gridlayout.setColumnStretch(1, 15)
+        translation_gridlayout.setColumnStretch(2, 80)
         vlayout.addLayout(translation_gridlayout)
+
+        vlayout.addStretch()
 
         # buttom buttons
         buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
@@ -51,7 +61,15 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)        
         vlayout.addWidget(buttonBox)
+    
+    def on_translation_selected(self):
+        radio_button = self.sender()
+        if radio_button.isChecked():
+            selected_service = radio_button.service
+            logging.debug(f'selected service: {selected_service}')
 
 
 
