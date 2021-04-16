@@ -17,9 +17,14 @@ else:
 
 
 class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
-    def __init__(self, languagetools: LanguageTools, all_translations):
+    def __init__(self, languagetools: LanguageTools, original_text, from_language, to_language, all_translations):
         super(PyQt5.QtWidgets.QDialog, self).__init__()
         self.languagetools = languagetools
+
+        self.original_text = original_text
+        self.from_language = from_language
+        self.to_language = to_language
+
         self.all_translations = all_translations
 
     def setupUi(self):
@@ -27,10 +32,28 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         self.resize(500, 350)
 
         vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
-
         vlayout.addWidget(gui_utils.get_header_label('Choose Translation'))
 
+        # add the source text / languages
+        translation_info_gridlayout = PyQt5.QtWidgets.QGridLayout()
+        vlayout.addLayout(translation_info_gridlayout)
+
+        translation_info_gridlayout.addWidget(gui_utils.get_medium_label('Source Text'), 0, 0, 1, 1)
+        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.original_text), 1, 0, 1, 1)
+        translation_info_gridlayout.addWidget(gui_utils.get_medium_label('From'), 0, 1, 1, 1)
+        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.from_language)), 1, 1, 1, 1)
+        translation_info_gridlayout.addWidget(gui_utils.get_medium_label('To'), 0, 2, 1, 1)
+        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.to_language)), 1, 2, 1, 1)
+
+        translation_info_gridlayout.setColumnStretch(0, 60)
+        translation_info_gridlayout.setColumnStretch(1, 20)
+        translation_info_gridlayout.setColumnStretch(2, 20)
+
+        vlayout.addLayout(translation_info_gridlayout)
+
+
         # add grid with translations
+        vlayout.addWidget(gui_utils.get_medium_label('Translations Available'))
         translation_gridlayout = PyQt5.QtWidgets.QGridLayout()
 
         i = 0
@@ -73,7 +96,7 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
 
 
 
-def prepare_dialog(languagetools, all_translations):
-    dialog = ChooseTranslationDialog(languagetools, all_translations)
+def prepare_dialog(languagetools, original_text, from_language, to_language, all_translations):
+    dialog = ChooseTranslationDialog(languagetools, original_text, from_language, to_language, all_translations)
     dialog.setupUi()
     return dialog

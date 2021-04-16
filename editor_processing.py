@@ -38,12 +38,14 @@ def process_choosetranslation(editor, languagetools, str):
     def load_translation_all():
         return languagetools.get_translation_all(from_text, from_language, to_language)
 
-    def load_translation_all_done(fut):
-        languagetools.anki_utils.stop_progress_bar()
-        data = fut.result()
-        # logging.debug(f'all translations: {data}')
-        dialog = dialog_choosetranslation.prepare_dialog(languagetools, data)
-        dialog.exec_()
+    def get_done_callback(from_text, from_language, to_language):
+        def load_translation_all_done(fut):
+            languagetools.anki_utils.stop_progress_bar()
+            data = fut.result()
+            # logging.debug(f'all translations: {data}')
+            dialog = dialog_choosetranslation.prepare_dialog(languagetools, from_text, from_language, to_language, data)
+            dialog.exec_()
+        return load_translation_all_done
 
     languagetools.anki_utils.show_progress_bar("retrieving all translations")
-    languagetools.anki_utils.run_in_background(load_translation_all, load_translation_all_done)
+    languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language))
