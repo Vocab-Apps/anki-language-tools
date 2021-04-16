@@ -100,3 +100,6 @@ class AnkiUtils():
         # update the webview
         js_command = f"""set_field_value({field_index}, "{text}")"""
         editor.web.eval(js_command)        
+
+    def display_dialog(self, dialog):
+        return dialog.exec_()
