@@ -39,11 +39,17 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addLayout(translation_info_gridlayout)
 
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('Source Text'), 0, 0, 1, 1)
-        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.original_text), 1, 0, 1, 1)
+        
+        self.original_text_label = PyQt5.QtWidgets.QLabel(self.original_text)
+        translation_info_gridlayout.addWidget(self.original_text_label, 1, 0, 1, 1)
+        
+        self.from_language_label = PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.from_language))
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('From'), 0, 1, 1, 1)
-        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.from_language)), 1, 1, 1, 1)
+        translation_info_gridlayout.addWidget(self.from_language_label, 1, 1, 1, 1)
+        
+        self.to_language_label = PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.to_language))
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('To'), 0, 2, 1, 1)
-        translation_info_gridlayout.addWidget(PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.to_language)), 1, 2, 1, 1)
+        translation_info_gridlayout.addWidget(self.to_language_label, 1, 2, 1, 1)
 
         translation_info_gridlayout.setColumnStretch(0, 60)
         translation_info_gridlayout.setColumnStretch(1, 20)

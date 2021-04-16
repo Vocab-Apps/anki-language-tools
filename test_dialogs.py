@@ -7,6 +7,7 @@ import PyQt5
 import dialogs
 import dialog_languagemapping
 import dialog_voiceselection
+import dialog_choosetranslation
 import languagetools
 import constants
 import testing_utils
@@ -321,3 +322,24 @@ def test_voice_selection_no_voices(qtbot):
 
 
     # voice_selection_dialog.exec_()
+
+def test_choose_translation(qtbot):
+    # pytest test_dialogs.py -rPP -k test_choose_translation
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    original_text = 'translate this'
+    from_language = 'zh_cn'
+    to_language = 'en'
+
+    all_translations = {
+        'service1': 'bla bla 1',
+        'service2': 'bla bla 2'
+    }
+
+    dialog = dialog_choosetranslation.prepare_dialog(mock_language_tools, original_text, from_language, to_language, all_translations)
+
+    assert dialog.original_text_label.text() == original_text
+    assert dialog.from_language_label.text() == 'Chinese'
+    assert dialog.to_language_label.text() == 'English'
