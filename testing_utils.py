@@ -17,6 +17,7 @@ class MockAnkiUtils():
     def __init__(self, config):
         self.config = config
         self.written_config = None
+        self.editor_set_field_value_called = None
 
     def get_config(self):
         return self.config
