@@ -14,6 +14,7 @@ git push origin ${GIT_TAG}
 rm meta.json
 rm -rf __pycache__
 rm user_files/*.mp3
+rm -rvf htmlcov/
 ADDON_FILENAME=${HOME}/anki-addons-releases/anki-language-tools-${VERSION_NUMBER}.ankiaddon
 zip -r ${ADDON_FILENAME} *
 
