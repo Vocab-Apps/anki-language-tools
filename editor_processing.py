@@ -38,7 +38,7 @@ def process_choosetranslation(editor, languagetools, str):
     def load_translation_all():
         return languagetools.get_translation_all(from_text, from_language, to_language)
 
-    def get_done_callback(from_text, from_language, to_language):
+    def get_done_callback(from_text, from_language, to_language, editor, field_index):
         def load_translation_all_done(fut):
             languagetools.anki_utils.stop_progress_bar()
             data = fut.result()
@@ -47,8 +47,10 @@ def process_choosetranslation(editor, languagetools, str):
             retval = dialog.exec_()
             if retval == True:
                 chosen_translation = dialog.selected_translation
-                logging.debug(f'chosen translation: {chosen_translation}')
+                #logging.debug(f'chosen translation: {chosen_translation}')
+                languagetools.anki_utils.editor_set_field_value(editor, field_index, chosen_translation)
+
         return load_translation_all_done
 
     languagetools.anki_utils.show_progress_bar("retrieving all translations")
-    languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language))
+    languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_index))

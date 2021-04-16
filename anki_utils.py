@@ -93,3 +93,10 @@ class AnkiUtils():
 
     def stop_progress_bar(self):
         aqt.mw.progress.finish()
+
+    def editor_set_field_value(self, editor, field_index, text):
+        # set the field value on the note
+        editor.note.fields[field_index] = text
+        # update the webview
+        js_command = f"""set_field_value({field_index}, "{text}")"""
+        editor.web.eval(js_command)        
