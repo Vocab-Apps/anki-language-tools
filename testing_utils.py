@@ -5,6 +5,14 @@ import constants
 import deck_utils
 import languagetools
 
+class MockFuture():
+    def __init__(self, result_data):
+        self.result_data = result_data
+
+    def result(self):
+        return self.result_data
+
+
 class MockAnkiUtils():
     def __init__(self, config):
         self.config = config
@@ -54,7 +62,7 @@ class MockAnkiUtils():
     def run_in_background(self, task_fn, task_done_fn):
         # just run the two tasks immediately
         result = task_fn()
-        task_done_fn(result)
+        task_done_fn(MockFuture(result))
 
     def run_on_main(self, task_fn):
         # just run the task immediately
@@ -72,6 +80,29 @@ class MockAnkiUtils():
         # load the json inside the file
         with open(filename) as json_file:
             self.played_sound = json.load(json_file)
+
+    def show_progress_bar(self, message):
+        self.show_progress_bar_called = True
+
+    def stop_progress_bar(self):
+        self.stop_progress_bar_called = True
+
+    def editor_set_field_value(self, editor, field_index, text):
+        self.editor_set_field_value_called = {
+            'field_index': field_index,
+            'text': text
+        }
+
+    def display_dialog(self, dialog):
+        # currently only used for the choose translation dialog
+
+        if self.display_dialog_behavior == 'choose_serviceB':
+            # choose second translation available
+            dialog.selected_translation = dialog.all_translations['serviceB']
+            return True
+        
+        if self.display_dialog_behavior == 'cancel':
+            return False
 
 class MockCloudLanguageTools():
     def __init__(self):
@@ -230,6 +261,25 @@ class MockCloudLanguageTools():
         encoded_dict = json.dumps(self.requested_audio, indent=2).encode('utf-8')
         return encoded_dict
 
+    def get_translation_all(self, api_key, source_text, from_language, to_language):
+        return self.translate_all_result[source_text]
+
+class MockCard():
+    def __init__(self, deck_id):
+        self.did = deck_id
+
+class MockNote():
+    def __init__(self, model_id, field_dict, field_array):
+        self.mid = model_id
+        self.field_dict = field_dict
+        self.fields = field_array
+    
+    def __getitem__(self, key):
+        return self.field_dict[key]
+
+class MockEditor():
+    def __init__(self):
+        self.addMode = False
 
 class TestConfigGenerator():
     def __init__(self):
@@ -294,6 +344,19 @@ class TestConfigGenerator():
         }
         return base_config
 
+    def get_config_batch_translation(self):
+        base_config = self.get_default_config()
+        base_config[constants.CONFIG_BATCH_TRANSLATION] = {
+            self.model_name: {
+                self.deck_name: {
+                   self.field_english: {
+                       'from_field': self.field_chinese
+                   }
+                }
+            }
+        }
+        return base_config        
+
     def get_config_language_no_voices(self):
         base_config = self.get_default_config()
         base_config[constants.CONFIG_WANTED_LANGUAGES]['mg'] = True
@@ -306,6 +369,7 @@ class TestConfigGenerator():
             'default': self.get_default_config,
             'no_language_mapping': self.get_config_no_language_mapping,
             'batch_audio': self.get_config_batch_audio,
+            'batch_translation': self.get_config_batch_translation,
             'get_config_language_no_voices': self.get_config_language_no_voices
         }
 
@@ -374,6 +438,18 @@ class TestConfigGenerator():
             }
         }
         return notes_by_id, notes
+
+    def get_mock_editor_with_note(self, note_id):
+        editor = MockEditor()
+        editor.card = MockCard(self.deck_id)
+        field_array = []
+        notes_by_id, notes = self.get_notes()
+        note_data = notes_by_id[note_id]        
+        for field_entry in self.get_model_map()[self.model_id]['flds']:
+            field_name = field_entry['name']
+            field_array.append(note_data[field_name])
+        editor.note = MockNote(self.model_id, note_data, field_array)
+        return editor
 
 
     def build_languagetools_instance(self, scenario):
