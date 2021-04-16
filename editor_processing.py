@@ -3,8 +3,10 @@ import sys
 
 if hasattr(sys, '_pytest_mode'):
     import errors
+    import dialog_choosetranslation
 else:
     from . import errors
+    from . import dialog_choosetranslation
 
 def process_choosetranslation(editor, languagetools, str):
     logging.debug(f'choosetranslation command: [{str}]')
@@ -39,7 +41,9 @@ def process_choosetranslation(editor, languagetools, str):
     def load_translation_all_done(fut):
         languagetools.anki_utils.stop_progress_bar()
         data = fut.result()
-        logging.debug(f'all translations: {data}')
+        # logging.debug(f'all translations: {data}')
+        dialog = dialog_choosetranslation.prepare_dialog(languagetools, data)
+        dialog.exec_()
 
     languagetools.anki_utils.show_progress_bar("retrieving all translations")
     languagetools.anki_utils.run_in_background(load_translation_all, load_translation_all_done)
