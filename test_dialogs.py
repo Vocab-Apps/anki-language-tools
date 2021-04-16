@@ -359,4 +359,14 @@ def test_choose_translation(qtbot):
     translation_2 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'translation_label_1')
     assert translation_2.text() == 'second translation'
 
-    
+    # pick second translation
+    radio_button = dialog.findChild(PyQt5.QtWidgets.QRadioButton, 'radio_button_1')
+    radio_button.click()
+
+    # apply button should be enabled
+    assert dialog.apply_button.isEnabled() == True
+    qtbot.mouseClick(dialog.apply_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # verify translation retained
+    assert dialog.selected_translation == 'second translation'
+
