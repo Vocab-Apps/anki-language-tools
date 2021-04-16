@@ -1235,7 +1235,7 @@ class YomichanDialog(aqt.qt.QDialog):
         service = self.japanese_voice['service']
         url_params = f"api_key={api_key}&service={service}&voice_key={voice_key_str}&text={'{'}expression{'}'}"
         url_end = f'yomichan_audio?{url_params}'        
-        full_url = self.languagetools.base_url + '/' + url_end
+        full_url = self.languagetools.cloud_language_tools.base_url + '/' + url_end
 
         QtWidgets.QApplication.clipboard().setText(full_url)
 
