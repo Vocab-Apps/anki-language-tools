@@ -65,12 +65,15 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         i = 0
         for key, value in self.all_translations.items():
             service_radio_button = PyQt5.QtWidgets.QRadioButton()
+            service_radio_button.setObjectName(f'radio_button_{i}')
             service_radio_button.service = key
             service_radio_button.toggled.connect(self.on_translation_selected)
             service_label = PyQt5.QtWidgets.QLabel()
             service_label.setText(f'<b>{key}</b>')
+            service_label.setObjectName(f'service_label_{i}')
             translation_label = PyQt5.QtWidgets.QLabel()
             translation_label.setText(f'{value}')
+            translation_label.setObjectName(f'translation_label_{i}')
             translation_gridlayout.addWidget(service_radio_button, i, 0, 1, 1)
             translation_gridlayout.addWidget(service_label, i, 1, 1, 1)
             translation_gridlayout.addWidget(translation_label, i, 2, 1, 1)
@@ -84,12 +87,12 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
 
         # buttom buttons
         buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
-        self.applyButton.setObjectName('apply')
-        self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setObjectName('cancel')
-        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
+        self.apply_button = buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        self.apply_button.setObjectName('apply')
+        self.apply_button.setEnabled(False)
+        self.cancel_button = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancel_button.setObjectName('cancel')
+        self.cancel_button.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)        
         vlayout.addWidget(buttonBox)
@@ -97,8 +100,8 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
     def on_translation_selected(self):
         radio_button = self.sender()
         if radio_button.isChecked():
-            self.applyButton.setEnabled(True)
-            self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
+            self.apply_button.setEnabled(True)
+            self.apply_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
             selected_service = radio_button.service
             logging.debug(f'selected service: {selected_service}')
             self.selected_translation = self.all_translations[selected_service]

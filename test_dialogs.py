@@ -334,8 +334,8 @@ def test_choose_translation(qtbot):
     to_language = 'en'
 
     all_translations = {
-        'service1': 'bla bla 1',
-        'service2': 'bla bla 2'
+        'serviceA': 'first translation',
+        'serviceB': 'second translation'
     }
 
     dialog = dialog_choosetranslation.prepare_dialog(mock_language_tools, original_text, from_language, to_language, all_translations)
@@ -343,3 +343,20 @@ def test_choose_translation(qtbot):
     assert dialog.original_text_label.text() == original_text
     assert dialog.from_language_label.text() == 'Chinese'
     assert dialog.to_language_label.text() == 'English'
+
+    # first, apply button should be disabled
+    assert dialog.apply_button.isEnabled() == False
+
+    # check that services and translations are present
+    # services
+    service_1 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'service_label_0')
+    assert service_1.text() == '<b>serviceA</b>'
+    service_2 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'service_label_1')
+    assert service_2.text() == '<b>serviceB</b>'
+    # translations
+    translation_1 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'translation_label_0')
+    assert translation_1.text() == 'first translation'
+    translation_2 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'translation_label_1')
+    assert translation_2.text() == 'second translation'
+
+    
