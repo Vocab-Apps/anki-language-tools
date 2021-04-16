@@ -1136,9 +1136,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
                             field_data = note[from_field]
                             transliteration_option = setting['transliteration_option']
-                            service = transliteration_option['service']
-                            transliteration_key = transliteration_option['transliteration_key']
-                            transliteration_result = self.languagetools.get_transliteration(field_data, service, transliteration_key)
+                            transliteration_result = self.languagetools.get_transliteration(field_data, transliteration_option)
                             note[to_field] = transliteration_result
                             self.success_count += 1
                         except Exception as err:
