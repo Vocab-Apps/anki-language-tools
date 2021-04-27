@@ -214,9 +214,10 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         self.play_audio_error = None
         voice_key = voice['voice_key']
         service = voice['service']
+        language_code = voice['language_code']
 
         try:
-            self.languagetools.play_tts_audio(source_text, service, voice_key, {})
+            self.languagetools.play_tts_audio(source_text, service, language_code, voice_key, {})
         except errors.LanguageToolsRequestError as err:
             self.play_audio_error = str(err)
 

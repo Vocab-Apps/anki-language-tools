@@ -228,9 +228,10 @@ def init(languagetools):
                 def play_audio(languagetools, source_text, voice):
                     voice_key = voice['voice_key']
                     service = voice['service']
+                    language_code = voice['language_code']
 
                     try:
-                        filename = languagetools.get_tts_audio(source_text, service, voice_key, {})
+                        filename = languagetools.get_tts_audio(source_text, service, language_code, voice_key, {})
                         if filename != None:
                             aqt.sound.av_player.play_file(filename)
                     except errors.LanguageToolsRequestError as err:

@@ -498,7 +498,7 @@ class LanguageTools():
     def generate_audio_tag_collection(self, source_text, voice):
         result = {'sound_tag': None,
                   'full_filename': None}
-        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['voice_key'], {})
+        generated_filename = self.get_tts_audio(source_text, voice['service'], voice['language_code'], voice['voice_key'], {})
         if generated_filename != None:
             full_filename = aqt.mw.col.media.addFile(generated_filename)
             collection_filename = os.path.basename(full_filename)
@@ -541,19 +541,19 @@ class LanguageTools():
         filename = f'languagetools-{hash_str}.mp3'
         return os.path.join(user_files_dir, filename)
 
-    def get_tts_audio(self, source_text, service, voice_key, options):
+    def get_tts_audio(self, source_text, service, language_code, voice_key, options):
         filename = self.get_audio_filename(source_text, service, voice_key, options)
         if os.path.isfile(filename):
             return filename
-        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], source_text, service, voice_key, options)
+        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], source_text, service, language_code, voice_key, options)
         with open(filename, 'wb') as f:
             f.write(audio_content)
         f.close()
         logging.info(f'wrote audio filename {filename}')
         return filename
 
-    def play_tts_audio(self, source_text, service, voice_key, options):
-        audio_filename = self.get_tts_audio(source_text, service, voice_key, options)
+    def play_tts_audio(self, source_text, service, language_code, voice_key, options):
+        audio_filename = self.get_tts_audio(source_text, service, language_code, voice_key, options)
         self.anki_utils.play_sound(audio_filename)
 
     def get_tts_voice_list(self):

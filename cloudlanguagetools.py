@@ -5,6 +5,7 @@ import logging
 
 from . import constants
 from . import errors
+from . import version
 
 class CloudLanguageTools():
     def __init__(self):
@@ -51,15 +52,19 @@ class CloudLanguageTools():
         data = json.loads(response.content)
         return data
 
-    def get_tts_audio(self, api_key, source_text, service, voice_key, options):
-        url_path = '/audio'
+    def get_tts_audio(self, api_key, source_text, service, language_code, voice_key, options):
+        url_path = '/audio_v2'
         data = {
             'text': source_text,
             'service': service,
             'voice_key': voice_key,
+            'request_mode': 'batch',
+            'language_code': language_code,
+            'deck_name': 'n/a',
             'options': options
         }
-        response = requests.post(self.base_url + url_path, json=data, headers={'api_key': api_key})
+        response = requests.post(self.base_url + url_path, json=data, 
+            headers={'api_key': api_key, 'client': constants.CLIENT_NAME, 'client_version': version.ANKI_LANGUAGE_TOOLS_VERSION})
 
         if response.status_code == 200:
             return response.content
