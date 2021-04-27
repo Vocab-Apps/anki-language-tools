@@ -2,5 +2,6 @@ meta.json
 __pycache__/
 temp/
 .coverage
+.vscode/
 htmlcov/
 user_files/*.mp3
