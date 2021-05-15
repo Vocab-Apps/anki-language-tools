@@ -1,4 +1,7 @@
 
+# pyqt
+import PyQt5
+
 # anki imports
 import aqt.qt
 import aqt.editor
@@ -17,6 +20,10 @@ from . import deck_utils
 def init(languagetools):
 
     # add context menu handler
+
+    def show_getting_started():
+        url = PyQt5.QtCore.QUrl('https://languagetools.anki.study/tutorials/language-tools-getting-started')
+        PyQt5.QtGui.QDesktopServices.openUrl(url)
 
     def show_language_mapping():
         dialogs.language_mapping_dialogue(languagetools)
@@ -185,6 +192,10 @@ def init(languagetools):
 
     # add menu items to anki deck picker / main screen
     # ================================================
+    
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Getting Started", aqt.mw)
+    action.triggered.connect(show_getting_started)
+    aqt.mw.form.menuTools.addAction(action)
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Language Mapping", aqt.mw)
     action.triggered.connect(show_language_mapping)
