@@ -15,6 +15,7 @@ if hasattr(sys, '_pytest_mode'):
     import errors
     import dialog_languagemapping
     import dialog_voiceselection
+    import dialog_apikey
     from languagetools import LanguageTools
 else:
     from . import constants
@@ -23,6 +24,7 @@ else:
     from . import errors
     from . import dialog_languagemapping
     from . import dialog_voiceselection
+    from . import dialog_apikey
     from .languagetools import LanguageTools
 
 
@@ -1392,4 +1394,9 @@ def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_li
 
     dialog = NoteSettingsDialog(languagetools, deck_note_type)
     dialog.setupUi()
+    dialog.exec_()
+
+
+def show_api_key_dialog(languagetools):
+    dialog = dialog_apikey.prepare_api_key_dialog(languagetools)
     dialog.exec_()

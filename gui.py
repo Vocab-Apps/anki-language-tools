@@ -34,6 +34,9 @@ def init(languagetools):
     def show_yomichan_integration():
         dialogs.yomichan_dialog(languagetools)
 
+    def show_api_key_dialog():
+        dialogs.show_api_key_dialog(languagetools)
+
     def show_change_language(deck_note_type_field: deck_utils.DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
 
@@ -206,7 +209,7 @@ def init(languagetools):
     aqt.mw.form.menuTools.addAction(action)
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key", aqt.mw)
-    action.triggered.connect(languagetools.run_api_key_verification)
+    action.triggered.connect(show_api_key_dialog)
     aqt.mw.form.menuTools.addAction(action)    
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Yomichan Integration", aqt.mw)
