@@ -515,7 +515,6 @@ class BatchConversionDialog(aqt.qt.QDialog):
             self.languagetools.store_batch_translation_setting(deck_note_type_field, self.from_field, self.translation_option)
         elif self.transformation_type == constants.TransformationType.Transliteration:
             self.languagetools.store_batch_transliteration_setting(deck_note_type_field, self.from_field, self.transliteration_option)
-        aqt.utils.tooltip(f'Wrote data into field {self.to_field}')
 
 class AddAudioDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list):
@@ -1026,7 +1025,6 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
             self.languagetools.remove_audio_setting(dntf)
         
         self.close()
-        aqt.utils.tooltip(f'Saved Settings')
 
 class RunRulesDialog(NoteSettingsDialogBase):
     def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list):

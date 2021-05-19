@@ -284,7 +284,7 @@ class LanguageTools():
         # retrieve notes
         return self.perform_language_detection_deck_note_type_field(deck_note_type_field)
 
-    def store_language_detection_result(self, deck_note_type_field: deck_utils.DeckNoteTypeField, language, tooltip=False):
+    def store_language_detection_result(self, deck_note_type_field: deck_utils.DeckNoteTypeField, language):
         # write per-deck detected languages
 
         model_name = deck_note_type_field.get_model_name()
@@ -307,9 +307,6 @@ class LanguageTools():
 
         self.anki_utils.write_config(self.config)
 
-        if tooltip:
-            aqt.utils.tooltip(f'Set {deck_note_type_field} to {self.get_language_name(language)}')
- 
     def store_batch_translation_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField, source_field: str, translation_option):
         model_name = deck_note_type_field.get_model_name()
         deck_name = deck_note_type_field.get_deck_name()

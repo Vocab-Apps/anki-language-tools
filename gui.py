@@ -56,7 +56,7 @@ def init(languagetools):
         chosen_index = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Language for {deck_note_type_field.field_name}', language_list, startrow=current_row)
 
         new_language = language_code_list[chosen_index]
-        languagetools.store_language_detection_result(deck_note_type_field, new_language, tooltip=True)
+        languagetools.store_language_detection_result(deck_note_type_field, new_language)
 
 
     def show_translation(source_text, from_language, to_language):
