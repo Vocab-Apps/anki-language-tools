@@ -424,7 +424,7 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.noteTableModel.setFromFieldData(from_field_data)
 
     def loadTranslations(self):
-        if self.languagetools.check_api_key_valid() == False:
+        if self.languagetools.ensure_api_key_checked() == False:
             return
         if self.transformation_type == constants.TransformationType.Translation:
             if len(self.translation_options) == 0:

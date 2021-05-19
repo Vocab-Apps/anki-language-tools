@@ -350,7 +350,7 @@ class LanguageMappingDialog_UI(object):
             self.languagetools.store_language_detection_result(key, value)
 
     def runLanguageDetection(self):
-        if self.languagetools.check_api_key_valid() == False:
+        if self.languagetools.ensure_api_key_checked() == False:
             return
 
         self.languagetools.anki_utils.run_in_background(self.runLanguageDetectionBackground, self.runLanguageDetectionDone)

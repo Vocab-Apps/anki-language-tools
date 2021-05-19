@@ -79,9 +79,6 @@ class LanguageTools():
     def initializeDone(self, future):
         pass
 
-    def get_api_key_checked(self):
-        return self.api_key_checked
-
     def get_config_api_key(self):
         return self.config['api_key']
 
@@ -99,28 +96,12 @@ class LanguageTools():
             message = result['msg']
             return False, message
 
-    def run_api_key_verification(self):
-        prompt = f"""{constants.MENU_PREFIX} Enter API Key"""
-        (api_key, return_code) = aqt.utils.getText(prompt, title=constants.MENU_PREFIX, default=self.config['api_key'])
-        if return_code == False:
-            return False
-        result = self.cloud_language_tools.api_key_validate_query(api_key)
-        if result['key_valid'] == True:
-            self.config['api_key'] = api_key
-            aqt.mw.addonManager.writeConfig(__name__, self.config)
-            aqt.utils.showInfo(f"API Key is valid: {result['msg']}", title=constants.MENU_PREFIX)
-            self.api_key_checked = True
-            return True
-        else:
-            aqt.utils.showInfo(result['msg'], title=constants.MENU_PREFIX)
-            return False
-
-
-    def check_api_key_valid(self):
+    def ensure_api_key_checked(self):
         # print(f'self.api_key_checked: {self.api_key_checked}')
         if self.api_key_checked:
             return True
-        return self.run_api_key_verification()
+        aqt.utils.showInfo(f'Please enter API key from menu <b>Tools -> Language Tools: Verify API Key</b>', title=constants.MENU_PREFIX)
+        return False
 
 
     def language_detection_done(self):
