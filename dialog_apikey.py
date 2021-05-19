@@ -43,16 +43,31 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         self.api_text_input = PyQt5.QtWidgets.QLineEdit()
         vlayout.addWidget(self.api_text_input)
 
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
+        self.applyButton = self.buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = self.buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
         
         vlayout.addStretch()
-        vlayout.addWidget(buttonBox)
+        vlayout.addWidget(self.buttonBox)
+
+        # wire events
+        self.typing_timer = PyQt5.QtCore.QTimer()
+        self.typing_timer.setSingleShot(True)
+        self.typing_timer.timeout.connect(self.api_key_changed)
+        self.api_text_input.textChanged.connect(self.start_typing_timer)
+
+    def start_typing_timer(self):
+        """Wait until there are no changes for 1 second before making changes."""
+        self.typing_timer.start(1000)
+
+    def api_key_changed(self):
+        print('api_key_changed')
 
 
 
