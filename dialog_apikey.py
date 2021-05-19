@@ -41,6 +41,7 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(signup_label)
 
         self.api_text_input = PyQt5.QtWidgets.QLineEdit()
+        self.api_text_input.setText(self.languagetools.get_config_api_key())
         vlayout.addWidget(self.api_text_input)
 
         self.status_label = PyQt5.QtWidgets.QLabel('Enter API Key')
@@ -65,19 +66,20 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         self.typing_timer.timeout.connect(self.api_key_changed)
         self.api_text_input.textChanged.connect(self.start_typing_timer)
 
+        # run api_key_changed logic once
+        self.api_key_changed()
+
     def start_typing_timer(self):
         """Wait until there are no changes for 1 second before making changes."""
         self.typing_timer.start(1000)
 
     def api_key_changed(self):
-        print('api_key_changed')
         api_key_text = self.api_text_input.text()
         if len(api_key_text) == 0:
             self.status_label.setText('Enter API Key')
             return
         self.status_label.setText('Verifying API Key...')
         self.languagetools.anki_utils.run_in_background(self.verify_api_key_background, self.verify_api_key_done)
-        # is_valid, message = self.languagetools.verify_api_key(api_key_text)
 
     def verify_api_key_background(self):
         api_key_text = self.api_text_input.text()
@@ -94,7 +96,11 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
             self.applyButton.setEnabled(False)
             self.applyButton.setStyleSheet(None)
 
-
+    def accept(self):
+        # store api key into config
+        api_key_text = self.api_text_input.text()
+        self.languagetools.set_config_api_key(api_key_text)
+        self.close()
 
 def prepare_api_key_dialog(languagetools):
     dialog = ApiKeyDialog(languagetools)

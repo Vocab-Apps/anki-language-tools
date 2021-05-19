@@ -82,6 +82,14 @@ class LanguageTools():
     def get_api_key_checked(self):
         return self.api_key_checked
 
+    def get_config_api_key(self):
+        return self.config['api_key']
+
+    def set_config_api_key(self, api_key):
+        self.config['api_key'] = api_key
+        self.anki_utils.write_config(self.config)
+        self.api_key_checked = True
+
     def verify_api_key(self, api_key):
         result = self.cloud_language_tools.api_key_validate_query(api_key)
         if result['key_valid'] == True:
