@@ -260,7 +260,7 @@ class MockCloudLanguageTools():
 
         return {
             'key_valid': self.verify_api_key_is_valid,
-            'msg': 'api key valid yo'
+            'msg': f'api key: {self.verify_api_key_is_valid}'
         }     
 
     def language_detection(self, api_key, field_sample):

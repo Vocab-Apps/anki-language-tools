@@ -404,46 +404,25 @@ def test_api_key(qtbot):
 
     # type in a fake API key
     mock_language_tools.cloud_language_tools.verify_api_key_is_valid = False
-    # dialog.api_text_input.setText('dummykey1')
     qtbot.keyClicks(dialog.api_text_input, 'dummykey1')
 
     assert mock_language_tools.cloud_language_tools.verify_api_key_called == True
     assert mock_language_tools.cloud_language_tools.verify_api_key_input == 'dummykey1'
+
+    assert dialog.applyButton.isEnabled() == False
     
+    # type in a valid API key
+    mock_language_tools.cloud_language_tools.verify_api_key_is_valid = True
+    dialog.api_text_input.clear()
+    qtbot.keyClicks(dialog.api_text_input, 'validkey1')
 
+    assert mock_language_tools.cloud_language_tools.verify_api_key_called == True
+    assert mock_language_tools.cloud_language_tools.verify_api_key_input == 'validkey1'
 
-    
-    # # assert deck name, note type, and 3 fields
-    # deck_frame = mapping_dialog.findChild(PyQt5.QtWidgets.QFrame, f'frame_{config_gen.deck_name}')
-    # assert deck_frame != None
-    # deck_name_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'deck_name_{config_gen.deck_name}')
-    # assert deck_name_label.text() == config_gen.deck_name
-    # note_type_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'note_type_name_{config_gen.deck_name}_{config_gen.model_name}')
-    # assert note_type_label.text() == config_gen.model_name
+    assert dialog.applyButton.isEnabled() == True
 
-    # # look for labels on all 3 fields
-    # for field_name in config_gen.all_fields:
-    #     field_label_obj_name = f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
-    #     field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, field_label_obj_name)
-    #     assert field_label.text() == field_name
+    # click OK
+    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
 
-    # # none of the languages should be set
-    # for field_name in config_gen.all_fields:
-    #     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
-    #     field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
-    #     assert field_language != None
-    #     # ensure the "not set" option is selected
-    #     assert field_language.currentText() == 'Not Set'
-
-    # # now, set languages manually
-    # # ---------------------------
-
-    # field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
-    # field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
-    # qtbot.keyClicks(field_language_combobox, 'Chinese')
-    # field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
-    # field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
-    # qtbot.keyClicks(field_language_combobox, 'English')
-
-    # apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
-    # qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+    # verify that API key in config is correct
+    assert mock_language_tools.anki_utils.written_config['api_key'] == 'validkey1'
