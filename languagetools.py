@@ -82,6 +82,15 @@ class LanguageTools():
     def get_api_key_checked(self):
         return self.api_key_checked
 
+    def verify_api_key(self, api_key):
+        result = self.cloud_language_tools.api_key_validate_query(api_key)
+        if result['key_valid'] == True:
+            message = result['msg']
+            return True, message
+        else:
+            message = result['msg']
+            return False, message
+
     def run_api_key_verification(self):
         prompt = f"""{constants.MENU_PREFIX} Enter API Key"""
         (api_key, return_code) = aqt.utils.getText(prompt, title=constants.MENU_PREFIX, default=self.config['api_key'])
