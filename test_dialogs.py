@@ -426,3 +426,4 @@ def test_api_key(qtbot):
 
     # verify that API key in config is correct
     assert mock_language_tools.anki_utils.written_config['api_key'] == 'validkey1'
+    assert mock_language_tools.api_key_checked == True
