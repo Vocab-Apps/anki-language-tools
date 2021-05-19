@@ -69,6 +69,11 @@ class MockAnkiUtils():
         # just run the task immediately
         task_fn()
 
+    def wire_typing_timer(self, text_input, text_input_changed):
+        # just fire the text_input_changed callback immediately, there won't be any typing
+        text_input.textChanged.connect(text_input_changed)
+        return None
+
     def info_message(self, message, parent):
         logging.info(f'info message: {message}')
         self.info_message_received = message
@@ -107,6 +112,10 @@ class MockAnkiUtils():
 
 class MockCloudLanguageTools():
     def __init__(self):
+        self.verify_api_key_called = False
+        self.verify_api_key_input = None
+        self.verify_api_key_is_valid = True
+
         self.language_list = {
             'en': 'English',
             'zh_cn': 'Chinese',
@@ -245,8 +254,13 @@ class MockCloudLanguageTools():
         return self.voice_list
 
     def api_key_validate_query(self, api_key):
+
+        self.verify_api_key_called = True
+        self.verify_api_key_input = api_key
+
         return {
-            'key_valid': True
+            'key_valid': self.verify_api_key_is_valid,
+            'msg': 'api key valid yo'
         }     
 
     def language_detection(self, api_key, field_sample):
@@ -330,6 +344,12 @@ class TestConfigGenerator():
         }
         return languagetools_config
 
+    def get_noapikey_config(self):
+        languagetools_config = self.get_default_config()
+        languagetools_config['api_key'] = ''
+        return languagetools_config
+
+
     def get_config_no_language_mapping(self):
         base_config = self.get_default_config()
         base_config[constants.CONFIG_DECK_LANGUAGES] = {}
@@ -369,6 +389,7 @@ class TestConfigGenerator():
 
         fn_map = {
             'default': self.get_default_config,
+            'noapikey': self.get_noapikey_config,
             'no_language_mapping': self.get_config_no_language_mapping,
             'batch_audio': self.get_config_batch_audio,
             'batch_translation': self.get_config_batch_translation,

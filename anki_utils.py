@@ -2,6 +2,7 @@ import sys
 import aqt
 import anki.template
 import anki.sound
+import PyQt5
 from . import constants    
 
     
@@ -78,6 +79,14 @@ class AnkiUtils():
 
     def run_on_main(self, task_fn):
         aqt.mw.taskman.run_on_main(task_fn)
+
+    def wire_typing_timer(self, text_input, text_input_changed):
+        typing_timer = PyQt5.QtCore.QTimer()
+        typing_timer.setSingleShot(True)
+        typing_timer.timeout.connect(text_input_changed)
+        text_input.textChanged.connect(lambda: typing_timer.start(1000))
+        return typing_timer
+
 
     def info_message(self, message, parent):
         aqt.utils.showInfo(message, title=constants.ADDON_NAME, textFormat='rich', parent=parent)

@@ -61,10 +61,7 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(self.buttonBox)
 
         # wire events
-        self.typing_timer = PyQt5.QtCore.QTimer()
-        self.typing_timer.setSingleShot(True)
-        self.typing_timer.timeout.connect(self.api_key_changed)
-        self.api_text_input.textChanged.connect(self.start_typing_timer)
+        self.typing_timer = self.languagetools.anki_utils.wire_typing_timer(self.api_text_input, self.api_key_changed)
 
         # run api_key_changed logic once
         self.api_key_changed()
