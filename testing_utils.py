@@ -110,6 +110,12 @@ class MockAnkiUtils():
         if self.display_dialog_behavior == 'cancel':
             return False
 
+class MockTranslationResponse():
+    def __init__(self, status_code, content_obj):
+        self.status_code = status_code
+        self.content = json.dumps(content_obj)
+
+
 class MockCloudLanguageTools():
     def __init__(self):
         self.verify_api_key_called = False
@@ -279,6 +285,10 @@ class MockCloudLanguageTools():
 
     def get_translation_all(self, api_key, source_text, from_language, to_language):
         return self.translate_all_result[source_text]
+
+    def get_translation(self, api_key, source_text, translation_option):
+        translated_text = self.translation_map[source_text]
+        return MockTranslationResponse(200, {'translated_text': translated_text})
 
 class MockCard():
     def __init__(self, deck_id):

@@ -477,4 +477,20 @@ def test_batch_transformation(qtbot):
     index = dialog.noteTableModel.createIndex(1, column) # second row
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == ''
 
+    # load translations
+    # =================
+    mock_language_tools.cloud_language_tools.translation_map = {
+        '老人家': 'old people',
+        '你好': 'hello'
+    }
+    qtbot.mouseClick(dialog.load_translations_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # ensure translations are displayed on the table
+    # data - output
+    column = 1
+    index = dialog.noteTableModel.createIndex(0, column)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'old people'
+    index = dialog.noteTableModel.createIndex(1, column) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'hello'
+
     # dialog.exec_()
