@@ -128,6 +128,9 @@ class MockCloudLanguageTools():
         self.verify_api_key_input = None
         self.verify_api_key_is_valid = True
 
+        # used to simulate translation errors
+        self.translation_error_map = {}
+
         self.language_list = {
             'en': 'English',
             'zh_cn': 'Chinese',
@@ -293,6 +296,8 @@ class MockCloudLanguageTools():
         return self.translate_all_result[source_text]
 
     def get_translation(self, api_key, source_text, translation_option):
+        if source_text in self.translation_error_map:
+            return MockTranslationResponse(400, {'error': self.translation_error_map[source_text]})
         translated_text = self.translation_map[source_text]
         return MockTranslationResponse(200, {'translated_text': translated_text})
 

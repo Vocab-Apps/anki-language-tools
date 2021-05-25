@@ -509,6 +509,88 @@ def test_batch_transformation(qtbot):
     assert note_2.flush_called == True    
 
 
+    # dialog.exec_()
 
+def test_batch_transformation_error_handling(qtbot):
+    # pytest test_dialogs.py -rPP -k test_batch_transformation_error_handling
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    deck_note_type = deck_utils.DeckNoteType(config_gen.deck_id, config_gen.deck_name, config_gen.model_id, config_gen.model_name)
+    note_id_list = config_gen.get_note_id_list()
+    transformation_type = constants.TransformationType.Translation
+
+    dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue(mock_language_tools, deck_note_type, note_id_list, transformation_type)
+
+    # assertions
+    # ==========
+    assert_combobox_items_equal(dialog.from_combobox, ['Chinese', 'English'])
+    assert_combobox_items_equal(dialog.to_combobox, ['Chinese', 'English'])
+    assert_combobox_items_equal(dialog.service_combobox, ['Azure'])
+
+    # set from to Chinese
+    qtbot.keyClicks(dialog.from_combobox, 'Chinese')
+    qtbot.keyClicks(dialog.to_combobox, 'English')
+
+    # load translations button should be enabled
+    assert dialog.load_translations_button.isEnabled() == True
+    # apply to notes should be disabled
+    assert dialog.applyButton.isEnabled() == False
+    # cancel button should be enabled
+    assert dialog.cancelButton.isEnabled() == True
+
+    # check table model
+    # =================
+
+    # headers
+    assert dialog.noteTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Chinese'
+    assert dialog.noteTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'English'
+    # data - input
+    column = 0
+    index = dialog.noteTableModel.createIndex(0, column)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '老人家'
+    index = dialog.noteTableModel.createIndex(1, column) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '你好'
+    # data - output
+    column = 1
+    index = dialog.noteTableModel.createIndex(0, column)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    index = dialog.noteTableModel.createIndex(1, column) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+
+    # load translations
+    # =================
+    mock_language_tools.cloud_language_tools.translation_error_map = {'老人家': 'translation error 10'}
+    mock_language_tools.cloud_language_tools.translation_map = {
+        '你好': 'translation 2'
+    }
+
+    qtbot.mouseClick(dialog.load_translations_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # ensure translations are displayed on the table
+    # data - output
+    column = 1
+    index = dialog.noteTableModel.createIndex(0, column)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None # should be empty, there was an error
+    index = dialog.noteTableModel.createIndex(1, column) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 2'
+
+    # dialog.exec_()
+
+    # # apply button should be enabled now
+    assert dialog.applyButton.isEnabled() == True
+
+    # apply to notes
+    # ==============
+    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+
+    # # verify effect on notes
+    note_1 = config_gen.notes_by_id[config_gen.note_id_1]
+    assert note_1.set_values == {}
+    assert note_1.flush_called == False
+    note_2 = config_gen.notes_by_id[config_gen.note_id_2]
+    assert note_2.set_values == {'English': 'translation 2'}
+    assert note_2.flush_called == True    
 
     # dialog.exec_()

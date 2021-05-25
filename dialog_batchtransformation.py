@@ -40,7 +40,7 @@ class NoteTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def setFromFieldData(self, data):
         self.from_field_data = data
-        self.to_field_data = [''] * len(self.from_field_data)
+        self.to_field_data = [None] * len(self.from_field_data)
         # print(f'**** len(self.to_field_data): {len(self.to_field_data)}')
         start_index = self.createIndex(0, 0)
         end_index = self.createIndex(len(self.from_field_data)-1, 0)
@@ -456,20 +456,23 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
             self.load_errors.append(e)
             return
 
-        try:
-            i = 0
-            for field_data in self.from_field_data:
+
+        i = 0
+        for field_data in self.from_field_data:
+            try:
                 if self.transformation_type == constants.TransformationType.Translation:
                     translation_result = self.languagetools.get_translation(field_data, self.translation_option)
                 elif self.transformation_type == constants.TransformationType.Transliteration:
                     translation_result = self.languagetools.get_transliteration(field_data, self.transliteration_option)
                 self.languagetools.anki_utils.run_on_main(get_set_to_field_lambda(i, translation_result))
-                i += 1
-                self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(i))
-            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setDisabled(False))
-            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
-        except errors.LanguageToolsRequestError as e:
-            self.load_errors.append(e)
+            except errors.LanguageToolsRequestError as e:
+                self.load_errors.append(e)
+            i += 1
+            self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(i))
+
+        self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setDisabled(False))
+        self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
+
 
         self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setDisabled(False))
         self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
@@ -491,11 +494,11 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
         action_str = f'Translate from {self.languagetools.get_language_name(self.from_language)} to {self.languagetools.get_language_name(self.to_language)}'
         self.languagetools.anki_utils.checkpoint(action_str)
         for (note_id, i) in zip(self.note_id_list, range(len(self.note_id_list))):
-            #print(f'note_id: {note_id} i: {i}')
-            note = self.languagetools.anki_utils.get_note_by_id(note_id)
-            note[self.to_field] = self.noteTableModel.to_field_data[i]
-            # print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
-            note.flush()
+            to_field_data = self.noteTableModel.to_field_data[i]
+            if to_field_data != None:
+                note = self.languagetools.anki_utils.get_note_by_id(note_id)
+                note[self.to_field] = to_field_data
+                note.flush()
         self.close()
         # memorize this setting
         deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, self.to_field)
