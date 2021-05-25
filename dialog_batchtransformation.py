@@ -481,9 +481,12 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
 
     def loadTranslationDone(self, future_result):
         if len(self.load_errors) > 0:
-            first_error = self.load_errors[0]
-            error_message = f'{str(first_error)}'
-            self.languagetools.anki_utils.critical_message(f"{constants.MENU_PREFIX} {error_message}", self)
+            error_counts = {}
+            for error in self.load_errors:
+                current_count = error_counts.get(error, 0)
+                error_counts[error] = current_count + 1
+            error_message = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
+            self.languagetools.anki_utils.critical_message(error_message, self)
 
     def accept(self):
         if self.to_fields_empty == False:

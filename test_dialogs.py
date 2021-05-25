@@ -561,7 +561,7 @@ def test_batch_transformation_error_handling(qtbot):
 
     # load translations
     # =================
-    mock_language_tools.cloud_language_tools.translation_error_map = {'老人家': 'translation error 10'}
+    mock_language_tools.cloud_language_tools.translation_error_map = {'老人家': 'translation error 42'}
     mock_language_tools.cloud_language_tools.translation_map = {
         '你好': 'translation 2'
     }
@@ -584,6 +584,9 @@ def test_batch_transformation_error_handling(qtbot):
     # apply to notes
     # ==============
     qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+
+    # verify error message
+    assert mock_language_tools.anki_utils.critical_message_received == '<p><b>Errors</b>: Could not load translation: translation error 42 (1 times)</p>'
 
     # # verify effect on notes
     note_1 = config_gen.notes_by_id[config_gen.note_id_1]
