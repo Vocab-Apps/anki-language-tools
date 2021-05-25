@@ -94,6 +94,10 @@ class AnkiUtils():
     def critical_message(self, message, parent):
         aqt.utils.showCritical(message, title=constants.ADDON_NAME, parent=parent)
 
+    def ask_user(self, message, parent):
+        result = aqt.utils.askUser(message, parent=parent)
+        return result
+
     def play_sound(self, filename):
         aqt.sound.av_player.play_file(filename)
 
@@ -110,5 +114,10 @@ class AnkiUtils():
         js_command = f"""set_field_value({field_index}, "{text}")"""
         editor.web.eval(js_command)        
 
+    def checkpoint(self, action_str):
+        aqt.mw.checkpoint(action_str)
+
     def display_dialog(self, dialog):
         return dialog.exec_()
+
+    

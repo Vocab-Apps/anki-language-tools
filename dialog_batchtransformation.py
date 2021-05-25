@@ -402,7 +402,7 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
         from_field_data = []
         self.to_fields_empty = True
         for note_id in self.note_id_list:
-            note = aqt.mw.col.getNote(note_id)
+            note = self.languagetools.anki_utils.get_note_by_id(note_id)
             field_data = note[self.from_field]
             from_field_data.append(field_data)
             # self.to_fields_empty = True
@@ -416,26 +416,26 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
             return
         if self.transformation_type == constants.TransformationType.Translation:
             if len(self.translation_options) == 0:
-                aqt.utils.showCritical(f'No service found for translation from language {self.languagetools.get_language_name(self.from_language)}', title=constants.ADDON_NAME)
+                self.languagetools.anki_utils.critical_message(f'No service found for translation from language {self.languagetools.get_language_name(self.from_language)}', self)
                 return
         elif self.transformation_type == constants.TransformationType.Transliteration:
             if len(self.transliteration_options) == 0:
-                aqt.utils.showCritical(f'No service found for transliteration from language {self.languagetools.get_language_name(self.from_language)}', title=constants.ADDON_NAME)
+                self.languagetools.anki_utils.critical_message(f'No service found for transliteration from language {self.languagetools.get_language_name(self.from_language)}', self)
                 return
-        aqt.mw.taskman.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
+        self.languagetools.anki_utils.run_in_background(self.loadTranslationsTask, self.loadTranslationDone)
 
     def loadTranslationsTask(self):
         self.load_errors = []
 
         try:
-            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(True))
-            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(None))
-            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(True))
-            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(None))
-            aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
+            self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setDisabled(True))
+            self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setStyleSheet(None))
+            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setDisabled(True))
+            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setStyleSheet(None))
+            self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setText('Loading...'))
 
-            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(0))
-            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
+            self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(0))
+            self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setMaximum(len(self.from_field_data)))
 
             # get service
             if self.transformation_type == constants.TransformationType.Translation:
@@ -463,36 +463,36 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
                     translation_result = self.languagetools.get_translation(field_data, self.translation_option)
                 elif self.transformation_type == constants.TransformationType.Transliteration:
                     translation_result = self.languagetools.get_transliteration(field_data, self.transliteration_option)
-                aqt.mw.taskman.run_on_main(get_set_to_field_lambda(i, translation_result))
+                self.languagetools.anki_utils.run_on_main(get_set_to_field_lambda(i, translation_result))
                 i += 1
-                aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
-            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setDisabled(False))
-            aqt.mw.taskman.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
+                self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(i))
+            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setDisabled(False))
+            self.languagetools.anki_utils.run_on_main(lambda: self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
         except errors.LanguageToolsRequestError as e:
             self.load_errors.append(e)
 
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setDisabled(False))
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
-        aqt.mw.taskman.run_on_main(lambda: self.load_translations_button.setText(self.load_button_text_map[self.transformation_type]))
+        self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setDisabled(False))
+        self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet()))
+        self.languagetools.anki_utils.run_on_main(lambda: self.load_translations_button.setText(self.load_button_text_map[self.transformation_type]))
 
 
     def loadTranslationDone(self, future_result):
         if len(self.load_errors) > 0:
             first_error = self.load_errors[0]
             error_message = f'{str(first_error)}'
-            aqt.utils.showCritical(f"{constants.MENU_PREFIX} {error_message}", title=constants.ADDON_NAME)
+            self.languagetools.anki_utils.critical_message(f"{constants.MENU_PREFIX} {error_message}", self)
 
     def accept(self):
         if self.to_fields_empty == False:
-            proceed = aqt.utils.askUser(f'Overwrite existing data in field {self.to_field} ?', parent=self)
+            proceed = self.languagetools.anki_utils.ask_user(f'Overwrite existing data in field {self.to_field} ?', self)
             if proceed == False:
                 return
         # set field on notes
         action_str = f'Translate from {self.languagetools.get_language_name(self.from_language)} to {self.languagetools.get_language_name(self.to_language)}'
-        aqt.mw.checkpoint(action_str)
+        self.languagetools.anki_utils.checkpoint(action_str)
         for (note_id, i) in zip(self.note_id_list, range(len(self.note_id_list))):
             #print(f'note_id: {note_id} i: {i}')
-            note = aqt.mw.col.getNote(note_id)
+            note = self.languagetools.anki_utils.get_note_by_id(note_id)
             note[self.to_field] = self.noteTableModel.to_field_data[i]
             # print(f'** setting field {self.to_field} to {self.to_field_data[i]}')
             note.flush()
