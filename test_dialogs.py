@@ -473,9 +473,9 @@ def test_batch_transformation(qtbot):
     # data - output
     column = 1
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == ''
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == ''
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
 
     # load translations
     # =================
