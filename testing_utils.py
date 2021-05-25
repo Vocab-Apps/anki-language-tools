@@ -110,6 +110,12 @@ class MockAnkiUtils():
         if self.display_dialog_behavior == 'cancel':
             return False
 
+    def ask_user(self, message, parent):
+        return True
+
+    def checkpoint(self, action_str):
+        self.checkpoint_name = action_str
+
 class MockTranslationResponse():
     def __init__(self, status_code, content_obj):
         self.status_code = status_code
@@ -299,9 +305,21 @@ class MockNote():
         self.mid = model_id
         self.field_dict = field_dict
         self.fields = field_array
+        self.set_values = {}
+        self.flush_called = False
     
+    def __contains__(self, key):
+        return key in self.field_dict
+
     def __getitem__(self, key):
         return self.field_dict[key]
+
+    def __setitem__(self, key, value):
+        self.set_values[key] = value
+
+    def flush(self):
+        self.flush_called = True
+
 
 class MockEditor():
     def __init__(self):
@@ -321,6 +339,19 @@ class TestConfigGenerator():
         self.note_id_2 = 43005
 
         self.all_fields = [self.field_chinese, self.field_english, self.field_sound]
+
+        self.notes_by_id = {
+            self.note_id_1: MockNote(self.model_id,{
+                self.field_chinese: '老人家',
+                self.field_english: 'old people',
+                self.field_sound: ''
+            }, self.all_fields),
+            self.note_id_2: MockNote(self.model_id, {
+                self.field_chinese: '你好',
+                self.field_english: 'hello',
+                self.field_sound: ''
+            }, self.all_fields)
+        }        
 
         self.chinese_voice_key = 'chinese voice'
         self.chinese_voice_description = 'this is a chinese voice'
@@ -457,24 +488,12 @@ class TestConfigGenerator():
         return list(notes_by_id.keys())
 
     def get_notes(self):
-        notes_by_id = {
-            self.note_id_1: {
-                self.field_chinese: '老人家',
-                self.field_english: 'old people',
-                self.field_sound: ''
-            },
-            self.note_id_2: {
-                self.field_chinese: '你好',
-                self.field_english: 'hello',
-                self.field_sound: ''
-            }
-        }
         notes = {
             self.deck_id: {
-                self.model_id: notes_by_id
+                self.model_id: self.notes_by_id
             }
         }
-        return notes_by_id, notes
+        return self.notes_by_id, notes
 
     def get_mock_editor_with_note(self, note_id):
         editor = MockEditor()

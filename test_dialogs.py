@@ -493,4 +493,12 @@ def test_batch_transformation(qtbot):
     index = dialog.noteTableModel.createIndex(1, column) # second row
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'hello'
 
+    # apply button should be enabled now
+    assert dialog.applyButton.isEnabled() == True
+
+    # apply to notes
+    # ==============
+    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+
+
     # dialog.exec_()

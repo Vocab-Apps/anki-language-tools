@@ -322,7 +322,7 @@ class LanguageTools():
             'from_field': source_field,
             'translation_option': translation_option
         }
-        aqt.mw.addonManager.writeConfig(__name__, self.config)
+        self.anki_utils.write_config(self.config)
 
     def remove_translation_setting(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         model_name = deck_note_type_field.get_model_name()
@@ -346,7 +346,7 @@ class LanguageTools():
             'from_field': source_field,
             'transliteration_option': transliteration_option
         }
-        aqt.mw.addonManager.writeConfig(__name__, self.config)
+        self.anki_utils.write_config(self.config)
 
         # the language for the target field should be set to transliteration
         self.store_language_detection_result(deck_note_type_field, constants.SpecialLanguage.transliteration.name)
