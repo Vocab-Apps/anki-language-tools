@@ -8,6 +8,7 @@ import dialogs
 import dialog_languagemapping
 import dialog_voiceselection
 import dialog_choosetranslation
+import dialog_batchtransformation
 import dialog_apikey
 import languagetools
 import constants
@@ -84,10 +85,10 @@ def test_add_translation_transliteration_no_language_mapping(qtbot):
     testcase_instance = unittest.TestCase()
     
     # translation
-    testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Translation)
+    testcase_instance.assertRaises(errors.LanguageMappingError, dialog_batchtransformation.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Translation)
 
     # transliteration
-    testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
+    testcase_instance.assertRaises(errors.LanguageMappingError, dialog_batchtransformation.BatchConversionDialog, mock_language_tools, deck_note_type, note_id_list, constants.TransformationType.Transliteration)
 
 
 
