@@ -464,10 +464,17 @@ def test_batch_transformation(qtbot):
     # headers
     assert dialog.noteTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Chinese'
     assert dialog.noteTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'English'
-    # data
-    index = dialog.noteTableModel.createIndex(0, 0)
+    # data - input
+    column = 0
+    index = dialog.noteTableModel.createIndex(0, column)
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '老人家'
-    index = dialog.noteTableModel.createIndex(1, 0) # second row
+    index = dialog.noteTableModel.createIndex(1, column) # second row
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '你好'
+    # data - output
+    column = 1
+    index = dialog.noteTableModel.createIndex(0, column)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == ''
+    index = dialog.noteTableModel.createIndex(1, column) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == ''
 
     # dialog.exec_()
