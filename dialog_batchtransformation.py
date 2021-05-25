@@ -482,11 +482,13 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
     def loadTranslationDone(self, future_result):
         if len(self.load_errors) > 0:
             error_counts = {}
-            for error in self.load_errors:
+            for error_exception in self.load_errors:
+                error = str(error_exception)
                 current_count = error_counts.get(error, 0)
                 error_counts[error] = current_count + 1
             error_message = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
-            self.languagetools.anki_utils.critical_message(error_message, self)
+            complete_message = f'<p>Encountered errors while generating {self.transformation_type.name}. You can still click <b>Apply to Notes</b> to apply the values retrieved to your notes.</p>' + error_message
+            self.languagetools.anki_utils.critical_message(complete_message, self)
 
     def accept(self):
         if self.to_fields_empty == False:
