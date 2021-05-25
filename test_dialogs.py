@@ -435,12 +435,27 @@ def test_batch_transformation(qtbot):
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('default')
 
-    # dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue
-    # def prepare_batch_transformation_dialogue(languagetools, deck_note_type, note_id_list, transformation_type):
-
     deck_note_type = deck_utils.DeckNoteType(config_gen.deck_id, config_gen.deck_name, config_gen.model_id, config_gen.model_name)
     note_id_list = config_gen.get_note_id_list()
     transformation_type = constants.TransformationType.Translation
 
     dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue(mock_language_tools, deck_note_type, note_id_list, transformation_type)
-    dialog.exec_()
+
+    # assertions
+    # ==========
+    assert_combobox_items_equal(dialog.from_combobox, ['Chinese', 'English'])
+    assert_combobox_items_equal(dialog.to_combobox, ['Chinese', 'English'])
+    assert_combobox_items_equal(dialog.service_combobox, ['Azure'])
+
+    # set from to Chinese
+    qtbot.keyClicks(dialog.from_combobox, 'Chinese')
+    qtbot.keyClicks(dialog.to_combobox, 'English')
+
+    # load translations button should be enabled
+    assert dialog.load_translations_button.isEnabled() == True
+    # apply to notes should be disabled
+    assert dialog.applyButton.isEnabled() == False
+    # cancel button should be enabled
+    assert dialog.cancelButton.isEnabled() == True
+
+    # dialog.exec_()
