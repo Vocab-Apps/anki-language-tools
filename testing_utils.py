@@ -442,6 +442,10 @@ class TestConfigGenerator():
             [self.deck_id, self.model_id]
         ]        
 
+    def get_note_id_list(self):
+        notes_by_id, notes = self.get_notes()
+        return list(notes_by_id.keys())
+
     def get_notes(self):
         notes_by_id = {
             self.note_id_1: {

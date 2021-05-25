@@ -428,3 +428,19 @@ def test_api_key(qtbot):
     # verify that API key in config is correct
     assert mock_language_tools.anki_utils.written_config['api_key'] == 'validkey1'
     assert mock_language_tools.api_key_checked == True
+
+def test_batch_transformation(qtbot):
+    # pytest test_dialogs.py -rPP -k test_batch_transformation
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    # dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue
+    # def prepare_batch_transformation_dialogue(languagetools, deck_note_type, note_id_list, transformation_type):
+
+    deck_note_type = deck_utils.DeckNoteType(config_gen.deck_id, config_gen.deck_name, config_gen.model_id, config_gen.model_name)
+    note_id_list = config_gen.get_note_id_list()
+    transformation_type = constants.TransformationType.Translation
+
+    dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue(mock_language_tools, deck_note_type, note_id_list, transformation_type)
+    dialog.exec_()
