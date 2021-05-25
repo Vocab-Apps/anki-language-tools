@@ -458,4 +458,16 @@ def test_batch_transformation(qtbot):
     # cancel button should be enabled
     assert dialog.cancelButton.isEnabled() == True
 
+    # check table model
+    # =================
+
+    # headers
+    assert dialog.noteTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Chinese'
+    assert dialog.noteTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'English'
+    # data
+    index = dialog.noteTableModel.createIndex(0, 0)
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '老人家'
+    index = dialog.noteTableModel.createIndex(1, 0) # second row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '你好'
+
     # dialog.exec_()
