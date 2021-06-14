@@ -773,22 +773,6 @@ def language_mapping_dialogue(languagetools):
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(languagetools)
     mapping_dialog.exec_()
 
-def voice_selection_dialog(languagetools):
-    # did the user perform language mapping ? 
-    if not languagetools.language_detection_done():
-        aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)
-        return
-
-    aqt.mw.progress.start(immediate=True, label=f'{constants.MENU_PREFIX} retrieving voice list')
-    def get_complete_lambda(languagetools):
-        def voicelist_complete(fut_result):
-            aqt.mw.progress.finish()
-            voice_list = fut_result.result()
-            voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(languagetools, voice_list)
-            voice_selection_dialog.exec_()            
-        return voicelist_complete
-    aqt.mw.taskman.run_in_background(languagetools.get_tts_voice_list, get_complete_lambda(languagetools))
-
 def yomichan_dialog(languagetools):
     if not languagetools.language_detection_done():
         aqt.utils.showInfo(text='Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', title=constants.ADDON_NAME)

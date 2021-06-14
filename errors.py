@@ -26,4 +26,7 @@ class LanguageToolsRequestError(Exception):
 class AudioLanguageToolsRequestError(LanguageToolsRequestError):
     pass
 
+class VoiceListRequestError(LanguageToolsRequestError):
+    pass
+
 

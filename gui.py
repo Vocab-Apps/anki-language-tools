@@ -15,6 +15,7 @@ from . import constants
 from . import editor
 from . import dialogs
 from . import deck_utils
+from . import dialog_voiceselection
 
 
 def init(languagetools):
@@ -29,7 +30,7 @@ def init(languagetools):
         dialogs.language_mapping_dialogue(languagetools)
 
     def show_voice_selection():
-        dialogs.voice_selection_dialog(languagetools)
+        dialog_voiceselection.voice_selection_dialog(languagetools, aqt.mw)
 
     def show_yomichan_integration():
         dialogs.yomichan_dialog(languagetools)

@@ -54,8 +54,10 @@ class CloudLanguageTools():
 
     def get_tts_voice_list(self, api_key):
         response = requests.get(self.base_url + '/voice_list')
-        data = json.loads(response.content)
-        return data
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            return data
+        raise errors.VoiceListRequestError(f'Could not retrieve voice list, please try again({response.content})')
 
     def get_tts_audio(self, api_key, source_text, service, language_code, voice_key, options):
         url_path = '/audio_v2'
