@@ -411,6 +411,8 @@ def test_api_key(qtbot):
     assert mock_language_tools.cloud_language_tools.verify_api_key_input == 'dummykey1'
 
     assert dialog.applyButton.isEnabled() == False
+
+    assert  dialog.account_info_label.text() == ''
     
     # type in a valid API key
     mock_language_tools.cloud_language_tools.verify_api_key_is_valid = True
@@ -419,6 +421,11 @@ def test_api_key(qtbot):
 
     assert mock_language_tools.cloud_language_tools.verify_api_key_called == True
     assert mock_language_tools.cloud_language_tools.verify_api_key_input == 'validkey1'
+
+    assert mock_language_tools.cloud_language_tools.account_info_called == True
+    assert mock_language_tools.cloud_language_tools.account_info_api_key == 'validkey1'
+
+    assert  dialog.account_info_label.text() == """<b>type</b>: 250 chars<br/><b>email</b>: no@spam.com"""    
 
     assert dialog.applyButton.isEnabled() == True
 

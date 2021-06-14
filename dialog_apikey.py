@@ -47,6 +47,9 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         self.status_label = PyQt5.QtWidgets.QLabel('Enter API Key')
         vlayout.addWidget(self.status_label)
 
+        self.account_info_label = PyQt5.QtWidgets.QLabel()
+        vlayout.addWidget(self.account_info_label)
+
         self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
         self.applyButton = self.buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
         self.applyButton.setObjectName('apply')
@@ -88,10 +91,23 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
             self.status_label.setText(message)
             self.applyButton.setEnabled(True)
             self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
+            self.languagetools.anki_utils.run_in_background(self.get_account_info_background, self.get_account_info_done)
         else:
             self.status_label.setText(message)
             self.applyButton.setEnabled(False)
             self.applyButton.setStyleSheet(None)
+
+    def get_account_info_background(self):
+        api_key_text = self.api_text_input.text()
+        return self.languagetools.cloud_language_tools.account_info(api_key_text)
+
+    def get_account_info_done(self, future_result):
+        result = future_result.result()
+        lines = []
+        for key, value in result.items():
+            lines.append(f'<b>{key}</b>: {value}')
+        self.account_info_label.setText('<br/>'.join(lines))
+
 
     def accept(self):
         # store api key into config

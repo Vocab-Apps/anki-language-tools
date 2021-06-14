@@ -128,6 +128,8 @@ class MockCloudLanguageTools():
         self.verify_api_key_input = None
         self.verify_api_key_is_valid = True
 
+        self.account_info_called = False
+
         # used to simulate translation errors
         self.translation_error_map = {}
 
@@ -277,6 +279,16 @@ class MockCloudLanguageTools():
             'key_valid': self.verify_api_key_is_valid,
             'msg': f'api key: {self.verify_api_key_is_valid}'
         }     
+
+    def account_info(self, api_key):
+        self.account_info_called = True
+        self.account_info_api_key = api_key
+
+        return {
+            'type': '250 chars',
+            'email': 'no@spam.com'
+        }
+
 
     def language_detection(self, api_key, field_sample):
         return self.language_detection_result[field_sample[0]]
