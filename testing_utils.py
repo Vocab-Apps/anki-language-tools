@@ -18,6 +18,7 @@ class MockAnkiUtils():
         self.config = config
         self.written_config = None
         self.editor_set_field_value_called = None
+        self.added_media_file = None
 
     def get_config(self):
         return self.config
