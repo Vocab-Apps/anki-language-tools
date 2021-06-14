@@ -477,7 +477,7 @@ class LanguageTools():
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = self.anki_utils.get_note_by_id(note_id)
         source_text = note[from_field]
-        if len(source_text) == 0:
+        if self.field_empty(source_text):
             return False
         
         response = self.generate_audio_tag_collection(source_text, voice)

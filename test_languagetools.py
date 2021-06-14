@@ -1,6 +1,39 @@
 import testing_utils
 
+class EmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
+    def __init__(self):
+        testing_utils.TestConfigGenerator.__init__(self)
+        self.notes_by_id = {
+            self.note_id_1: testing_utils.MockNote(self.model_id,{
+                self.field_chinese: '', # empty
+                self.field_english: 'old people',
+                self.field_sound: ''
+            }, self.all_fields),
+            self.note_id_2: testing_utils.MockNote(self.model_id, {
+                self.field_chinese: '你好',
+                self.field_english: 'hello',
+                self.field_sound: ''
+            }, self.all_fields)
+        }                
+
+class DummyHtmlEmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
+    def __init__(self):
+        testing_utils.TestConfigGenerator.__init__(self)
+        self.notes_by_id = {
+            self.note_id_1: testing_utils.MockNote(self.model_id,{
+                self.field_chinese: '&nbsp;', # empty
+                self.field_english: 'old people',
+                self.field_sound: ''
+            }, self.all_fields),
+            self.note_id_2: testing_utils.MockNote(self.model_id, {
+                self.field_chinese: '你好',
+                self.field_english: 'hello',
+                self.field_sound: ''
+            }, self.all_fields)
+        }                        
+
 def test_generate_audio_for_field(qtbot):
+
     
     # regular case
     # ============
@@ -8,7 +41,7 @@ def test_generate_audio_for_field(qtbot):
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('default')
 
-    # add some audio
+    # common variables
     note_id = config_gen.note_id_1
     from_field = config_gen.field_chinese
     to_field = config_gen.field_sound
@@ -30,4 +63,41 @@ def test_generate_audio_for_field(qtbot):
 
     assert mock_language_tools.anki_utils.added_media_file != None
     assert 'languagetools-' in mock_language_tools.anki_utils.added_media_file
+
+    # empty field
+    # ===========
+
+    config_gen = EmptyFieldConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    result = mock_language_tools.generate_audio_for_field(note_id, from_field, to_field, voice)
+    assert result == False    
+
+    # get the note
+    note = config_gen.notes_by_id[config_gen.note_id_1]
+
+    # make sure no sound was added
+    assert config_gen.field_sound not in note.set_values
+    assert note.flush_called == False
+
+    assert mock_language_tools.anki_utils.added_media_file == None
+
+    # empty field but with html junk
+    # ==============================
+
+    config_gen = DummyHtmlEmptyFieldConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    result = mock_language_tools.generate_audio_for_field(note_id, from_field, to_field, voice)
+    assert result == False    
+
+    # get the note
+    note = config_gen.notes_by_id[config_gen.note_id_1]
+
+    # make sure no sound was added
+    assert config_gen.field_sound not in note.set_values
+    assert note.flush_called == False
+
+    assert mock_language_tools.anki_utils.added_media_file == None    
+
 
