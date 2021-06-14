@@ -33,6 +33,11 @@ class CloudLanguageTools():
         data = json.loads(response.content)
         return data
 
+    def account_info(self, api_key):
+        response = requests.get(self.base_url + '/account', headers={'api_key': api_key})
+        data = json.loads(response.content)
+        return data
+
     def language_detection(self, api_key, field_sample):
         response = requests.post(self.base_url + '/detect', json={
                 'text_list': field_sample
