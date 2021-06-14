@@ -208,7 +208,7 @@ def init(languagetools):
     action.triggered.connect(show_voice_selection)
     aqt.mw.form.menuTools.addAction(action)
 
-    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key", aqt.mw)
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key && Account Info", aqt.mw)
     action.triggered.connect(show_api_key_dialog)
     aqt.mw.form.menuTools.addAction(action)    
 
