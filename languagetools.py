@@ -475,7 +475,7 @@ class LanguageTools():
         return self.interpret_transliteration_response_async(self.get_transliteration_async(source_text, transliteration_option))
 
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
-        note = aqt.mw.col.getNote(note_id)
+        note = self.anki_utils.get_note_by_id(note_id)
         source_text = note[from_field]
         if len(source_text) == 0:
             return False
@@ -495,7 +495,7 @@ class LanguageTools():
                   'full_filename': None}
         generated_filename = self.get_tts_audio(source_text, voice['service'], voice['language_code'], voice['voice_key'], {})
         if generated_filename != None:
-            full_filename = aqt.mw.col.media.addFile(generated_filename)
+            full_filename = self.anki_utils.media_add_file(generated_filename)
             collection_filename = os.path.basename(full_filename)
             sound_tag = f'[sound:{collection_filename}]'
             result['sound_tag'] = sound_tag

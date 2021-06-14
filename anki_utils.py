@@ -74,6 +74,10 @@ class AnkiUtils():
     def get_deck_id(self, deck_name):
         return aqt.mw.col.decks.id_for_name(deck_name)
 
+    def media_add_file(self, filename):
+        full_filename = aqt.mw.col.media.addFile(filename)
+        return full_filename
+
     def run_in_background(self, task_fn, task_done_fn):
         aqt.mw.taskman.run_in_background(task_fn, task_done_fn)
 

@@ -60,6 +60,10 @@ class MockAnkiUtils():
     def get_deck_id(self, deck_name):
         return self.deck_by_name[deck_name]
 
+    def media_add_file(self, filename):
+        self.added_media_file = filename
+        return filename
+
     def run_in_background(self, task_fn, task_done_fn):
         # just run the two tasks immediately
         result = task_fn()
