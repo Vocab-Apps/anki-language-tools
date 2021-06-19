@@ -112,4 +112,8 @@ def test_get_tts_audio(qtbot):
     data = json.loads(file_contents)
 
     assert data['text'] == 'unter etwas' # after text replacement
+    assert data['service'] == 'Azure'
+    assert data['language_code'] == 'de_de'
+    assert data['voice_key'] == {'name': 'voice1'}
+    assert data['options'] == {}
 
