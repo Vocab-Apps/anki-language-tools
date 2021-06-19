@@ -1,3 +1,4 @@
+import json
 import testing_utils
 
 class EmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
@@ -98,4 +99,17 @@ def test_generate_audio_for_field(qtbot):
     assert note.flush_called == False
 
     assert mock_language_tools.anki_utils.added_media_file == None    
+
+
+def test_get_tts_audio(qtbot):
+    # pytest test_languagetools.py -k test_get_tts_audio
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('text_replacement')
+
+    filename = mock_language_tools.get_tts_audio('unter etw', 'Azure', 'de_de', {'name': 'voice1'}, {})
+    file_contents = open(filename, 'r').read()
+    data = json.loads(file_contents)
+
+    assert data['text'] == 'unter etwas' # after text replacement
 

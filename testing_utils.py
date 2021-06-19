@@ -446,7 +446,20 @@ class TestConfigGenerator():
         base_config = self.get_default_config()
         base_config[constants.CONFIG_WANTED_LANGUAGES]['mg'] = True
         base_config[constants.CONFIG_DECK_LANGUAGES][self.model_name][self.deck_name][self.field_english] = 'mg'
-        return base_config    
+        return base_config  
+
+    def get_config_text_replacement(self):
+        base_config = self.get_default_config()    
+        base_config[constants.CONFIG_TEXT_PROCESSING] = {
+            'replacements': [
+                {'pattern': r'etw', 
+                'replace': 'etwas',
+                'Audio': True,
+                'Translation': False,
+                'Transliteration': False},
+            ]
+        }
+        return base_config
 
     def get_languagetools_config(self, scenario):
 
@@ -456,7 +469,8 @@ class TestConfigGenerator():
             'no_language_mapping': self.get_config_no_language_mapping,
             'batch_audio': self.get_config_batch_audio,
             'batch_translation': self.get_config_batch_translation,
-            'get_config_language_no_voices': self.get_config_language_no_voices
+            'get_config_language_no_voices': self.get_config_language_no_voices,
+            'text_replacement': self.get_config_text_replacement
         }
 
         fn_instance = fn_map[scenario]
