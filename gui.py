@@ -23,7 +23,7 @@ def init(languagetools):
     # add context menu handler
 
     def show_getting_started():
-        url = PyQt5.QtCore.QUrl('https://languagetools.anki.study/tutorials/language-tools-getting-started')
+        url = PyQt5.QtCore.QUrl('https://languagetools.anki.study/tutorials/language-tools-getting-started?utm_campaign=langtools_menu&utm_source=languagetools&utm_medium=addon')
         PyQt5.QtGui.QDesktopServices.openUrl(url)
 
     def show_language_mapping():

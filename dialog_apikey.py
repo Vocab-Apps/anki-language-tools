@@ -34,7 +34,7 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         description_label.setWordWrap(True)
         vlayout.addWidget(description_label)
 
-        urlLink="<a href=\"https://languagetools.anki.study/language-tools-signup\">Don't have an API Key? Sign up here</a>"
+        urlLink="<a href=\"https://languagetools.anki.study/language-tools-signup?utm_campaign=langtools_apikey&utm_source=languagetools&utm_medium=addon\">Don't have an API Key? Sign up here</a>"
         signup_label=PyQt5.QtWidgets.QLabel()
         signup_label.setText(urlLink)
         signup_label.setOpenExternalLinks(True)
