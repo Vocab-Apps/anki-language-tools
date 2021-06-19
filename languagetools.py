@@ -429,7 +429,9 @@ class LanguageTools():
         return self.config[constants.CONFIG_WANTED_LANGUAGES].keys()
 
     def get_translation_async(self, source_text, translation_option):
-        return self.cloud_language_tools.get_translation(self.config['api_key'], source_text, translation_option)
+        processed_text = self.text_utils.process(source_text, constants.TransformationType.Translation)
+        logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        return self.cloud_language_tools.get_translation(self.config['api_key'], processed_text, translation_option)
 
     def interpret_translation_response_async(self, response):
         # print(response.status_code)
@@ -453,7 +455,9 @@ class LanguageTools():
         return self.cloud_language_tools.get_translation_all(self.config['api_key'], source_text, from_language, to_language)
     
     def get_transliteration_async(self, source_text, transliteration_option):
-        return self.cloud_language_tools.get_transliteration(self.config['api_key'], source_text, transliteration_option)
+        processed_text = self.text_utils.process(source_text, constants.TransformationType.Transliteration)
+        logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        return self.cloud_language_tools.get_transliteration(self.config['api_key'], processed_text, transliteration_option)
 
     def interpret_transliteration_response_async(self, response):
         if response.status_code == 200:
@@ -536,10 +540,12 @@ class LanguageTools():
         return os.path.join(user_files_dir, filename)
 
     def get_tts_audio(self, source_text, service, language_code, voice_key, options):
-        filename = self.get_audio_filename(source_text, service, voice_key, options)
+        processed_text = self.text_utils.process(source_text, constants.TransformationType.Audio)
+        logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        filename = self.get_audio_filename(processed_text, service, voice_key, options)
         if os.path.isfile(filename):
             return filename
-        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], source_text, service, language_code, voice_key, options)
+        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], processed_text, service, language_code, voice_key, options)
         with open(filename, 'wb') as f:
             f.write(audio_content)
         f.close()

@@ -16,7 +16,8 @@ class TextUtils():
 
         # apply replacements
         for replace in self.replacements:
-            if replace[transformation_type.name] == True:
+            replace_transformation_type = replace.get(transformation_type.name, False)
+            if replace_transformation_type == True:
                 result = re.sub(replace['pattern'], replace['replace'], result)
 
         return result
