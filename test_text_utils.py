@@ -25,10 +25,18 @@ def test_replace(qtbot):
         'replace': ' ',
         'Audio': True,
         'Translation': False,
-        'Transliteration': False}
+        'Transliteration': False},
+        {'pattern': r'\(etw \+D\)', 
+        'replace': 'etwas +Dativ',
+        'Audio': True,
+        'Translation': False,
+        'Transliteration': False},        
     ]})
 
     assert utils.process('word1 / word2', constants.TransformationType.Audio) == 'word1 word2'
     assert utils.process('word1 / word2', constants.TransformationType.Translation) == 'word1 / word2'
     assert utils.process('word1 / word2', constants.TransformationType.Transliteration) == 'word1 / word2'
     assert utils.process('<b>word1</b> / word2', constants.TransformationType.Audio) == 'word1 word2'
+    assert utils.process('unter (etw +D)', constants.TransformationType.Audio) == 'unter etwas +Dativ'
+    assert utils.process('<b>unter</b> (etw +D)', constants.TransformationType.Audio) == 'unter etwas +Dativ'
+    assert utils.process('<b>unter</b> (etw +D)', constants.TransformationType.Transliteration) == 'unter (etw +D)'
