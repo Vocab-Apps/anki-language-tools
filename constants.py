@@ -8,6 +8,7 @@ CONFIG_BATCH_TRANSLITERATION = 'batch_transliterations'
 CONFIG_BATCH_AUDIO = 'batch_audio'
 CONFIG_VOICE_SELECTION = 'voice_selection'
 CONFIG_APPLY_UPDATES_AUTOMATICALLY = 'apply_updates_automatically'
+CONFIG_TEXT_PROCESSING = 'text_processing'
 ADDON_NAME = 'Language Tools'
 MENU_PREFIX = ADDON_NAME + ':'
 DEFAULT_LANGUAGE = 'en' # always add this language, even if the user didn't add it themselves

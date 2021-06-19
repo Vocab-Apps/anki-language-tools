@@ -99,17 +99,3 @@ def test_generate_audio_for_field(qtbot):
 
     assert mock_language_tools.anki_utils.added_media_file == None    
 
-
-
-def test_field_empty(qtbot):
-    config_gen = testing_utils.TestConfigGenerator()
-    mock_language_tools = config_gen.build_languagetools_instance('default')
-
-    assert mock_language_tools.field_empty('yo') == False
-    assert mock_language_tools.field_empty('') == True
-    assert mock_language_tools.field_empty(' ') == True
-    assert mock_language_tools.field_empty('&nbsp;') == True
-    assert mock_language_tools.field_empty('&nbsp; ') == True
-    assert mock_language_tools.field_empty(' &nbsp; ') == True
-    assert mock_language_tools.field_empty('<br>') == True
-    assert mock_language_tools.field_empty('<div>\n</div>') == True

@@ -24,11 +24,13 @@ if hasattr(sys, '_pytest_mode'):
     import version
     import errors
     import deck_utils
+    import text_utils
 else:
     from . import constants
     from . import version
     from . import errors
     from . import deck_utils
+    from . import text_utils
 
 
 class LanguageTools():
@@ -38,6 +40,7 @@ class LanguageTools():
         self.deck_utils = deck_utils
         self.cloud_language_tools = cloud_language_tools
         self.config = self.anki_utils.get_config()
+        self.text_utils = text_utils.TextUtils(self.config.get(constants.CONFIG_TEXT_PROCESSING, {}))
 
         self.collectionLoaded = False
         self.mainWindowInitialized = False
@@ -202,10 +205,6 @@ class LanguageTools():
         deck_id = deck_note_type.deck_id
         model_id = deck_note_type.model_id
         return self.anki_utils.get_noteids_for_deck_note_type(deck_id, model_id, sample_size)
-
-    def field_empty(self, field_value: str) -> bool:
-        stripped_field_value = anki.utils.htmlToTextLine(field_value)
-        return len(stripped_field_value) == 0
 
     def get_field_samples(self, deck_note_type_field: deck_utils.DeckNoteTypeField, sample_size: int) -> List[str]:
         note_ids = self.get_noteids_for_deck_note_type(deck_note_type_field.deck_note_type, sample_size)
@@ -477,7 +476,7 @@ class LanguageTools():
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = self.anki_utils.get_note_by_id(note_id)
         source_text = note[from_field]
-        if self.field_empty(source_text):
+        if self.text_utils.is_empty(source_text):
             return False
         
         response = self.generate_audio_tag_collection(source_text, voice)

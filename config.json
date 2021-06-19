@@ -8,5 +8,6 @@
     "batch_transliterations": {},
     "batch_audio": {},
     "voice_selection": {},
-    "apply_updates_automatically": true
+    "apply_updates_automatically": true,
+    "text_processing": {}
 }
