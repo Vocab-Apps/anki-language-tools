@@ -117,3 +117,31 @@ def test_get_tts_audio(qtbot):
     assert data['voice_key'] == {'name': 'voice1'}
     assert data['options'] == {}
 
+
+def test_get_translation(qtbot):
+    # pytest test_languagetools.py -k test_get_translation
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('text_replacement')
+
+    source_text = 'unter etw'
+    mock_language_tools.cloud_language_tools.translation_map = {
+        'unter etwas': 'under something'
+    }
+
+    translated_text = mock_language_tools.get_translation(source_text, {'translation_key': 'de to en'})
+    assert translated_text == 'under something'
+
+def test_get_transliteration(qtbot):
+    # pytest test_languagetools.py -k test_get_transliteration
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('text_replacement')
+
+    source_text = 'unter etw'
+    mock_language_tools.cloud_language_tools.transliteration_map = {
+        'unter etwas': 'ˈʊntɐ ˈɛtvas'
+    }
+
+    transliterated_text = mock_language_tools.get_transliteration(source_text, {'transliteration_key': 'de to en'})
+    assert transliterated_text == 'ˈʊntɐ ˈɛtvas'

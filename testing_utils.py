@@ -318,6 +318,11 @@ class MockCloudLanguageTools():
         translated_text = self.translation_map[source_text]
         return MockTranslationResponse(200, {'translated_text': translated_text})
 
+    def get_transliteration(self, api_key, source_text, transliteration_option):
+        # if needed, error simulation can be added here
+        transliterated_text = self.transliteration_map[source_text]
+        return MockTranslationResponse(200, {'transliterated_text': transliterated_text})
+
 class MockCard():
     def __init__(self, deck_id):
         self.did = deck_id
@@ -455,8 +460,8 @@ class TestConfigGenerator():
                 {'pattern': r'etw', 
                 'replace': 'etwas',
                 'Audio': True,
-                'Translation': False,
-                'Transliteration': False},
+                'Translation': True,
+                'Transliteration': True},
             ]
         }
         return base_config
