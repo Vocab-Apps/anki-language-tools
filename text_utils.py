@@ -7,10 +7,25 @@ if hasattr(sys, '_pytest_mode'):
 else:
     from . import constants
 
+class TextReplacement():
+    def __init__(self, options):
+        self.pattern = options['pattern']
+        self.replace = options['replace']
+        self.transformation_type_map = {}
+        for transformation_type in constants.TransformationType:
+            self.transformation_type_map[transformation_type] = options.get(transformation_type.name, False)
+
+    def process(self, text, transformation_type):
+        result = text
+        if self.transformation_type_map[transformation_type]:
+            result = re.sub(self.pattern, self.replace, text)
+        return result
+
 class TextUtils():
     def __init__(self, options):
         self.options = options
-        self.replacements = self.options.get('replacements', [])
+        replacements_array = self.options.get('replacements', [])
+        self.replacements = [TextReplacement(replacement) for replacement in replacements_array]
 
     def is_empty(self, text):
         stripped_field_value = anki.utils.htmlToTextLine(text)
@@ -20,9 +35,7 @@ class TextUtils():
         result = anki.utils.htmlToTextLine(text)
 
         # apply replacements
-        for replace in self.replacements:
-            replace_transformation_type = replace.get(transformation_type.name, False)
-            if replace_transformation_type == True:
-                result = re.sub(replace['pattern'], replace['replace'], result)
+        for replacement in self.replacements:
+            result = replacement.process(result, transformation_type)
 
         return result

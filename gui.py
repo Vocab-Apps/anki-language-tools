@@ -16,6 +16,7 @@ from . import editor
 from . import dialogs
 from . import deck_utils
 from . import dialog_voiceselection
+from . import dialog_textprocessing
 
 
 def init(languagetools):
@@ -31,6 +32,9 @@ def init(languagetools):
 
     def show_voice_selection():
         dialog_voiceselection.voice_selection_dialog(languagetools, aqt.mw)
+
+    def show_text_processing():
+        dialog_textprocessing.text_processing_dialog(languagetools)
 
     def show_yomichan_integration():
         dialogs.yomichan_dialog(languagetools)
@@ -207,6 +211,10 @@ def init(languagetools):
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Voice Selection", aqt.mw)
     action.triggered.connect(show_voice_selection)
+    aqt.mw.form.menuTools.addAction(action)
+
+    action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Text Processing", aqt.mw)
+    action.triggered.connect(show_text_processing)
     aqt.mw.form.menuTools.addAction(action)
 
     action = aqt.qt.QAction(f"{constants.MENU_PREFIX} Verify API Key && Account Info", aqt.mw)

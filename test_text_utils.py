@@ -40,3 +40,17 @@ def test_replace(qtbot):
     assert utils.process('unter (etw +D)', constants.TransformationType.Audio) == 'unter etwas +Dativ'
     assert utils.process('<b>unter</b> (etw +D)', constants.TransformationType.Audio) == 'unter etwas +Dativ'
     assert utils.process('<b>unter</b> (etw +D)', constants.TransformationType.Transliteration) == 'unter (etw +D)'
+
+
+def test_replacement(qtbot):
+    text_replacement = text_utils.TextReplacement({
+        'pattern': ' / ', 
+        'replace': ' ',
+        'Audio': True,
+        'Translation': False,
+        'Transliteration': False        
+    })
+    
+    assert text_replacement.process('word1 / word2', constants.TransformationType.Audio) == 'word1 word2'
+    assert text_replacement.process('word1 / word2', constants.TransformationType.Transliteration) == 'word1 / word2'
+    assert text_replacement.process('word1 / word2', constants.TransformationType.Translation) == 'word1 / word2'
