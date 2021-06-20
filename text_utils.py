@@ -1,6 +1,11 @@
+import sys
 import anki.utils
-import constants
 import re
+
+if hasattr(sys, '_pytest_mode'):
+    import constants
+else:
+    from . import constants
 
 class TextUtils():
     def __init__(self, options):
