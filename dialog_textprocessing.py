@@ -1,16 +1,22 @@
 import sys
 import PyQt5
+import logging
 
 if hasattr(sys, '_pytest_mode'):
     import constants
     import gui_utils
     import errors
+    import text_utils
     from languagetools import LanguageTools
 else:
     from . import constants
     from . import gui_utils
     from . import errors
+    from . import text_utils
     from .languagetools import LanguageTools
+
+COL_INDEX_PATTERN = 0
+COL_INDEX_REPLACEMENT = 1
 
 class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
     def __init__(self):
@@ -18,15 +24,12 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
 
         self.replacements = []
 
-        self.pattern_col_index = 0
-        self.replacement_col_index = 1
-
         self.header_text = [
             'Pattern',
             'Replacement'
         ]
         self.col_index_to_transformation_type_map = {}
-        col_index = 3
+        col_index = 2
         for transformation_type in constants.TransformationType:
             self.header_text.append(transformation_type.name)
             self.col_index_to_transformation_type_map[col_index] = transformation_type
@@ -34,36 +37,80 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def flags(self, index):
         # all columns are editable
-        return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
+        col = index.column()
+        if col == COL_INDEX_PATTERN or col == COL_INDEX_REPLACEMENT:
+            return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
+        # should be a transformation type
+        return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsUserCheckable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
 
     def rowCount(self, parent):
         return len(self.replacements)
 
     def columnCount(self, parent):
+        return self.num_columns()
+
+    def num_columns(self):
         return len(self.header_text)
+
+    def add_replacement(self):
+        self.replacements.append(text_utils.TextReplacement({}))
+        self.layoutChanged.emit()
 
     def data(self, index, role):
         if not index.isValid():
             return PyQt5.QtCore.QVariant()
-        elif role != PyQt5.QtCore.Qt.DisplayRole and role != PyQt5.QtCore.Qt.EditRole: # only support display and edit
-           return PyQt5.QtCore.QVariant()
-        if index.column() == 0:
-            # from field
-            return PyQt5.QtCore.QVariant(self.from_field_data[index.row()])
-        else:
-            # result field
-            return PyQt5.QtCore.QVariant(self.to_field_data[index.row()])
+
+        column = index.column()
+        row = index.row()
+
+        # check whether we've got data for this row
+        if row >= len(self.replacements):
+            return PyQt5.QtCore.QVariant()
+
+        replacement = self.replacements[row]
+
+        if role == PyQt5.QtCore.Qt.DisplayRole or role == PyQt5.QtCore.Qt.EditRole:
+
+            if column == COL_INDEX_PATTERN:
+                return self.data_display(replacement.pattern, role)
+            if column == COL_INDEX_REPLACEMENT:
+                return self.data_display(replacement.replace, role)
+
+        if role == PyQt5.QtCore.Qt.CheckStateRole:
+            if column == COL_INDEX_PATTERN or column == COL_INDEX_REPLACEMENT:
+                # don't support these columns in this role
+                return PyQt5.QtCore.QVariant()
+
+            # should be a transformation type
+            transformation_type = self.col_index_to_transformation_type_map[column]
+            is_enabled = replacement.transformation_type_map[transformation_type]
+            if is_enabled:
+                return PyQt5.QtCore.Qt.Checked
+            return PyQt5.QtCore.Qt.Unchecked
+
+        return PyQt5.QtCore.QVariant()
+
+    def data_display(self, value, role):
+        if role == PyQt5.QtCore.Qt.DisplayRole:
+            text = '""'
+            if value != None:
+                text = '"' + value + '"'
+            return PyQt5.QtCore.QVariant(text)
+        elif role == PyQt5.QtCore.Qt.EditRole:
+            return PyQt5.QtCore.QVariant(value)
+
+
 
     def setData(self, index, value, role):
         if index.isValid() and role == PyQt5.QtCore.Qt.EditRole:
             
             # set the value into a TextReplacement object
-            column = index.col()
+            column = index.column()
             row = index.row()
             replacement = self.replacements[row]
-            if column == self.pattern_col_index:
+            if column == COL_INDEX_PATTERN:
                 replacement.pattern = value
-            elif column == self.replacement_col_index:
+            elif column == COL_INDEX_REPLACEMENT:
                 replacement.replace = value
             else:
                 transformation_type = self.col_index_to_transformation_type_map[column]
@@ -106,6 +153,12 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         header.setSectionResizeMode(0, PyQt5.QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, PyQt5.QtWidgets.QHeaderView.Stretch)
         vlayout.addWidget(self.table_view)
+        
+        # setup buttons below table
+        hlayout = PyQt5.QtWidgets.QHBoxLayout()
+        self.add_replace_button = PyQt5.QtWidgets.QPushButton('Add Text Replacement')
+        hlayout.addWidget(self.add_replace_button)
+        vlayout.addLayout(hlayout)
 
         # setup bottom buttons
         # ====================
@@ -122,6 +175,7 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         # ===========
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
+        self.add_replace_button.pressed.connect(self.textReplacementTableModel.add_replacement)
 
 
 def prepare_text_processing_dialog(languagetools):

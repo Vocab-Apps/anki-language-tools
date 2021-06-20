@@ -9,11 +9,11 @@ else:
 
 class TextReplacement():
     def __init__(self, options):
-        self.pattern = options['pattern']
-        self.replace = options['replace']
+        self.pattern = options.get('pattern', None)
+        self.replace = options.get('replace', None)
         self.transformation_type_map = {}
         for transformation_type in constants.TransformationType:
-            self.transformation_type_map[transformation_type] = options.get(transformation_type.name, False)
+            self.transformation_type_map[transformation_type] = options.get(transformation_type.name, True)
 
     def process(self, text, transformation_type):
         result = text
