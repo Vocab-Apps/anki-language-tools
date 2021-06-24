@@ -56,6 +56,17 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
         self.replacements.append(text_utils.TextReplacement({}))
         self.layoutChanged.emit()
 
+    def delete_rows(self, row_index):
+        row = row_index.row()
+        del self.replacements[row]
+        self.layoutChanged.emit()
+
+    def delete_selected_replacement(self):
+        # get selected row id
+        # self.
+        rows = self.selectionModel().selectedRows()
+        logging.info(f'rows: {rows}')
+
     def data(self, index, role):
         if not index.isValid():
             return PyQt5.QtCore.QVariant()
@@ -128,8 +139,9 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
             return True
         elif role == PyQt5.QtCore.Qt.CheckStateRole:
             transformation_type = self.col_index_to_transformation_type_map[column]
-            replacement.transformation_type_map[transformation_type] = value
-            logging.info(f'setting {transformation_type} to {value}')
+            is_checked = value == PyQt5.QtCore.Qt.Checked
+            replacement.transformation_type_map[transformation_type] = is_checked
+            logging.info(f'setting {transformation_type} to {is_checked}')
             start_index = self.createIndex(row, column)
             end_index = self.createIndex(row, column)
             self.dataChanged.emit(start_index, end_index)            
@@ -162,6 +174,8 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
 
         self.table_view = PyQt5.QtWidgets.QTableView()
         self.table_view.setModel(self.textReplacementTableModel)
+        self.table_view.setSelectionMode(PyQt5.QtWidgets.QTableView.SingleSelection)
+        # self.table_view.setSelectionBehavior(PyQt5.QtWidgets.QTableView.SelectRows)
         header = self.table_view.horizontalHeader()       
         header.setSectionResizeMode(0, PyQt5.QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, PyQt5.QtWidgets.QHeaderView.Stretch)
@@ -171,6 +185,8 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         hlayout = PyQt5.QtWidgets.QHBoxLayout()
         self.add_replace_button = PyQt5.QtWidgets.QPushButton('Add Text Replacement')
         hlayout.addWidget(self.add_replace_button)
+        self.remove_replace_button = PyQt5.QtWidgets.QPushButton('Remove Selected Text Replacement')
+        hlayout.addWidget(self.remove_replace_button)
         vlayout.addLayout(hlayout)
 
         # setup bottom buttons
@@ -189,7 +205,13 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
         self.add_replace_button.pressed.connect(self.textReplacementTableModel.add_replacement)
+        self.remove_replace_button.pressed.connect(self.delete_text_replacement)
 
+
+    def delete_text_replacement(self):
+        rows_indices = self.table_view.selectionModel().selectedIndexes()
+        if len(rows_indices) == 1:
+            self.textReplacementTableModel.delete_rows(rows_indices[0])
 
 def prepare_text_processing_dialog(languagetools):
     text_processing_dialog = TextProcessingDialog(languagetools)
