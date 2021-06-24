@@ -41,7 +41,7 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
         if col == COL_INDEX_PATTERN or col == COL_INDEX_REPLACEMENT:
             return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
         # should be a transformation type
-        return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsUserCheckable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
+        return PyQt5.QtCore.Qt.ItemIsUserCheckable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
 
     def rowCount(self, parent):
         return len(self.replacements)
@@ -102,12 +102,17 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
 
 
     def setData(self, index, value, role):
-        if index.isValid() and role == PyQt5.QtCore.Qt.EditRole:
+        if not index.isValid():
+            return False
+
+        column = index.column()
+        row = index.row()
+
+        replacement = self.replacements[row]
+
+        if role == PyQt5.QtCore.Qt.EditRole:
             
             # set the value into a TextReplacement object
-            column = index.column()
-            row = index.row()
-            replacement = self.replacements[row]
             if column == COL_INDEX_PATTERN:
                 replacement.pattern = value
             elif column == COL_INDEX_REPLACEMENT:
@@ -120,6 +125,14 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
             start_index = self.createIndex(row, column)
             end_index = self.createIndex(row, column)
             self.dataChanged.emit(start_index, end_index)
+            return True
+        elif role == PyQt5.QtCore.Qt.CheckStateRole:
+            transformation_type = self.col_index_to_transformation_type_map[column]
+            replacement.transformation_type_map[transformation_type] = value
+            logging.info(f'setting {transformation_type} to {value}')
+            start_index = self.createIndex(row, column)
+            end_index = self.createIndex(row, column)
+            self.dataChanged.emit(start_index, end_index)            
             return True
         else:
             return False
