@@ -27,7 +27,8 @@ class TextReplacement():
     def process(self, text, transformation_type):
         result = text
         if self.transformation_type_map[transformation_type]:
-            result = re.sub(self.pattern, self.replace, text)
+            if self.pattern != None and self.replace != None:
+                result = re.sub(self.pattern, self.replace, text)
         return result
 
 class TextUtils():

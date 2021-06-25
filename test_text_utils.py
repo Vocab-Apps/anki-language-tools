@@ -72,3 +72,11 @@ def test_replacement(qtbot):
     assert text_replacement_2.process('word1 / word2', constants.TransformationType.Transliteration) == 'word1 / word2'
     assert text_replacement_2.process('word1 / word2', constants.TransformationType.Translation) == 'word1 / word2'    
 
+    # malformed input
+    text_replacement = text_utils.TextReplacement({
+        'pattern': ' / ', 
+        'Audio': True,
+        'Translation': False,
+        'Transliteration': False        
+    })
+    assert text_replacement.process('word1', constants.TransformationType.Audio) == 'word1'

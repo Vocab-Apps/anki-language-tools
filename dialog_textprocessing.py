@@ -19,10 +19,11 @@ COL_INDEX_PATTERN = 0
 COL_INDEX_REPLACEMENT = 1
 
 class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
-    def __init__(self):
+    def __init__(self, recompute_sample_callback):
         PyQt5.QtCore.QAbstractTableModel.__init__(self, None)
 
         self.replacements = []
+        self.recompute_sample_callback = recompute_sample_callback
 
         self.header_text = [
             'Pattern',
@@ -59,13 +60,8 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
     def delete_rows(self, row_index):
         row = row_index.row()
         del self.replacements[row]
+        self.recompute_sample_callback()
         self.layoutChanged.emit()
-
-    def delete_selected_replacement(self):
-        # get selected row id
-        # self.
-        rows = self.selectionModel().selectedRows()
-        logging.info(f'rows: {rows}')
 
     def data(self, index, role):
         if not index.isValid():
@@ -136,6 +132,7 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
             start_index = self.createIndex(row, column)
             end_index = self.createIndex(row, column)
             self.dataChanged.emit(start_index, end_index)
+            self.recompute_sample_callback()
             return True
         elif role == PyQt5.QtCore.Qt.CheckStateRole:
             transformation_type = self.col_index_to_transformation_type_map[column]
@@ -144,7 +141,8 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
             logging.info(f'setting {transformation_type} to {is_checked}')
             start_index = self.createIndex(row, column)
             end_index = self.createIndex(row, column)
-            self.dataChanged.emit(start_index, end_index)            
+            self.dataChanged.emit(start_index, end_index)       
+            self.recompute_sample_callback()     
             return True
         else:
             return False
@@ -158,7 +156,7 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
     def __init__(self, languagetools: LanguageTools):
         super(PyQt5.QtWidgets.QDialog, self).__init__()
         self.languagetools = languagetools
-        self.textReplacementTableModel = TextReplacementsTableModel()
+        self.textReplacementTableModel = TextReplacementsTableModel(self.update_transformed_text)
 
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
@@ -168,6 +166,21 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
 
         vlayout.addWidget(gui_utils.get_header_label('Text Processing Settings'))
         vlayout.addWidget(gui_utils.get_medium_label('Text Replacement'))
+
+        # setup test input box
+        # ====================
+        hlayout = PyQt5.QtWidgets.QHBoxLayout()
+        label = PyQt5.QtWidgets.QLabel('Enter sample text:')
+        hlayout.addWidget(label)
+        self.sample_text_input = PyQt5.QtWidgets.QLineEdit()
+        hlayout.addWidget(self.sample_text_input)
+        
+        self.sample_text_transformed_label = PyQt5.QtWidgets.QLabel('<i>Enter sample text to test transformation</i>')
+        hlayout.addWidget(self.sample_text_transformed_label)
+        
+        hlayout.addStretch()
+
+        vlayout.addLayout(hlayout)        
 
         # setup preview table
         # ===================
@@ -183,9 +196,9 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         
         # setup buttons below table
         hlayout = PyQt5.QtWidgets.QHBoxLayout()
-        self.add_replace_button = PyQt5.QtWidgets.QPushButton('Add Text Replacement')
+        self.add_replace_button = PyQt5.QtWidgets.QPushButton('Add Text Replacement Rule')
         hlayout.addWidget(self.add_replace_button)
-        self.remove_replace_button = PyQt5.QtWidgets.QPushButton('Remove Selected Text Replacement')
+        self.remove_replace_button = PyQt5.QtWidgets.QPushButton('Remove Selected Text Replacement Rule')
         hlayout.addWidget(self.remove_replace_button)
         vlayout.addLayout(hlayout)
 
@@ -206,6 +219,27 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         buttonBox.rejected.connect(self.reject)
         self.add_replace_button.pressed.connect(self.textReplacementTableModel.add_replacement)
         self.remove_replace_button.pressed.connect(self.delete_text_replacement)
+        self.typing_timer = self.languagetools.anki_utils.wire_typing_timer(self.sample_text_input, self.sample_text_changed)
+
+    def sample_text_changed(self):
+        self.update_transformed_text()
+
+    def update_transformed_text(self):
+        # get the sample text
+        sample_text = self.sample_text_input.text()
+        if len(sample_text) == 0:
+            label_text = '<i>Enter sample text to test transformation</i>'
+        else:
+            # get the text replacements
+            replacement_list = self.textReplacementTableModel.replacements
+            replacement_dict_list = [x.to_dict() for x in replacement_list]
+            utils = text_utils.TextUtils({'replacements': replacement_dict_list})
+            sample_text_processed = utils.process(sample_text, constants.TransformationType.Audio)
+            label_text = f'<i>result</i>: {sample_text_processed}'
+
+        # self.sample_text_transformed_label.setText(label_text)
+        self.languagetools.anki_utils.run_on_main(lambda: self.sample_text_transformed_label.setText(label_text))
+
 
 
     def delete_text_replacement(self):
