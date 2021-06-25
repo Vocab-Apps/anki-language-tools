@@ -54,3 +54,21 @@ def test_replacement(qtbot):
     assert text_replacement.process('word1 / word2', constants.TransformationType.Audio) == 'word1 word2'
     assert text_replacement.process('word1 / word2', constants.TransformationType.Transliteration) == 'word1 / word2'
     assert text_replacement.process('word1 / word2', constants.TransformationType.Translation) == 'word1 / word2'
+
+    actual_dict_data = text_replacement.to_dict()
+    expected_dict_data = {
+        'pattern': ' / ', 
+        'replace': ' ',
+        'Audio': True,
+        'Translation': False,
+        'Transliteration': False
+    }
+
+    assert actual_dict_data == expected_dict_data
+
+    # try to re-create from the dict
+    text_replacement_2 = text_utils.TextReplacement(actual_dict_data)
+    assert text_replacement_2.process('word1 / word2', constants.TransformationType.Audio) == 'word1 word2'
+    assert text_replacement_2.process('word1 / word2', constants.TransformationType.Transliteration) == 'word1 / word2'
+    assert text_replacement_2.process('word1 / word2', constants.TransformationType.Translation) == 'word1 / word2'    
+

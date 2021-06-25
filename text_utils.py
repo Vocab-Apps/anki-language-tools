@@ -15,6 +15,15 @@ class TextReplacement():
         for transformation_type in constants.TransformationType:
             self.transformation_type_map[transformation_type] = options.get(transformation_type.name, True)
 
+    def to_dict(self):
+        transformation_type_map = {key.name:value for (key, value) in self.transformation_type_map.items()}
+        data = {
+            'pattern': self.pattern,
+            'replace': self.replace,
+        }
+        data.update(transformation_type_map)
+        return data
+
     def process(self, text, transformation_type):
         result = text
         if self.transformation_type_map[transformation_type]:
