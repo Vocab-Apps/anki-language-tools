@@ -40,7 +40,7 @@ class LanguageTools():
         self.deck_utils = deck_utils
         self.cloud_language_tools = cloud_language_tools
         self.config = self.anki_utils.get_config()
-        self.text_utils = text_utils.TextUtils(self.config.get(constants.CONFIG_TEXT_PROCESSING, {}))
+        self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
 
         self.collectionLoaded = False
         self.mainWindowInitialized = False
@@ -403,6 +403,14 @@ class LanguageTools():
         # logging.debug(f'get_batch_audio_settings, config: {self.config}')
 
         return self.config.get(constants.CONFIG_BATCH_AUDIO, {}).get(model_name, {}).get(deck_name, {})
+
+    def get_text_processing_settings(self):
+        return self.config.get(constants.CONFIG_TEXT_PROCESSING, {})
+
+    def store_text_processing_settings(self, settings):
+        self.config[constants.CONFIG_TEXT_PROCESSING] = settings
+        self.anki_utils.write_config(self.config)
+        self.text_utils = text_utils.TextUtils(settings)
 
     def store_voice_selection(self, language_code, voice_mapping):
         self.config[constants.CONFIG_VOICE_SELECTION][language_code] = voice_mapping

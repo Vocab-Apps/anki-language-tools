@@ -19,10 +19,10 @@ COL_INDEX_PATTERN = 0
 COL_INDEX_REPLACEMENT = 1
 
 class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
-    def __init__(self, recompute_sample_callback):
+    def __init__(self, recompute_sample_callback, replacements):
         PyQt5.QtCore.QAbstractTableModel.__init__(self, None)
 
-        self.replacements = []
+        self.replacements = replacements
         self.recompute_sample_callback = recompute_sample_callback
 
         self.header_text = [
@@ -156,7 +156,7 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
     def __init__(self, languagetools: LanguageTools):
         super(PyQt5.QtWidgets.QDialog, self).__init__()
         self.languagetools = languagetools
-        self.textReplacementTableModel = TextReplacementsTableModel(self.update_transformed_text)
+        self.textReplacementTableModel = TextReplacementsTableModel(self.update_transformed_text, languagetools.text_utils.replacements)
 
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
@@ -174,6 +174,11 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         hlayout.addWidget(label)
         self.sample_text_input = PyQt5.QtWidgets.QLineEdit()
         hlayout.addWidget(self.sample_text_input)
+
+        self.sample_transformation_type_combo_box = PyQt5.QtWidgets.QComboBox()
+        transformation_type_names = [x.name for x in constants.TransformationType]
+        self.sample_transformation_type_combo_box.addItems(transformation_type_names)
+        hlayout.addWidget(self.sample_transformation_type_combo_box)
         
         self.sample_text_transformed_label = PyQt5.QtWidgets.QLabel('<i>Enter sample text to test transformation</i>')
         hlayout.addWidget(self.sample_text_transformed_label)
@@ -220,32 +225,43 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         self.add_replace_button.pressed.connect(self.textReplacementTableModel.add_replacement)
         self.remove_replace_button.pressed.connect(self.delete_text_replacement)
         self.typing_timer = self.languagetools.anki_utils.wire_typing_timer(self.sample_text_input, self.sample_text_changed)
+        self.sample_transformation_type_combo_box.currentIndexChanged.connect(self.sample_transformation_type_changed)
+
+    def sample_transformation_type_changed(self):
+        self.update_transformed_text
 
     def sample_text_changed(self):
         self.update_transformed_text()
 
+    def get_text_processing_settings(self):
+        replacement_list = self.textReplacementTableModel.replacements
+        replacement_dict_list = [x.to_dict() for x in replacement_list]
+        return {'replacements': replacement_dict_list}
+
     def update_transformed_text(self):
         # get the sample text
         sample_text = self.sample_text_input.text()
+        transformation_type = constants.TransformationType[self.sample_transformation_type_combo_box.currentText()]
         if len(sample_text) == 0:
             label_text = '<i>Enter sample text to test transformation</i>'
         else:
             # get the text replacements
-            replacement_list = self.textReplacementTableModel.replacements
-            replacement_dict_list = [x.to_dict() for x in replacement_list]
-            utils = text_utils.TextUtils({'replacements': replacement_dict_list})
-            sample_text_processed = utils.process(sample_text, constants.TransformationType.Audio)
+            utils = text_utils.TextUtils(self.get_text_processing_settings())
+            sample_text_processed = utils.process(sample_text, transformation_type)
             label_text = f'<i>result</i>: {sample_text_processed}'
 
         # self.sample_text_transformed_label.setText(label_text)
         self.languagetools.anki_utils.run_on_main(lambda: self.sample_text_transformed_label.setText(label_text))
 
 
-
     def delete_text_replacement(self):
         rows_indices = self.table_view.selectionModel().selectedIndexes()
         if len(rows_indices) == 1:
             self.textReplacementTableModel.delete_rows(rows_indices[0])
+
+    def accept(self):
+        self.languagetools.store_text_processing_settings(self.get_text_processing_settings())
+        self.close()
 
 def prepare_text_processing_dialog(languagetools):
     text_processing_dialog = TextProcessingDialog(languagetools)
