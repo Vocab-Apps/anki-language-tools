@@ -629,4 +629,15 @@ def test_dialog_textprocessing(qtbot):
     qtbot.keyClicks(dialog.sample_text_input, 'abdc1234')
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
+    # add a text transformation rule
+    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    # enter pattern and replacement
+    index_pattern = dialog.textReplacementTableModel.createIndex(0, 0)
+    dialog.textReplacementTableModel.setData(index_pattern, '1234', PyQt5.QtCore.Qt.EditRole)
+    index_replacement = dialog.textReplacementTableModel.createIndex(0, 1)
+    dialog.textReplacementTableModel.setData(index_replacement, '5678', PyQt5.QtCore.Qt.EditRole)
+
+    # verify preview
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
+
 
