@@ -729,5 +729,19 @@ def test_dialog_textprocessing(qtbot):
     assert actual_written_config_text_processing['replacements'][0] == expected_written_config_text_processing['replacements'][0]
     assert actual_written_config_text_processing['replacements'][1] == expected_written_config_text_processing['replacements'][1]
 
+    # try to generate some translations
+    source_text = 'word1 / word2'
+    mock_language_tools.cloud_language_tools.translation_map = {
+        'word1 word2': 'word3 word4'
+    }
+    translated_text = mock_language_tools.get_translation(source_text, {'translation_key': 'de to en'})
+    assert translated_text == 'word3 word4'
 
+    # try to generate transliteration
+    source_text = 'word1 / word2'
+    mock_language_tools.cloud_language_tools.transliteration_map = {
+        'wordnumber wordnumber': 'correct correct'
+    }
+    translated_text = mock_language_tools.get_transliteration(source_text, {'translation_key': 'de to en'})
+    assert translated_text == 'correct correct'
 
