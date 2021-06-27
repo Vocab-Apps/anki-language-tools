@@ -632,12 +632,25 @@ def test_dialog_textprocessing(qtbot):
     # add a text transformation rule
     qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
     # enter pattern and replacement
-    index_pattern = dialog.textReplacementTableModel.createIndex(0, 0)
+    row = 0
+    index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
     dialog.textReplacementTableModel.setData(index_pattern, '1234', PyQt5.QtCore.Qt.EditRole)
-    index_replacement = dialog.textReplacementTableModel.createIndex(0, 1)
+    index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
     dialog.textReplacementTableModel.setData(index_replacement, '5678', PyQt5.QtCore.Qt.EditRole)
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
 
+    # add another transformation rule
+    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    # enter pattern and replacement
+    row = 1
+    index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
+    dialog.textReplacementTableModel.setData(index_pattern, ' / ', PyQt5.QtCore.Qt.EditRole)
+    index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
+    dialog.textReplacementTableModel.setData(index_replacement, ' ', PyQt5.QtCore.Qt.EditRole)
 
+    # check processing preview
+    dialog.sample_text_input.clear()
+    qtbot.keyClicks(dialog.sample_text_input, 'word1 / word2')
+    assert dialog.sample_text_transformed_label.text() == '<b>word1 word2</b>'
