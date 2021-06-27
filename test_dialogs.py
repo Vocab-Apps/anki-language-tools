@@ -622,4 +622,11 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.textReplacementTableModel.headerData(2, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Translation'
     assert dialog.textReplacementTableModel.headerData(3, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Transliteration'
     assert dialog.textReplacementTableModel.headerData(4, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Audio'
+    # should have 0 rows
+    assert dialog.textReplacementTableModel.rowCount(None) == 0
+
+    # check processing preview
+    qtbot.keyClicks(dialog.sample_text_input, 'abdc1234')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
+
 
