@@ -675,4 +675,38 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.textReplacementTableModel.data(index_pattern, PyQt5.QtCore.Qt.DisplayRole) == '\" / \"'
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
     assert dialog.textReplacementTableModel.data(index_replacement, PyQt5.QtCore.Qt.DisplayRole) == '\" \"'
+    
+    # check the preview
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
+
+    # try a regexp rule
+    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    row = 1
+    index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
+    dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', PyQt5.QtCore.Qt.EditRole)
+    index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
+    dialog.textReplacementTableModel.setData(index_replacement, 'number', PyQt5.QtCore.Qt.EditRole)
+    # this transformation will only apply to transliteration
+    index_translation = dialog.textReplacementTableModel.createIndex(row, 2)
+    dialog.textReplacementTableModel.setData(index_translation, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
+    index_transliteration = dialog.textReplacementTableModel.createIndex(row, 3)
+    dialog.textReplacementTableModel.setData(index_transliteration, PyQt5.QtCore.Qt.Checked, PyQt5.QtCore.Qt.CheckStateRole)
+    index_audio = dialog.textReplacementTableModel.createIndex(row, 4)
+    dialog.textReplacementTableModel.setData(index_audio, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
+
+    # check the preview in different transformation types
+    dialog.sample_transformation_type_combo_box.setCurrentText('Transliteration')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdcnumber</b>'
+
+    dialog.sample_transformation_type_combo_box.setCurrentText('Translation')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
+
+    dialog.sample_transformation_type_combo_box.setCurrentText('Audio')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
+
+    # now, click OK to the dialog
+    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+
+    # ensure that config has been written
+
 
