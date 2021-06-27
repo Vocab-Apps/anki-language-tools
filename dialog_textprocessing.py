@@ -1,6 +1,7 @@
 import sys
 import PyQt5
 import logging
+import html
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -17,6 +18,8 @@ else:
 
 COL_INDEX_PATTERN = 0
 COL_INDEX_REPLACEMENT = 1
+
+BLANK_TEXT = '<i>Enter sample text to verify text processing settings.</i>'
 
 class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
     def __init__(self, recompute_sample_callback, replacements):
@@ -165,27 +168,34 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label('Text Processing Settings'))
-        vlayout.addWidget(gui_utils.get_medium_label('Text Replacement'))
 
         # setup test input box
         # ====================
-        hlayout = PyQt5.QtWidgets.QHBoxLayout()
-        label = PyQt5.QtWidgets.QLabel('Enter sample text:')
-        hlayout.addWidget(label)
-        self.sample_text_input = PyQt5.QtWidgets.QLineEdit()
-        hlayout.addWidget(self.sample_text_input)
 
+        # first line
+        hlayout = PyQt5.QtWidgets.QHBoxLayout()
+        hlayout.addWidget(PyQt5.QtWidgets.QLabel('Transformation Type:'))
         self.sample_transformation_type_combo_box = PyQt5.QtWidgets.QComboBox()
         transformation_type_names = [x.name for x in constants.TransformationType]
         self.sample_transformation_type_combo_box.addItems(transformation_type_names)
         hlayout.addWidget(self.sample_transformation_type_combo_box)
-        
-        self.sample_text_transformed_label = PyQt5.QtWidgets.QLabel('<i>Enter sample text to test transformation</i>')
-        hlayout.addWidget(self.sample_text_transformed_label)
-        
-        hlayout.addStretch()
 
-        vlayout.addLayout(hlayout)        
+        label = PyQt5.QtWidgets.QLabel('Enter sample text:')
+        hlayout.addWidget(label)
+        self.sample_text_input = PyQt5.QtWidgets.QLineEdit()
+        hlayout.addWidget(self.sample_text_input)
+        hlayout.addStretch()
+        vlayout.addLayout(hlayout)
+
+        # second line
+        hlayout = PyQt5.QtWidgets.QHBoxLayout()
+        hlayout.addWidget(PyQt5.QtWidgets.QLabel('Transformed Text:'))
+        self.sample_text_transformed_label = PyQt5.QtWidgets.QLabel(BLANK_TEXT)
+        hlayout.addWidget(self.sample_text_transformed_label)
+        hlayout.addStretch()
+        vlayout.addLayout(hlayout)
+
+        vlayout.addWidget(gui_utils.get_medium_label('Text Replacement'))
 
         # setup preview table
         # ===================
@@ -243,12 +253,12 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         sample_text = self.sample_text_input.text()
         transformation_type = constants.TransformationType[self.sample_transformation_type_combo_box.currentText()]
         if len(sample_text) == 0:
-            label_text = '<i>Enter sample text to test transformation</i>'
+            label_text = BLANK_TEXT
         else:
             # get the text replacements
             utils = text_utils.TextUtils(self.get_text_processing_settings())
             sample_text_processed = utils.process(sample_text, transformation_type)
-            label_text = f'<i>result</i>: {sample_text_processed}'
+            label_text = f'<b>{html.escape(sample_text_processed)}</b>'
 
         # self.sample_text_transformed_label.setText(label_text)
         self.languagetools.anki_utils.run_on_main(lambda: self.sample_text_transformed_label.setText(label_text))
