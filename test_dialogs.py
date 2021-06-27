@@ -654,3 +654,25 @@ def test_dialog_textprocessing(qtbot):
     dialog.sample_text_input.clear()
     qtbot.keyClicks(dialog.sample_text_input, 'word1 / word2')
     assert dialog.sample_text_transformed_label.text() == '<b>word1 word2</b>'
+
+    # go back to previous preview string
+    dialog.sample_text_input.clear()
+    qtbot.keyClicks(dialog.sample_text_input, 'abdc1234')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
+
+    # remove the first rule
+    dialog.table_view.selectRow(0)
+    index_first_row = dialog.textReplacementTableModel.createIndex(0, dialog_textprocessing.COL_INDEX_PATTERN)
+    dialog.table_view.selectionModel().select(index_first_row, PyQt5.QtCore.QItemSelectionModel.Select)
+    qtbot.mouseClick(dialog.remove_replace_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # there should only be one row left
+    assert dialog.textReplacementTableModel.rowCount(None) == 1
+
+    # check the rule at row 0
+    row = 0
+    index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
+    assert dialog.textReplacementTableModel.data(index_pattern, PyQt5.QtCore.Qt.DisplayRole) == '\" / \"'
+    index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
+    assert dialog.textReplacementTableModel.data(index_replacement, PyQt5.QtCore.Qt.DisplayRole) == '\" \"'
+
