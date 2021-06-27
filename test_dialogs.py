@@ -708,5 +708,26 @@ def test_dialog_textprocessing(qtbot):
     qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
 
     # ensure that config has been written
+    actual_written_config = mock_language_tools.anki_utils.written_config
+    actual_written_config_text_processing = actual_written_config[constants.CONFIG_TEXT_PROCESSING]
+    expected_written_config_text_processing = {
+        'replacements': 
+            [
+                {'Audio': True,
+                'Transliteration': True,
+                'Translation': True,
+                'pattern': ' / ',
+                'replace': ' '},
+                {'Audio': False,
+                'Transliteration': True,
+                'Translation': False,
+                'pattern': '[0-9]+',
+                'replace': 'number'},
+            ]
+    }
+
+    assert actual_written_config_text_processing['replacements'][0] == expected_written_config_text_processing['replacements'][0]
+    assert actual_written_config_text_processing['replacements'][1] == expected_written_config_text_processing['replacements'][1]
+
 
 
