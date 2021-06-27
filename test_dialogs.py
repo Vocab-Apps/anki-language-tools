@@ -10,6 +10,7 @@ import dialog_voiceselection
 import dialog_choosetranslation
 import dialog_batchtransformation
 import dialog_apikey
+import dialog_textprocessing
 import languagetools
 import constants
 import testing_utils
@@ -604,3 +605,21 @@ def test_batch_transformation_error_handling(qtbot):
     assert note_2.flush_called == True    
 
     # dialog.exec_()
+
+def test_dialog_textprocessing(qtbot):
+    # pytest test_dialogs.py -rPP -k test_dialog_textprocessing
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    dialog = dialog_textprocessing.prepare_text_processing_dialog(mock_language_tools)
+
+    # check table model
+    # =================
+    # headers
+    assert dialog.textReplacementTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Pattern'
+    assert dialog.textReplacementTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Replacement'
+    assert dialog.textReplacementTableModel.headerData(2, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Translation'
+    assert dialog.textReplacementTableModel.headerData(3, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Transliteration'
+    assert dialog.textReplacementTableModel.headerData(4, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Audio'
+
