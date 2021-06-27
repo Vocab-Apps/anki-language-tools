@@ -172,6 +172,8 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         # setup test input box
         # ====================
 
+        vlayout.addWidget(gui_utils.get_medium_label('Preview Settings'))
+
         # first line
         hlayout = PyQt5.QtWidgets.QHBoxLayout()
         hlayout.addWidget(PyQt5.QtWidgets.QLabel('Transformation Type:'))
@@ -238,7 +240,7 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         self.sample_transformation_type_combo_box.currentIndexChanged.connect(self.sample_transformation_type_changed)
 
     def sample_transformation_type_changed(self):
-        self.update_transformed_text
+        self.update_transformed_text()
 
     def sample_text_changed(self):
         self.update_transformed_text()
