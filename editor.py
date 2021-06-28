@@ -58,7 +58,7 @@ def load_transformation(languagetools, editor: aqt.editor.Editor, original_note_
         editor.web.eval(js_command)        
 
     # is the source field empty ?
-    if languagetools.field_empty(field_value):
+    if languagetools.text_utils.is_empty(field_value):
         apply_field_value(field_index, '')
         return
 
