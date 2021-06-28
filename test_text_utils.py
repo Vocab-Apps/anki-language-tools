@@ -80,3 +80,14 @@ def test_replacement(qtbot):
         'Transliteration': False        
     })
     assert text_replacement.process('word1', constants.TransformationType.Audio) == 'word1'
+
+def test_replacement_regexp_error(qtbot):
+    text_replacement = text_utils.TextReplacement({
+        'pattern': 'yoyo)', 
+        'replace': 'rep',
+        'Audio': True,
+        'Translation': True,
+        'Transliteration': True
+    })
+    
+    assert text_replacement.process('yoyo', constants.TransformationType.Audio) == 'yoyo'

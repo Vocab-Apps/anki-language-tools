@@ -1,4 +1,5 @@
 import sys
+import logging
 import anki.utils
 import re
 
@@ -28,7 +29,10 @@ class TextReplacement():
         result = text
         if self.transformation_type_map[transformation_type]:
             if self.pattern != None and self.replace != None:
-                result = re.sub(self.pattern, self.replace, text)
+                try:
+                    result = re.sub(self.pattern, self.replace, text)
+                except Exception as e:
+                    logging.error(f'error while processing regular expression {self.pattern} / {self.replace}: {e}')
         return result
 
 class TextUtils():
