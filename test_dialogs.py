@@ -617,11 +617,12 @@ def test_dialog_textprocessing(qtbot):
     # check table model
     # =================
     # headers
-    assert dialog.textReplacementTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Pattern'
-    assert dialog.textReplacementTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Replacement'
-    assert dialog.textReplacementTableModel.headerData(2, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Translation'
-    assert dialog.textReplacementTableModel.headerData(3, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Transliteration'
-    assert dialog.textReplacementTableModel.headerData(4, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Audio'
+    assert dialog.textReplacementTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Type'
+    assert dialog.textReplacementTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Pattern'
+    assert dialog.textReplacementTableModel.headerData(2, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Replacement'
+    assert dialog.textReplacementTableModel.headerData(3, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Translation'
+    assert dialog.textReplacementTableModel.headerData(4, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Transliteration'
+    assert dialog.textReplacementTableModel.headerData(5, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Audio'
     # should have 0 rows
     assert dialog.textReplacementTableModel.rowCount(None) == 0
 
@@ -630,7 +631,7 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
     # add a text transformation rule
-    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
     # enter pattern and replacement
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
@@ -642,7 +643,7 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
 
     # add another transformation rule
-    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
     # enter pattern and replacement
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
@@ -680,18 +681,18 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
     # try a regexp rule
-    qtbot.mouseClick(dialog.add_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
     dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', PyQt5.QtCore.Qt.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
     dialog.textReplacementTableModel.setData(index_replacement, 'number', PyQt5.QtCore.Qt.EditRole)
     # this transformation will only apply to transliteration
-    index_translation = dialog.textReplacementTableModel.createIndex(row, 2)
+    index_translation = dialog.textReplacementTableModel.createIndex(row, 3)
     dialog.textReplacementTableModel.setData(index_translation, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
-    index_transliteration = dialog.textReplacementTableModel.createIndex(row, 3)
+    index_transliteration = dialog.textReplacementTableModel.createIndex(row, 4)
     dialog.textReplacementTableModel.setData(index_transliteration, PyQt5.QtCore.Qt.Checked, PyQt5.QtCore.Qt.CheckStateRole)
-    index_audio = dialog.textReplacementTableModel.createIndex(row, 4)
+    index_audio = dialog.textReplacementTableModel.createIndex(row, 5)
     dialog.textReplacementTableModel.setData(index_audio, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
 
     # check the preview in different transformation types

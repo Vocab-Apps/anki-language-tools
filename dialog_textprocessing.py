@@ -16,8 +16,9 @@ else:
     from . import text_utils
     from .languagetools import LanguageTools
 
-COL_INDEX_PATTERN = 0
-COL_INDEX_REPLACEMENT = 1
+COL_INDEX_TYPE = 0
+COL_INDEX_PATTERN = 1
+COL_INDEX_REPLACEMENT = 2
 
 BLANK_TEXT = '<i>Enter sample text to verify text processing settings.</i>'
 
@@ -29,11 +30,12 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
         self.recompute_sample_callback = recompute_sample_callback
 
         self.header_text = [
+            'Type',
             'Pattern',
             'Replacement'
         ]
         self.col_index_to_transformation_type_map = {}
-        col_index = 2
+        col_index = COL_INDEX_REPLACEMENT + 1
         for transformation_type in constants.TransformationType:
             self.header_text.append(transformation_type.name)
             self.col_index_to_transformation_type_map[col_index] = transformation_type
@@ -42,6 +44,9 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
     def flags(self, index):
         # all columns are editable
         col = index.column()
+        if col == COL_INDEX_TYPE:
+            # not editable
+            return PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
         if col == COL_INDEX_PATTERN or col == COL_INDEX_REPLACEMENT:
             return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
         # should be a transformation type
@@ -56,8 +61,8 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
     def num_columns(self):
         return len(self.header_text)
 
-    def add_replacement(self):
-        self.replacements.append(text_utils.TextReplacement({}))
+    def add_replacement(self, replace_type):
+        self.replacements.append(text_utils.TextReplacement({'replace_type': replace_type.name}))
         self.layoutChanged.emit()
 
     def delete_rows(self, row_index):
@@ -81,13 +86,15 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
 
         if role == PyQt5.QtCore.Qt.DisplayRole or role == PyQt5.QtCore.Qt.EditRole:
 
+            if column == COL_INDEX_TYPE:
+                return PyQt5.QtCore.QVariant(replacement.replace_type.name.title())
             if column == COL_INDEX_PATTERN:
                 return self.data_display(replacement.pattern, role)
             if column == COL_INDEX_REPLACEMENT:
                 return self.data_display(replacement.replace, role)
 
         if role == PyQt5.QtCore.Qt.CheckStateRole:
-            if column == COL_INDEX_PATTERN or column == COL_INDEX_REPLACEMENT:
+            if column == COL_INDEX_TYPE or column == COL_INDEX_PATTERN or column == COL_INDEX_REPLACEMENT:
                 # don't support these columns in this role
                 return PyQt5.QtCore.QVariant()
 
@@ -123,7 +130,10 @@ class TextReplacementsTableModel(PyQt5.QtCore.QAbstractTableModel):
         if role == PyQt5.QtCore.Qt.EditRole:
             
             # set the value into a TextReplacement object
-            if column == COL_INDEX_PATTERN:
+            if column == COL_INDEX_TYPE:
+                # editing no supported
+                return False
+            elif column == COL_INDEX_PATTERN:
                 replacement.pattern = value
             elif column == COL_INDEX_REPLACEMENT:
                 replacement.replace = value
@@ -213,8 +223,10 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         
         # setup buttons below table
         hlayout = PyQt5.QtWidgets.QHBoxLayout()
-        self.add_replace_button = PyQt5.QtWidgets.QPushButton('Add Text Replacement Rule')
-        hlayout.addWidget(self.add_replace_button)
+        self.add_replace_simple_button = PyQt5.QtWidgets.QPushButton('Add Simple Text Replacement Rule')
+        hlayout.addWidget(self.add_replace_simple_button)
+        self.add_replace_regex_button = PyQt5.QtWidgets.QPushButton('Add Regex Text Replacement Rule')
+        hlayout.addWidget(self.add_replace_regex_button)
         self.remove_replace_button = PyQt5.QtWidgets.QPushButton('Remove Selected Text Replacement Rule')
         hlayout.addWidget(self.remove_replace_button)
         vlayout.addLayout(hlayout)
@@ -234,7 +246,8 @@ class TextProcessingDialog(PyQt5.QtWidgets.QDialog):
         # ===========
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
-        self.add_replace_button.pressed.connect(self.textReplacementTableModel.add_replacement)
+        self.add_replace_simple_button.pressed.connect(lambda: self.textReplacementTableModel.add_replacement(constants.ReplaceType.simple))
+        self.add_replace_regex_button.pressed.connect(lambda: self.textReplacementTableModel.add_replacement(constants.ReplaceType.regex))
         self.remove_replace_button.pressed.connect(self.delete_text_replacement)
         self.typing_timer = self.languagetools.anki_utils.wire_typing_timer(self.sample_text_input, self.sample_text_changed)
         self.sample_transformation_type_combo_box.currentIndexChanged.connect(self.sample_transformation_type_changed)
