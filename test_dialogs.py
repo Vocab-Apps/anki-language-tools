@@ -718,12 +718,14 @@ def test_dialog_textprocessing(qtbot):
                 'Transliteration': True,
                 'Translation': True,
                 'pattern': ' / ',
-                'replace': ' '},
+                'replace': ' ',
+                'replace_type': 'regex'},
                 {'Audio': False,
                 'Transliteration': True,
                 'Translation': False,
                 'pattern': '[0-9]+',
-                'replace': 'number'},
+                'replace': 'number',
+                'replace_type': 'regex'},
             ]
     }
 
@@ -746,3 +748,33 @@ def test_dialog_textprocessing(qtbot):
     translated_text = mock_language_tools.get_transliteration(source_text, {'translation_key': 'de to en'})
     assert translated_text == 'correct correct'
 
+def test_dialog_textprocessing_simple(qtbot):
+    # pytest test_dialogs.py -rPP -k test_dialog_textprocessing_simple
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    dialog = dialog_textprocessing.prepare_text_processing_dialog(mock_language_tools)
+
+    # check table model
+    # =================
+    # should have 0 rows
+    assert dialog.textReplacementTableModel.rowCount(None) == 0
+
+    # check processing preview
+    qtbot.keyClicks(dialog.sample_text_input, 'abdc1234 [9]+')
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234 [9]+</b>'
+
+    # add a text transformation rule
+    qtbot.mouseClick(dialog.add_replace_simple_button, PyQt5.QtCore.Qt.LeftButton)
+    # enter pattern and replacement
+    row = 0
+    index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
+    dialog.textReplacementTableModel.setData(index_pattern, ' [9]+', PyQt5.QtCore.Qt.EditRole) # should not get interpreted as regexp
+    index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
+    dialog.textReplacementTableModel.setData(index_replacement, 'rep', PyQt5.QtCore.Qt.EditRole)
+
+    # dialog.exec_()
+
+    # verify preview
+    assert dialog.sample_text_transformed_label.text() == '<b>abdc1234rep</b>'

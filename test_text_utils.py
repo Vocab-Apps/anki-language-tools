@@ -59,6 +59,7 @@ def test_replacement(qtbot):
     expected_dict_data = {
         'pattern': ' / ', 
         'replace': ' ',
+        'replace_type': 'regex',
         'Audio': True,
         'Translation': False,
         'Transliteration': False
@@ -105,3 +106,16 @@ def test_replacement_simple(qtbot):
     
     assert text_replacement.process('yoyo', constants.TransformationType.Audio) == 'yoyo'
     assert text_replacement.process('yoyo)', constants.TransformationType.Audio) == 'rep'
+
+    expected_dict = {
+        'pattern': 'yoyo)', 
+        'replace': 'rep',
+        'replace_type': 'simple',
+        'Audio': True,
+        'Translation': True,
+        'Transliteration': True        
+    }
+    assert text_replacement.to_dict() == expected_dict
+
+    text_replacement2 = text_utils.TextReplacement(expected_dict)
+    assert text_replacement2.process('yoyo)', constants.TransformationType.Audio) == 'rep'

@@ -32,6 +32,7 @@ class TextReplacement():
         data = {
             'pattern': self.pattern,
             'replace': self.replace,
+            'replace_type': self.replace_type.name
         }
         data.update(transformation_type_map)
         return data
