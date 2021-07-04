@@ -91,3 +91,17 @@ def test_replacement_regexp_error(qtbot):
     })
     
     assert text_replacement.process('yoyo', constants.TransformationType.Audio) == 'yoyo'
+
+
+def test_replacement_simple(qtbot):
+    text_replacement = text_utils.TextReplacement({
+        'pattern': 'yoyo)', 
+        'replace': 'rep',
+        'replace_type': 'simple',
+        'Audio': True,
+        'Translation': True,
+        'Transliteration': True
+    })
+    
+    assert text_replacement.process('yoyo', constants.TransformationType.Audio) == 'yoyo'
+    assert text_replacement.process('yoyo)', constants.TransformationType.Audio) == 'rep'

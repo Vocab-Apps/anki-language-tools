@@ -29,6 +29,9 @@ class TransformationType(enum.Enum):
     Transliteration = enum.auto()
     Audio = enum.auto()
 
+class ReplaceType(enum.Enum):
+    simple = enum.auto()
+    regex = enum.auto()
 
 # these are special languages that we store on a field level, which don't allow translating to/from
 class SpecialLanguage(enum.Enum):
