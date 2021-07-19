@@ -449,7 +449,12 @@ class TestConfigGenerator():
             self.model_name: {
                 self.deck_name: {
                    self.field_english: {
-                       'from_field': self.field_chinese
+                       'from_field': self.field_chinese,
+                        "translation_option": {
+                            "service": "Azure",
+                            "source_language_id": "zh-Hans",
+                            "target_language_id": "en"
+                        }
                    }
                 }
             }
