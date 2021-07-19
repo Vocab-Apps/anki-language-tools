@@ -101,6 +101,12 @@ class DeckUtils():
 
         return deck_note_type
 
+    # given an editor and field index, return DNTF
+    def editor_get_dntf(self, editor, field_index):
+        deck_note_type = self.build_deck_note_type_from_editor(editor)
+        deck_note_type_field = self.get_dntf_from_fieldindex(deck_note_type, field_index)
+        return deck_note_type_field
+
     # given deck id, model id, build DNT
     def build_deck_note_type(self, deck_id, model_id) -> DeckNoteType:
         model = self.anki_utils.get_model(model_id)
@@ -148,3 +154,10 @@ class DeckUtils():
         fields = model['flds']
         field_name = fields[field_index]['name']
         return self.build_dntf_from_dnt(deck_note_type, field_name)        
+
+    def get_field_id(self, deck_note_type_field: DeckNoteTypeField):
+        model = self.anki_utils.get_model(deck_note_type_field.deck_note_type.model_id)
+        fields = model['flds']
+        field_names = [x['name'] for x in fields]
+        field_index = field_names.index(deck_note_type_field.field_name)
+        return field_index    
