@@ -51,3 +51,27 @@ def test_process_choosetranslation_cancel(qtbot):
 
     assert mock_language_tools.anki_utils.editor_set_field_value_called == None
     
+
+def test_editor_translation(qtbot):
+    # pytest test_editor.py -rPP -k test_editor_translation
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_translation')
+
+    mock_language_tools.cloud_language_tools.translation_map = {
+        '老人': 'old people (short)'
+    }    
+
+    editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
+    editor_manager = editor_processing.EditorManager(mock_language_tools)
+
+    field_index = 1
+    note_id = config_gen.note_id_1
+    field_value = '老人' # short version
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # verify outputs
+    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 2
+    assert mock_language_tools.anki_utils.editor_set_field_value_called['text'] == 'old people (short)'
+

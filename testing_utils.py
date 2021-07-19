@@ -19,6 +19,8 @@ class MockAnkiUtils():
         self.written_config = None
         self.editor_set_field_value_called = None
         self.added_media_file = None
+        self.show_loading_indicator_called = None
+        self.hide_loading_indicator_called = None
 
     def get_config(self):
         return self.config
@@ -103,6 +105,12 @@ class MockAnkiUtils():
             'field_index': field_index,
             'text': text
         }
+
+    def show_loading_indicator(self, editor, field_index):
+        self.show_loading_indicator_called = True
+
+    def hide_loading_indicator(self, editor, field_index, original_field_value):
+        self.hide_loading_indicator_called = True
 
     def display_dialog(self, dialog):
         # currently only used for the choose translation dialog
@@ -328,7 +336,8 @@ class MockCard():
         self.did = deck_id
 
 class MockNote():
-    def __init__(self, model_id, field_dict, field_array):
+    def __init__(self, note_id, model_id, field_dict, field_array):
+        self.id = note_id
         self.mid = model_id
         self.field_dict = field_dict
         self.fields = field_array
@@ -368,12 +377,12 @@ class TestConfigGenerator():
         self.all_fields = [self.field_chinese, self.field_english, self.field_sound]
 
         self.notes_by_id = {
-            self.note_id_1: MockNote(self.model_id,{
+            self.note_id_1: MockNote(self.note_id_1, self.model_id,{
                 self.field_chinese: '老人家',
                 self.field_english: 'old people',
                 self.field_sound: ''
             }, self.all_fields),
-            self.note_id_2: MockNote(self.model_id, {
+            self.note_id_2: MockNote(self.note_id_2, self.model_id, {
                 self.field_chinese: '你好',
                 self.field_english: 'hello',
                 self.field_sound: ''
@@ -545,7 +554,7 @@ class TestConfigGenerator():
         for field_entry in self.get_model_map()[self.model_id]['flds']:
             field_name = field_entry['name']
             field_array.append(note_data[field_name])
-        editor.note = MockNote(self.model_id, note_data, field_array)
+        editor.note = MockNote(note_id, self.model_id, note_data, field_array)
         return editor
 
 
