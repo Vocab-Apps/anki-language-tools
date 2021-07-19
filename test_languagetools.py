@@ -5,12 +5,12 @@ class EmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
     def __init__(self):
         testing_utils.TestConfigGenerator.__init__(self)
         self.notes_by_id = {
-            self.note_id_1: testing_utils.MockNote(self.model_id,{
+            self.note_id_1: testing_utils.MockNote(self.note_id_1, self.model_id,{
                 self.field_chinese: '', # empty
                 self.field_english: 'old people',
                 self.field_sound: ''
             }, self.all_fields),
-            self.note_id_2: testing_utils.MockNote(self.model_id, {
+            self.note_id_2: testing_utils.MockNote(self.note_id_2, self.model_id, {
                 self.field_chinese: '你好',
                 self.field_english: 'hello',
                 self.field_sound: ''
@@ -21,12 +21,12 @@ class DummyHtmlEmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
     def __init__(self):
         testing_utils.TestConfigGenerator.__init__(self)
         self.notes_by_id = {
-            self.note_id_1: testing_utils.MockNote(self.model_id,{
+            self.note_id_1: testing_utils.MockNote(self.note_id_1, self.model_id,{
                 self.field_chinese: '&nbsp;', # empty
                 self.field_english: 'old people',
                 self.field_sound: ''
             }, self.all_fields),
-            self.note_id_2: testing_utils.MockNote(self.model_id, {
+            self.note_id_2: testing_utils.MockNote(self.note_id_2, self.model_id, {
                 self.field_chinese: '你好',
                 self.field_english: 'hello',
                 self.field_sound: ''
