@@ -66,6 +66,9 @@ def test_editor_translation(qtbot):
     editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
     editor_manager = editor_processing.EditorManager(mock_language_tools)
 
+    # regular example
+    # ---------------
+
     field_index = 0
     note_id = config_gen.note_id_1
     field_value = '老人' # short version
@@ -76,6 +79,29 @@ def test_editor_translation(qtbot):
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'old people (short)'
+
+    # empty input
+    # -----------
+    field_value = '' # empty
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # verify outputs
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 2
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[1]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[1]['text'] == ''
+
+
+    # empty input (html tag)
+    # ----------------------
+    field_value = '<br/>' # empty
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # verify outputs
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 3
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['text'] == ''    
 
 def test_editor_transliteration(qtbot):
     # pytest test_editor.py -rPP -k test_editor_transliteration
