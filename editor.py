@@ -140,6 +140,8 @@ def editor_get_dntf(editor, languagetools, field_index):
 
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
+    
+    editor_manager = editor_processing.EditorManager(languagetools)
 
     def on_webview_will_set_content(web_content: aqt.webview.WebContent, context):
         if not isinstance(context, aqt.editor.Editor):
@@ -199,7 +201,7 @@ def init(languagetools):
             return handled
 
         if str.startswith('choosetranslation:'):
-            editor_processing.process_choosetranslation(editor, languagetools, str)
+            editor_manager.process_choosetranslation(editor, str)
             return True, None
 
         if str.startswith('ttsspeak:'):
