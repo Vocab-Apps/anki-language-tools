@@ -370,22 +370,25 @@ class TestConfigGenerator():
         self.field_chinese = 'Chinese'
         self.field_english = 'English'
         self.field_sound = 'Sound'
+        self.field_pinyin = 'Pinyin'
 
         self.note_id_1 = 42005
         self.note_id_2 = 43005
 
-        self.all_fields = [self.field_chinese, self.field_english, self.field_sound]
+        self.all_fields = [self.field_chinese, self.field_english, self.field_sound, self.field_pinyin]
 
         self.notes_by_id = {
             self.note_id_1: MockNote(self.note_id_1, self.model_id,{
                 self.field_chinese: '老人家',
                 self.field_english: 'old people',
-                self.field_sound: ''
+                self.field_sound: '',
+                self.field_pinyin: ''
             }, self.all_fields),
             self.note_id_2: MockNote(self.note_id_2, self.model_id, {
                 self.field_chinese: '你好',
                 self.field_english: 'hello',
-                self.field_sound: ''
+                self.field_sound: '',
+                self.field_pinyin: ''
             }, self.all_fields)
         }        
 
@@ -403,7 +406,8 @@ class TestConfigGenerator():
                     self.deck_name: {
                         self.field_chinese: 'zh_cn',
                         self.field_english: 'en',
-                        self.field_sound: 'sound'
+                        self.field_sound: 'sound',
+                        self.field_pinyin: 'transliteration',
                     }
                 }
             },
@@ -461,6 +465,30 @@ class TestConfigGenerator():
         }
         return base_config        
 
+    def get_config_batch_transliteration(self):
+        base_config = self.get_default_config()
+        base_config[constants.CONFIG_BATCH_TRANSLITERATION] = {
+            self.model_name: {
+                self.deck_name: {
+                   self.field_pinyin: {
+                       'from_field': self.field_chinese,
+                        "transliteration_option": {
+                            "language_code": "zh_cn",
+                            "language_name": "Chinese (Simplified)",
+                            "service": "MandarinCantonese",
+                            "transliteration_key": {
+                                "conversion_type": "pinyin",
+                                "spaces": False,
+                                "tone_numbers": False
+                            },
+                            "transliteration_name": "Chinese (Simplified) to Pinyin (Diacritics ), MandarinCantonese"
+                        }
+                   }
+                }
+            }
+        }
+        return base_config        
+
     def get_config_language_no_voices(self):
         base_config = self.get_default_config()
         base_config[constants.CONFIG_WANTED_LANGUAGES]['mg'] = True
@@ -488,6 +516,7 @@ class TestConfigGenerator():
             'no_language_mapping': self.get_config_no_language_mapping,
             'batch_audio': self.get_config_batch_audio,
             'batch_translation': self.get_config_batch_translation,
+            'batch_transliteration': self.get_config_batch_transliteration,
             'get_config_language_no_voices': self.get_config_language_no_voices,
             'text_replacement': self.get_config_text_replacement
         }
@@ -503,7 +532,8 @@ class TestConfigGenerator():
                 'flds': [
                     {'name': self.field_chinese},
                     {'name': self.field_english},
-                    {'name': self.field_sound}
+                    {'name': self.field_sound},
+                    {'name': self.field_pinyin}
                 ]
             }
         }

@@ -24,6 +24,9 @@ def assert_combobox_items_equal(combobox, expected_items):
     
     combobox_items.sort()
     expected_items.sort()
+    if combobox_items != expected_items:
+        logging.error(f'combobox_items: {combobox_items}')
+        logging.error(f'expected_items: {expected_items}')
     assert combobox_items == expected_items
 
 # https://pytest-qt.readthedocs.io/en/latest/tutorial.html
