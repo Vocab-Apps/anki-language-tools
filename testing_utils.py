@@ -17,7 +17,7 @@ class MockAnkiUtils():
     def __init__(self, config):
         self.config = config
         self.written_config = None
-        self.editor_set_field_value_called = None
+        self.editor_set_field_value_calls = []
         self.added_media_file = None
         self.show_loading_indicator_called = None
         self.hide_loading_indicator_called = None
@@ -101,10 +101,10 @@ class MockAnkiUtils():
         self.stop_progress_bar_called = True
 
     def editor_set_field_value(self, editor, field_index, text):
-        self.editor_set_field_value_called = {
+        self.editor_set_field_value_calls.append({
             'field_index': field_index,
             'text': text
-        }
+        })
 
     def show_loading_indicator(self, editor, field_index):
         self.show_loading_indicator_called = True

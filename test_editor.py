@@ -23,8 +23,9 @@ def test_process_choosetranslation(qtbot):
     editor_manager = editor_processing.EditorManager(mock_language_tools)
     editor_manager.process_choosetranslation(editor,  bridge_str)
 
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['text'] == 'second translation B'
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'second translation B'
 
 
 def test_process_choosetranslation_cancel(qtbot):
@@ -49,7 +50,7 @@ def test_process_choosetranslation_cancel(qtbot):
     editor_manager = editor_processing.EditorManager(mock_language_tools)
     editor_manager.process_choosetranslation(editor,  bridge_str)    
 
-    assert mock_language_tools.anki_utils.editor_set_field_value_called == None
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 0
     
 
 def test_editor_translation(qtbot):
@@ -72,8 +73,9 @@ def test_editor_translation(qtbot):
     editor_manager.process_field_update(editor, bridge_str)
 
     # verify outputs
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['text'] == 'old people (short)'
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'old people (short)'
 
 def test_editor_transliteration(qtbot):
     # pytest test_editor.py -rPP -k test_editor_transliteration
@@ -95,5 +97,6 @@ def test_editor_transliteration(qtbot):
     editor_manager.process_field_update(editor, bridge_str)
 
     # verify outputs
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 3 # pinyin
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['text'] == 'laoren'
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 3 # pinyin
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'laoren'
