@@ -65,13 +65,13 @@ def test_editor_translation(qtbot):
     editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
     editor_manager = editor_processing.EditorManager(mock_language_tools)
 
-    field_index = 1
+    field_index = 0
     note_id = config_gen.note_id_1
     field_value = '老人' # short version
     bridge_str = f'key:{field_index}:{note_id}:{field_value}'
     editor_manager.process_field_update(editor, bridge_str)
 
     # verify outputs
-    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 2
+    assert mock_language_tools.anki_utils.editor_set_field_value_called['field_index'] == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_called['text'] == 'old people (short)'
 

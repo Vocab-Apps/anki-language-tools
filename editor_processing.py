@@ -80,7 +80,7 @@ class EditorManager():
 
             original_field_value = note[from_deck_note_type_field.field_name]
 
-            # print(f'new field value: [{field_value}] original field value: [{original_field_value}]')
+            logging.debug(f'new field value: [{field_value}] original field value: [{original_field_value}]')
 
             if field_value != original_field_value:
                 # only do something if the field has changed
