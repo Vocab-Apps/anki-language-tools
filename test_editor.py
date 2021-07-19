@@ -126,3 +126,34 @@ def test_editor_transliteration(qtbot):
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 3 # pinyin
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'laoren'
+
+def test_editor_audio(qtbot):
+    # pytest test_editor.py -rPP -k test_editor_audio
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_audio')
+
+    mock_language_tools.cloud_language_tools.transliteration_map = {
+        '老人': 'laoren'
+    }    
+
+    editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
+    editor_manager = editor_processing.EditorManager(mock_language_tools)
+
+    field_index = 0
+    note_id = config_gen.note_id_1
+    field_value = '老人' # short version
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # verify outputs
+
+    # sound should have been played
+    assert mock_language_tools.anki_utils.played_sound['text'] == '老人'
+
+    #
+    return
+
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 3 # pinyin
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'laoren'    

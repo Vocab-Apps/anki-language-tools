@@ -414,7 +414,9 @@ class TestConfigGenerator():
             constants.CONFIG_VOICE_SELECTION: {
                 'zh_cn': {
                     'voice_key': self.chinese_voice_key,
-                    'voice_description': self.chinese_voice_description
+                    'voice_description': self.chinese_voice_description,
+                    'service': 'Azure',
+                    'language_code': 'zh_cn'
                 }
             },
             constants.CONFIG_WANTED_LANGUAGES: {

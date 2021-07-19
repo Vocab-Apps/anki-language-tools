@@ -511,7 +511,6 @@ class LanguageTools():
             sound_tag = f'[sound:{collection_filename}]'
             result['sound_tag'] = sound_tag
             result['full_filename'] = full_filename
-            os.remove(generated_filename)
         return result
 
     def get_hash_for_request(self, url_path, data):

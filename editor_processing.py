@@ -109,6 +109,7 @@ class EditorManager():
                     if from_language != None:
                         # get voice for this language
                         voice_settings = self.languagetools.get_voice_selection_settings()
+                        logging.debug(f'voice_settings: {voice_settings}')
                         if from_language in voice_settings:
                             voice = voice_settings[from_language]
                             self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
@@ -190,6 +191,7 @@ class EditorManager():
                 raise errors.LanguageToolsRequestError('Could not generate audio: ' + response['error'])
             sound_tag = response['sound_tag']
             full_filename = response['full_filename']
+            logging.debug(f'load_audio, got response: sound_tag: {sound_tag} full_filename: {full_filename}')
             if sound_tag == None:
                 return ''
             # sound is valid, play sound
