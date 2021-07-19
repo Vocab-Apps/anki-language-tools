@@ -151,9 +151,6 @@ def test_editor_audio(qtbot):
     # sound should have been played
     assert mock_language_tools.anki_utils.played_sound['text'] == '老人'
 
-    #
-    return
-
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 3 # pinyin
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'laoren'    
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 2 # sound
+    assert '.mp3' in mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text']
