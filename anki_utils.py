@@ -92,6 +92,15 @@ class AnkiUtils():
         return typing_timer
 
 
+    def call_on_timer_expire(self, timer, task):
+        if timer.timer_obj != None:
+            # stop it first
+            timer.timer_obj.stop()
+        timer.timer_obj = PyQt5.QtCore.QTimer()
+        timer.timer_obj.setSingleShot(True)
+        timer.timer_obj.timeout.connect(task)
+        timer.timer_obj.start(timer.delay_ms)
+
     def info_message(self, message, parent):
         aqt.utils.showInfo(message, title=constants.ADDON_NAME, textFormat='rich', parent=parent)
 

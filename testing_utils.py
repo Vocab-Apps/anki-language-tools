@@ -81,6 +81,10 @@ class MockAnkiUtils():
         text_input.textChanged.connect(text_input_changed)
         return None
 
+    def call_on_timer_expire(self, timer_obj, task):
+        # just call the task for now
+        task()
+
     def info_message(self, message, parent):
         logging.info(f'info message: {message}')
         self.info_message_received = message

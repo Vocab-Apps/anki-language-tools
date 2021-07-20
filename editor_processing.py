@@ -10,6 +10,11 @@ else:
     from . import dialog_choosetranslation
     from . import deck_utils
 
+class FieldChangeTimer():
+    def __init__(self, delay_ms):
+        self.delay_ms = delay_ms
+        self.timer_obj = None
+
 class FieldChange():
     def __init__(self, editor, deck_note_type, from_deck_note_type_field, note_id, field_value):
         self.editor = editor
@@ -21,6 +26,8 @@ class FieldChange():
 class EditorManager():
     def __init__(self, languagetools):
         self.languagetools = languagetools
+        self.buffered_field_changes = {}
+        self.field_change_timer = FieldChangeTimer(2000)
 
     def process_choosetranslation(self, editor, str):
         try:
@@ -71,6 +78,13 @@ class EditorManager():
             self.languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_index))
         except Exception as e:
             self.languagetools.anki_utils.critical_message(str(e), None)
+
+    def process_all_field_changes(self):
+        logging.info('processing all field changes')
+        for dntf, field_change in self.buffered_field_changes.items():
+            logging.info(f'processing field change on {dntf}')
+            self.process_field_change(field_change)
+        self.buffered_field_changes = {}
 
     def process_field_change(self, field_change):
         deck_note_type = field_change.deck_note_type
@@ -130,7 +144,8 @@ class EditorManager():
                 # only do something if the field has changed
 
                 field_change = FieldChange(editor, deck_note_type, from_deck_note_type_field, note_id, field_value)
-                self.process_field_change(field_change)
+                self.buffered_field_changes[from_deck_note_type_field] = field_change
+                self.languagetools.anki_utils.call_on_timer_expire(self.field_change_timer, self.process_all_field_changes)
 
 
     # generic function to load a transformation asynchronously (translation / transliteration / audio)
