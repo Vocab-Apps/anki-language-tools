@@ -10,6 +10,14 @@ else:
     from . import dialog_choosetranslation
     from . import deck_utils
 
+class FieldChange():
+    def __init__(self, editor, deck_note_type, from_deck_note_type_field, note_id, field_value):
+        self.editor = editor
+        self.deck_note_type = deck_note_type
+        self.from_deck_note_type_field = from_deck_note_type_field
+        self.note_id = note_id
+        self.field_value = field_value
+
 class EditorManager():
     def __init__(self, languagetools):
         self.languagetools = languagetools
@@ -64,6 +72,42 @@ class EditorManager():
         except Exception as e:
             self.languagetools.anki_utils.critical_message(str(e), None)
 
+    def process_field_change(self, field_change):
+        deck_note_type = field_change.deck_note_type
+        editor = field_change.editor
+        from_deck_note_type_field = field_change.from_deck_note_type_field
+        note_id = field_change.note_id
+        field_value = field_change.field_value
+
+        # do we have translation rules for this deck_note_type
+        translation_settings = self.languagetools.get_batch_translation_settings(deck_note_type)
+        relevant_settings = {to_field:value for (to_field,value) in translation_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
+        for to_field, value in relevant_settings.items():
+            to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
+            self.load_translation(editor, note_id, field_value, to_deck_note_type_field, value['translation_option'])
+
+        # do we have transliteration rules for this deck_note_type
+        transliteration_settings = self.languagetools.get_batch_transliteration_settings(deck_note_type)
+        relevant_settings = {to_field:value for (to_field,value) in transliteration_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
+        for to_field, value in relevant_settings.items():
+            to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
+            self.load_transliteration(editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
+
+        # do we have any audio rules for this deck_note_type
+        audio_settings = self.languagetools.get_batch_audio_settings(deck_note_type)
+        relevant_settings = {to_field:from_field for (to_field,from_field) in audio_settings.items() if from_field == from_deck_note_type_field.field_name}
+        for to_field, from_field in relevant_settings.items():
+            to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
+            # get the from language
+            from_language = self.languagetools.get_language(from_deck_note_type_field)
+            if from_language != None:
+                # get voice for this language
+                voice_settings = self.languagetools.get_voice_selection_settings()
+                logging.debug(f'voice_settings: {voice_settings}')
+                if from_language in voice_settings:
+                    voice = voice_settings[from_language]
+                    self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
+
     def process_field_update(self, editor, str):
         components = str.split(':')
         if len(components) >= 4:
@@ -85,34 +129,9 @@ class EditorManager():
             if field_value != original_field_value:
                 # only do something if the field has changed
 
-                # do we have translation rules for this deck_note_type
-                translation_settings = self.languagetools.get_batch_translation_settings(deck_note_type)
-                relevant_settings = {to_field:value for (to_field,value) in translation_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
-                for to_field, value in relevant_settings.items():
-                    to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
-                    self.load_translation(editor, note_id, field_value, to_deck_note_type_field, value['translation_option'])
+                field_change = FieldChange(editor, deck_note_type, from_deck_note_type_field, note_id, field_value)
+                self.process_field_change(field_change)
 
-                # do we have transliteration rules for this deck_note_type
-                transliteration_settings = self.languagetools.get_batch_transliteration_settings(deck_note_type)
-                relevant_settings = {to_field:value for (to_field,value) in transliteration_settings.items() if value['from_field'] == from_deck_note_type_field.field_name}
-                for to_field, value in relevant_settings.items():
-                    to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
-                    self.load_transliteration(editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
-
-                # do we have any audio rules for this deck_note_type
-                audio_settings = self.languagetools.get_batch_audio_settings(deck_note_type)
-                relevant_settings = {to_field:from_field for (to_field,from_field) in audio_settings.items() if from_field == from_deck_note_type_field.field_name}
-                for to_field, from_field in relevant_settings.items():
-                    to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
-                    # get the from language
-                    from_language = self.languagetools.get_language(from_deck_note_type_field)
-                    if from_language != None:
-                        # get voice for this language
-                        voice_settings = self.languagetools.get_voice_selection_settings()
-                        logging.debug(f'voice_settings: {voice_settings}')
-                        if from_language in voice_settings:
-                            voice = voice_settings[from_language]
-                            self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
 
     # generic function to load a transformation asynchronously (translation / transliteration / audio)
     def load_transformation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
