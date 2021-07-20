@@ -2,10 +2,12 @@ import logging
 import sys
 
 if hasattr(sys, '_pytest_mode'):
+    import constants
     import errors
     import dialog_choosetranslation
     import deck_utils
 else:
+    from . import constants
     from . import errors
     from . import dialog_choosetranslation
     from . import deck_utils
@@ -27,7 +29,7 @@ class EditorManager():
     def __init__(self, languagetools):
         self.languagetools = languagetools
         self.buffered_field_changes = {}
-        self.field_change_timer = FieldChangeTimer(2000)
+        self.field_change_timer = FieldChangeTimer(languagetools.config.get(constants.CONFIG_LIVE_UPDATE_DELAY, 2500))
 
     def process_choosetranslation(self, editor, str):
         try:
