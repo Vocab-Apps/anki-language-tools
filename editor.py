@@ -40,8 +40,8 @@ def init(languagetools):
         if not isinstance(context, aqt.editor.Editor):
             return
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
-        javascript_path = f"/_addons/{addon_package}/editor_javascript.js"
-        css_path = f"/_addons/{addon_package}/editor_style.css"
+        javascript_path = f"/_addons/{addon_package}/languagetools.js"
+        css_path = f"/_addons/{addon_package}/languagetools.css"
         web_content.js.append(javascript_path)
         web_content.css.append(css_path)
 
