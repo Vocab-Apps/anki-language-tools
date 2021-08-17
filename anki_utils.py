@@ -125,16 +125,14 @@ class AnkiUtils():
         editor.note.fields[field_index] = text
         # update the webview
         js_command = f"""set_field_value({field_index}, "{text}")"""
-        editor.web.eval(js_command)        
+        editor.web.eval(js_command)
 
     def show_loading_indicator(self, editor: aqt.editor.Editor, field_index):
-        js_command = f"show_loading_indicator({field_index})"
-        # print(js_command)
+        js_command = f"window.setCurrentlyLoading(true)"
         editor.web.eval(js_command)
 
     def hide_loading_indicator(self, editor: aqt.editor.Editor, field_index, original_field_value):
-        js_command = f"""hide_loading_indicator({field_index}, "{original_field_value}")"""
-        # print(js_command)
+        js_command = f"window.setCurrentlyLoading(false)"
         editor.web.eval(js_command)
 
     def checkpoint(self, action_str):

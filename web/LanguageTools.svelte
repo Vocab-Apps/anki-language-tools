@@ -1,10 +1,33 @@
-<script>
-    let liveUpdates = true;
-    $: {
-        if(bridgeCommand != undefined){
-            bridgeCommand('liveupdates:' + liveUpdates);
-        }
+<script context="module">
+    import { writable } from 'svelte/store';
+    export const currentlyLoadingStore = writable(false);    
+    export function set_field_value(field_id, value) {
+        var decoded_value = decodeURI(value);
+
+        var field = getEditorField(field_id);
+        field.editingArea.fieldHTML = decoded_value;
     }
+
+    export function setCurrentlyLoading(loading) {
+        currentlyLoadingStore.set(loading);
+    }        
+</script>
+
+
+<script>
+    
+    let liveUpdates = true;
+    let currentlyLoading = false;
+
+    currentlyLoadingStore.subscribe(value => {
+		currentlyLoading = value;
+	});
+
+    function toggleLiveUpdates() {
+        liveUpdates = !liveUpdates;
+        bridgeCommand('liveupdates:' + liveUpdates);
+    }
+
 </script>
 
 <style>
@@ -18,6 +41,9 @@
     height: 28px;
     background-color: white;
     margin-top: 3px;    
+}
+.language-tools-loading {
+    color: red;
 }
 div {
     padding-left: 5px;
@@ -36,7 +62,13 @@ button {
     <div>
         <b>Language Tools</b>
     </div>
-    <div>Live Updates: <b>on</b></div>
-    <button>turn off</button>
+    <div>Live Updates: <b>{liveUpdates === true ? 'on' : 'off'}</b></div>
+    {#if currentlyLoading} 
+    <div class="language-tools-loading">Loading...</div>
+    {:else}
+    <button on:click={toggleLiveUpdates}>
+        turn {liveUpdates === true ? 'off' : 'on'}
+    </button>
     <button>run now</button>
+    {/if}
 </div>
