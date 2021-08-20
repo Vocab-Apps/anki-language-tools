@@ -1,14 +1,26 @@
+<script context="module">
+    import { writable } from 'svelte/store';
+    
+    export const liveUpdatesEnabledStore = writable(false);
+    export const typingDelayStore = writable(0);
+
+    export function setLanguageToolsEditorSettings(liveUpdatesEnabled, typingDelay) {
+        console.log('setLanguageToolsEditorSettings: ', liveUpdatesEnabled, typingDelay);
+        liveUpdatesEnabledStore.set(liveUpdatesEnabled);
+        typingDelayStore.set(typingDelay);
+    }
+
+</script>
+
 <script>
-    let liveUpdates = true;
-    let typingDelay = 1250;
 
     function toggleLiveUpdates() {
-        liveUpdates = !liveUpdates;
-        bridgeCommand('languagetools:liveupdates:' + liveUpdates);
+        $liveUpdatesEnabledStore = ! $liveUpdatesEnabledStore;
+        bridgeCommand('languagetools:liveupdates:' + $liveUpdatesEnabledStore);
     }
 
     function typingDelayChange(event){
-        const value = event.target.value;
+        const value = $typingDelayStore;
         // console.log('typingDelayChange: ', value);
         const cmdString = 'languagetools:typingdelay:' + value;
         bridgeCommand(cmdString);
@@ -60,7 +72,7 @@ div {
         <b>Language Tools</b>
     </div>
     <div>
-        {#if liveUpdates} 
+        {#if $liveUpdatesEnabledStore} 
         <span class="live-updates-on">Live Updates: on</span>
         {:else}
         <span class="live-updates-off">Live Updates: off</span>
@@ -68,10 +80,10 @@ div {
     </div>
 
     <button on:click={toggleLiveUpdates} class="lt-field-button">
-        turn {liveUpdates === true ? 'off' : 'on'}
+        turn {$liveUpdatesEnabledStore === true ? 'off' : 'on'}
     </button>
     <button on:click={triggerAllFieldUpdate} class="lt-field-button">run now</button>
     <div>delay (ms):
-        <input type=number bind:value={typingDelay} on:input={typingDelayChange} min=250 max=2500 step=250>
+        <input type=number bind:value={$typingDelayStore} on:input={typingDelayChange} min=250 max=4000 step=250>
     </div>
 </div>

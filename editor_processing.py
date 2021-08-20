@@ -136,6 +136,7 @@ class EditorManager():
     def set_typing_delay(self, delay_ms):
         self.update_field_change_timer(delay_ms)
         self.languagetools.set_live_update_delay(delay_ms)
+        logging.info(f'set typing delay to {delay_ms}')
 
     def process_command(self, editor, str):
         components = str.split(':')

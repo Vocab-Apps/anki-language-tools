@@ -1,5 +1,6 @@
 #python imports
 import json
+import typing
 import urllib.parse
 import logging
 from typing import List, Dict
@@ -23,11 +24,16 @@ from . import editor_processing
 
 
 
-def configure_editor_fields(editor: aqt.editor.Editor, field_options):
+def configure_editor_fields(editor: aqt.editor.Editor, field_options, live_updates, typing_delay):
     # logging.debug(f'configure_editor_fields, field_options: {field_options}')
     js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
     # print(js_command)
     editor.web.eval(js_command)
+
+    live_updates_str = str(live_updates).lower()
+    js_command = f"setLanguageToolsEditorSettings({live_updates_str}, {typing_delay})"
+    # print(js_command)
+    editor.web.eval(js_command)    
 
 
 
@@ -77,7 +83,9 @@ def init(languagetools):
                     # add_tts_speak(editor, index, field_name)
                     field_type = 'language'
             field_options.append(field_type)
-        configure_editor_fields(editor, field_options)
+        live_updates = languagetools.get_apply_updates_automatically()
+        typing_delay = languagetools.get_live_update_delay()
+        configure_editor_fields(editor, field_options, live_updates, typing_delay)
         
 
     def onBridge(handled, str, editor):
