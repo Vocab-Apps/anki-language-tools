@@ -138,6 +138,26 @@ class EditorManager():
                 self.set_live_updates(True)
             else:
                 self.set_live_updates(False)
+        if components[1] == 'forcefieldupdate':
+            self.process_forced_field_update(editor, str)
+
+
+    def process_forced_field_update(self, editor, str):
+        # user is asking for fields to be regenerated
+
+        components = str.split(':')
+        field_index = int(components[2])
+        field_value = ':'.join(components[3:])
+
+        note_id = 0
+
+        from_deck_note_type_field = from_deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
+        deck_note_type = from_deck_note_type_field.deck_note_type
+
+        field_change = FieldChange(editor, deck_note_type, from_deck_note_type_field, note_id, field_value)
+        self.buffered_field_changes[from_deck_note_type_field] = field_change
+        # run immediately
+        self.process_all_field_changes()
 
 
     def process_field_update(self, editor, str):

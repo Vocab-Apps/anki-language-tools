@@ -51,7 +51,6 @@ def init(languagetools):
         web_content.js.extend(javascript_path)
         web_content.css.extend(css_path)
 
-        logging.info(f'web_content.js: {web_content.js}')
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note

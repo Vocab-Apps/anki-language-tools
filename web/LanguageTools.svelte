@@ -10,7 +10,9 @@
         forEditorField([], (field, _data) => {
             const field_id = field.editingArea.ord;
             const field_value = field.editingArea.fieldHTML;
-            console.log('field_id: ', field_id, ' field_value: ', field_value);
+            // console.log('field_id: ', field_id, ' field_value: ', field_value);
+            const cmdString = 'languagetools:forcefieldupdate:' + field_id + ':' + field_value;
+            bridgeCommand(cmdString);
     });
 }    
 
