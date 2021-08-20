@@ -128,6 +128,7 @@ class EditorManager():
     def set_live_updates(self, enabled):
         self.apply_updates = enabled
         logging.info(f'live updates enabled: {self.apply_updates}')
+        self.languagetools.set_apply_updates_automatically(enabled)
 
     def process_command(self, editor, str):
         components = str.split(':')

@@ -151,12 +151,9 @@ def init(languagetools):
 
             return handled
 
-        if languagetools.get_apply_updates_automatically() == False:
-            # user doesn't want updates as they type
-            return handled
-
         if str.startswith("languagetools:"):
             editor_manager.process_command(editor, str)
+            return True, None
 
         if str.startswith("key:"):
             # user updated field, see if we need to do any transformations

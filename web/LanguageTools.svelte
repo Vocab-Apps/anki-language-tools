@@ -6,6 +6,14 @@
         bridgeCommand('languagetools:liveupdates:' + liveUpdates);
     }
 
+    function triggerAllFieldUpdate() {
+        forEditorField([], (field, _data) => {
+            const field_id = field.editingArea.ord;
+            const field_value = field.editingArea.fieldHTML;
+            console.log('field_id: ', field_id, ' field_value: ', field_value);
+    });
+}    
+
 </script>
 
 <style>
@@ -52,5 +60,5 @@ div {
     <button on:click={toggleLiveUpdates} class="lt-field-button">
         turn {liveUpdates === true ? 'off' : 'on'}
     </button>
-    <button class="lt-field-button">run now</button>
+    <button on:click={triggerAllFieldUpdate} class="lt-field-button">run now</button>
 </div>

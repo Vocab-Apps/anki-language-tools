@@ -23,7 +23,8 @@
 }
 
 .generated-for {
-    font-style: italic;    
+    font-style: italic;
+    margin-right: 5px;
 }
 
 .generated-for-hidden {

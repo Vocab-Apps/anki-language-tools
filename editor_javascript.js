@@ -147,10 +147,3 @@ function set_field_value(field_id, value) {
     var field = getEditorField(field_id);
     field.editingArea.fieldHTML = decoded_value;
 }
-
-function triggerAllFieldUpdate() {
-    forEditorField([], (field, _data) => {
-        const field_id = field.editingArea.ord;
-
-    });
-}
