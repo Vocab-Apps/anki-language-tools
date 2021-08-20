@@ -103,6 +103,36 @@ def test_editor_translation(qtbot):
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['field_index'] == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['text'] == ''    
 
+    # disable live updates
+    # --------------------
+
+    bridge_str = f'languagetools:liveupdates:false'
+    editor_manager.process_command(editor, bridge_str)
+
+    # now send another field update
+    field_value = 'yoyoyyo' # short version
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # nothing should have happened
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 3
+
+    # re-enable live updates
+    bridge_str = f'languagetools:liveupdates:true'
+    editor_manager.process_command(editor, bridge_str)    
+
+    # send field update
+    field_value = '老人' # short version
+    bridge_str = f'key:{field_index}:{note_id}:{field_value}'
+    editor_manager.process_field_update(editor, bridge_str)
+
+    # verify outputs
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 4
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['text'] == 'old people (short)'    
+
+
+
 def test_editor_transliteration(qtbot):
     # pytest test_editor.py -rPP -k test_editor_transliteration
 
