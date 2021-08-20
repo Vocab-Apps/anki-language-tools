@@ -9,6 +9,6 @@
     "batch_audio": {},
     "voice_selection": {},
     "apply_updates_automatically": true,
-    "live_update_delay": 2500,
+    "live_update_delay": 1250,
     "text_processing": {}
 }

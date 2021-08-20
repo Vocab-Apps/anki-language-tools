@@ -424,7 +424,14 @@ class LanguageTools():
 
     def set_apply_updates_automatically(self, value):
         self.config[constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY] = value
-        aqt.mw.addonManager.writeConfig(__name__, self.config)
+        self.anki_utils.write_config(self.config)
+
+    def get_live_update_delay(self):
+        return self.config.get(constants.CONFIG_LIVE_UPDATE_DELAY, 1250)
+
+    def set_live_update_delay(self, value):
+        self.config[constants.CONFIG_LIVE_UPDATE_DELAY] = value
+        self.anki_utils.write_config(self.config)
 
     def get_language(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
         """will return None if no language is associated with this field"""

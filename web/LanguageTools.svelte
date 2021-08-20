@@ -1,9 +1,17 @@
 <script>
     let liveUpdates = true;
+    let typingDelay = 1250;
 
     function toggleLiveUpdates() {
         liveUpdates = !liveUpdates;
         bridgeCommand('languagetools:liveupdates:' + liveUpdates);
+    }
+
+    function typingDelayChange(event){
+        const value = event.target.value;
+        // console.log('typingDelayChange: ', value);
+        const cmdString = 'languagetools:typingdelay:' + value;
+        bridgeCommand(cmdString);
     }
 
     function triggerAllFieldUpdate() {
@@ -63,4 +71,7 @@ div {
         turn {liveUpdates === true ? 'off' : 'on'}
     </button>
     <button on:click={triggerAllFieldUpdate} class="lt-field-button">run now</button>
+    <div>delay (ms):
+        <input type=number bind:value={typingDelay} on:input={typingDelayChange} min=250 max=2500 step=250>
+    </div>
 </div>

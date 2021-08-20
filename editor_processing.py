@@ -29,8 +29,11 @@ class EditorManager():
     def __init__(self, languagetools):
         self.languagetools = languagetools
         self.buffered_field_changes = {}
-        self.field_change_timer = FieldChangeTimer(languagetools.config.get(constants.CONFIG_LIVE_UPDATE_DELAY, 2500))
         self.apply_updates = languagetools.config.get(constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY, True)
+        self.update_field_change_timer(languagetools.get_live_update_delay())
+
+    def update_field_change_timer(self, delay_ms):
+        self.field_change_timer = FieldChangeTimer(delay_ms)
 
     def process_choosetranslation(self, editor, str):
         try:
@@ -130,6 +133,10 @@ class EditorManager():
         logging.info(f'live updates enabled: {self.apply_updates}')
         self.languagetools.set_apply_updates_automatically(enabled)
 
+    def set_typing_delay(self, delay_ms):
+        self.update_field_change_timer(delay_ms)
+        self.languagetools.set_live_update_delay(delay_ms)
+
     def process_command(self, editor, str):
         components = str.split(':')
         if components[1] == 'liveupdates':
@@ -140,6 +147,10 @@ class EditorManager():
                 self.set_live_updates(False)
         if components[1] == 'forcefieldupdate':
             self.process_forced_field_update(editor, str)
+
+        if components[1] == 'typingdelay':
+            typing_delay_ms = int(components[2])
+            self.set_typing_delay(typing_delay_ms)
 
 
     def process_forced_field_update(self, editor, str):
