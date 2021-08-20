@@ -128,11 +128,11 @@ class AnkiUtils():
         editor.web.eval(js_command)
 
     def show_loading_indicator(self, editor: aqt.editor.Editor, field_index):
-        js_command = f"window.setCurrentlyLoading(true)"
+        js_command = f"show_loading_indicator({field_index})"
         editor.web.eval(js_command)
 
     def hide_loading_indicator(self, editor: aqt.editor.Editor, field_index, original_field_value):
-        js_command = f"window.setCurrentlyLoading(false)"
+        js_command = f"""hide_loading_indicator({field_index}, "{original_field_value}")"""
         editor.web.eval(js_command)
 
     def checkpoint(self, action_str):

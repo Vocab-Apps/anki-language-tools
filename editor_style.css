@@ -3,6 +3,17 @@
     margin-left: 10px;
 }
 
+.lt-field-button {
+    height: 18px;
+    font-size: 12px !important;
+    padding-top: 0px !important;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background-color: #d1c4e9;
+}
+
 .loading-indicator {
     font-style: italic;
 }
@@ -18,3 +29,4 @@
 .generated-for-hidden {
     display: none;
 }
+

@@ -30,6 +30,7 @@ class EditorManager():
         self.languagetools = languagetools
         self.buffered_field_changes = {}
         self.field_change_timer = FieldChangeTimer(languagetools.config.get(constants.CONFIG_LIVE_UPDATE_DELAY, 2500))
+        self.apply_updates = languagetools.config.get(constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY, True)
 
     def process_choosetranslation(self, editor, str):
         try:
@@ -124,7 +125,25 @@ class EditorManager():
                     voice = voice_settings[from_language]
                     self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
 
+    def set_live_updates(self, enabled):
+        self.apply_updates = enabled
+        logging.info(f'live updates enabled: {self.apply_updates}')
+
+    def process_command(self, editor, str):
+        components = str.split(':')
+        if components[1] == 'liveupdates':
+            enabled_str = components[2]
+            if enabled_str == 'true':
+                self.set_live_updates(True)
+            else:
+                self.set_live_updates(False)
+
+
     def process_field_update(self, editor, str):
+        if not self.apply_updates:
+            logging.info(f'live updates not enabled, skipping field update')
+            return
+
         components = str.split(':')
         if len(components) >= 4:
             field_index_str = components[1]

@@ -9,6 +9,11 @@ function configure_languagetools_fields(options) {
 
         // the common set only needs to be added once, and doesn't need to be removed
         if (!field.hasAttribute("languagetools-common")) {
+            // alter the class on the field header
+            const fieldHeaderDiv = $(field).find("div.justify-content-between")[0];
+            fieldHeaderDiv.classList.remove("justify-content-between");
+            fieldHeaderDiv.classList.add("justify-content-start");
+
             // add loading indicator
             const loadingIndicator = document.createElement('span');
             loadingIndicator.id = 'loading_indicator' + field_id;
@@ -62,6 +67,7 @@ function configure_languagetools_fields(options) {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
                 speakButton.classList.add('class-language-field');
+                speakButton.classList.add('lt-field-button');
                 speakButton.innerText = 'Speak';
                 speakButton.addEventListener(
                     'click',
@@ -77,6 +83,7 @@ function configure_languagetools_fields(options) {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
                 speakButton.classList.add('class-language-field');
+                speakButton.classList.add('lt-field-button');
                 speakButton.innerText = 'Speak';
                 speakButton.addEventListener(
                     'click',
@@ -90,6 +97,7 @@ function configure_languagetools_fields(options) {
                 const translationButton = document.createElement('button');
                 translationButton.classList.add('field-label-element');
                 translationButton.classList.add('class-translation-field');
+                translationButton.classList.add('lt-field-button');
                 translationButton.innerText = 'Choose Translation';
                 translationButton.addEventListener(
                     'click',
@@ -104,6 +112,7 @@ function configure_languagetools_fields(options) {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
                 speakButton.classList.add('class-sound-field');
+                speakButton.classList.add('lt-field-button');
                 speakButton.innerText = 'Play';
                 speakButton.addEventListener(
                     'click',
@@ -137,4 +146,11 @@ function set_field_value(field_id, value) {
 
     var field = getEditorField(field_id);
     field.editingArea.fieldHTML = decoded_value;
+}
+
+function triggerAllFieldUpdate() {
+    forEditorField([], (field, _data) => {
+        const field_id = field.editingArea.ord;
+
+    });
 }

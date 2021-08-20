@@ -40,10 +40,18 @@ def init(languagetools):
         if not isinstance(context, aqt.editor.Editor):
             return
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
-        javascript_path = f"/_addons/{addon_package}/languagetools.js"
-        css_path = f"/_addons/{addon_package}/languagetools.css"
-        web_content.js.append(javascript_path)
-        web_content.css.append(css_path)
+        javascript_path = [
+            f"/_addons/{addon_package}/languagetools.js",
+            f"/_addons/{addon_package}/editor_javascript.js"
+        ]
+        css_path =  [
+            f"/_addons/{addon_package}/languagetools.css",
+            f"/_addons/{addon_package}/editor_style.css"
+        ]
+        web_content.js.extend(javascript_path)
+        web_content.css.extend(css_path)
+
+        logging.info(f'web_content.js: {web_content.js}')
 
     def loadNote(editor: aqt.editor.Editor):
         note = editor.note
@@ -74,6 +82,8 @@ def init(languagetools):
         
 
     def onBridge(handled, str, editor):
+        # logging.debug(f'bridge str: {str}')
+
         # return handled # don't do anything for now
         if not isinstance(editor, aqt.editor.Editor):
             return handled
@@ -144,6 +154,9 @@ def init(languagetools):
         if languagetools.get_apply_updates_automatically() == False:
             # user doesn't want updates as they type
             return handled
+
+        if str.startswith("languagetools:"):
+            editor_manager.process_command(editor, str)
 
         if str.startswith("key:"):
             # user updated field, see if we need to do any transformations
