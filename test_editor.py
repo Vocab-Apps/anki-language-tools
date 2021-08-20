@@ -1,5 +1,6 @@
 import testing_utils
 import editor_processing
+import constants
 
 def test_process_choosetranslation(qtbot):
     # pytest test_editor.py -rPP -k test_process_choosetranslation
@@ -60,7 +61,8 @@ def test_editor_translation(qtbot):
     mock_language_tools = config_gen.build_languagetools_instance('batch_translation')
 
     mock_language_tools.cloud_language_tools.translation_map = {
-        '老人': 'old people (short)'
+        '老人': 'old people (short)',
+        '电扇': 'electric fan'
     }    
 
     editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
@@ -129,7 +131,35 @@ def test_editor_translation(qtbot):
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 4
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['field_index'] == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['text'] == 'old people (short)'    
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['text'] == 'old people (short)'
+
+
+    # force update
+    # ------------
+
+    # disable updates again
+    bridge_str = f'languagetools:liveupdates:false'
+    editor_manager.process_command(editor, bridge_str)
+
+    # force an update
+    field_value = '电扇'
+    bridge_str = f'languagetools:forcefieldupdate:{field_index}:{field_value}'
+    editor_manager.process_command(editor, bridge_str)
+
+    # verify outputs
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 5
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['text'] == 'electric fan'
+
+    # change typing delay
+    # -------------------
+
+    bridge_str = f'languagetools:typingdelay:1750'
+    editor_manager.process_command(editor, bridge_str)
+
+    assert mock_language_tools.anki_utils.written_config[constants.CONFIG_LIVE_UPDATE_DELAY] == 1750
+    assert editor_manager.field_change_timer.delay_ms == 1750
+        
 
 
 
