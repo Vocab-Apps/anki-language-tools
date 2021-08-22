@@ -1,5 +1,6 @@
 import sys
 import os
+import traceback
 if hasattr(sys, '_pytest_mode'):
     # called from within a test run
     pass
@@ -13,6 +14,16 @@ else:
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
         traces_sample_rate=1.0
     )
+
+    def excepthook(etype, val, tb) -> None:  # type: ignore
+        # report exception
+        sentry_sdk.capture_exception(val)
+        # print exception to allow anki's logger to handle it
+        sys.stderr.write(
+            "Caught exception:\n%s\n"
+            % ("".join(traceback.format_exception(etype, val, tb)))
+        )
+    sys.excepthook = excepthook
 
     from . import languagetools
     from . import gui
