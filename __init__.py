@@ -1,18 +1,24 @@
 import sys
 import os
 import traceback
+import anki
 if hasattr(sys, '_pytest_mode'):
     # called from within a test run
     pass
 else:
     # setup sentry crash reporting
+    # ============================
+
     addon_dir = os.path.dirname(os.path.realpath(__file__))
     external_dir = os.path.join(addon_dir, 'external')
     sys.path.append(external_dir)
     import sentry_sdk
+    from . import version
     sentry_sdk.init(
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
-        traces_sample_rate=1.0
+        traces_sample_rate=1.0,
+        release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}-{anki.version}',
+        environment=os.environ.get('SENTRY_ENV', 'production')
     )
 
     def excepthook(etype, val, tb) -> None:  # type: ignore
