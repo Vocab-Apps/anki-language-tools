@@ -3,7 +3,6 @@ import json
 import typing
 import urllib.parse
 import logging
-import sentry_sdk
 from typing import List, Dict
 
 # anki imports
