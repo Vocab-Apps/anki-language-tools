@@ -76,7 +76,7 @@ class DeckUtils():
     # card: anki.cards.Card
     def build_deck_note_type_from_note_card(self, note, card) -> DeckNoteType:
         if card == None:
-            raise errors.AnkiNoteEditorError(f'card not found')
+            raise errors.AnkiItemNotFoundError(f'card not found')
         model_id = note.mid
         deck_id = card.did
         deck_note_type = self.build_deck_note_type(deck_id, model_id)
