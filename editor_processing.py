@@ -177,29 +177,32 @@ class EditorManager():
             logging.info(f'live updates not enabled, skipping field update')
             return
 
-        components = str.split(':')
-        if len(components) >= 4:
-            field_index_str = components[1]
-            note_id_str = components[2]
-            field_value = ':'.join(components[3:])
-            field_index = int(field_index_str)
-            note_id = int(note_id_str)
-            note = editor.note
-            note_id = note.id
+        try:
+            components = str.split(':')
+            if len(components) >= 4:
+                field_index_str = components[1]
+                note_id_str = components[2]
+                field_value = ':'.join(components[3:])
+                field_index = int(field_index_str)
+                note_id = int(note_id_str)
+                note = editor.note
+                note_id = note.id
 
-            from_deck_note_type_field = from_deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
-            deck_note_type = from_deck_note_type_field.deck_note_type
+                from_deck_note_type_field = from_deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
+                deck_note_type = from_deck_note_type_field.deck_note_type
 
-            original_field_value = note[from_deck_note_type_field.field_name]
+                original_field_value = note[from_deck_note_type_field.field_name]
 
-            logging.debug(f'new field value: [{field_value}] original field value: [{original_field_value}]')
+                logging.debug(f'new field value: [{field_value}] original field value: [{original_field_value}]')
 
-            if field_value != original_field_value:
-                # only do something if the field has changed
+                if field_value != original_field_value:
+                    # only do something if the field has changed
 
-                field_change = FieldChange(editor, deck_note_type, from_deck_note_type_field, note_id, field_value)
-                self.buffered_field_changes[from_deck_note_type_field] = field_change
-                self.languagetools.anki_utils.call_on_timer_expire(self.field_change_timer, self.process_all_field_changes)
+                    field_change = FieldChange(editor, deck_note_type, from_deck_note_type_field, note_id, field_value)
+                    self.buffered_field_changes[from_deck_note_type_field] = field_change
+                    self.languagetools.anki_utils.call_on_timer_expire(self.field_change_timer, self.process_all_field_changes)
+        except:
+            logging.exception(f'could not process field update [{str}]')
 
 
     # generic function to load a transformation asynchronously (translation / transliteration / audio)
