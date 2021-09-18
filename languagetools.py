@@ -42,6 +42,8 @@ class LanguageTools():
         self.config = self.anki_utils.get_config()
         self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
 
+        self.language_data = None
+
         self.collectionLoaded = False
         self.mainWindowInitialized = False
         self.deckBrowserRendered = False
@@ -68,10 +70,11 @@ class LanguageTools():
     def initialize(self):
         self.initDone = True
 
-        # get language lists
-        self.language_list = self.cloud_language_tools.get_language_list()
-        self.translation_language_list = self.cloud_language_tools.get_translation_language_list()
-        self.transliteration_language_list = self.cloud_language_tools.get_transliteration_language_list()
+        # get language data
+        self.language_data = self.cloud_language_tools.get_language_data()
+        self.language_list = self.language_data['language_list']
+        self.translation_language_list = self.language_data['translation_language_list']
+        self.transliteration_language_list = self.language_data['transliteration_language_list']
 
         # do we have an API key in the config ?
         if len(self.config['api_key']) > 0:
@@ -80,7 +83,8 @@ class LanguageTools():
                 self.api_key_checked = True
 
     def initializeDone(self, future):
-        pass
+        if self.language_data == None or len(self.language_data) == 0:
+            self.anki_utils.critical_message('Could not load language data from server, please try to restart Anki.', aqt.mw)
 
     def get_config_api_key(self):
         return self.config['api_key']
