@@ -63,6 +63,7 @@ function configure_languagetools_fields(options) {
             }
 
             // do we need to add some audio buttons ?
+            // add the speak button
             if( field_type == 'language') {
                 const speakButton = document.createElement('button');
                 speakButton.classList.add('field-label-element');
@@ -77,6 +78,22 @@ function configure_languagetools_fields(options) {
                 );
                 field.labelContainer.appendChild(speakButton);
             }
+
+            // add breakdown button
+            if( field_type == 'language') {
+                const breakdownButton = document.createElement('button');
+                breakdownButton.classList.add('field-label-element');
+                breakdownButton.classList.add('class-language-field');
+                breakdownButton.classList.add('lt-field-button');
+                breakdownButton.innerText = 'Breakdown';
+                breakdownButton.addEventListener(
+                    'click',
+                    (() => {
+                        pycmd('languagetools:breakdown:' + field_id + ':' + getEditorField(field_id).editingArea.fieldHTML)
+                    }),
+                );
+                field.labelContainer.appendChild(breakdownButton);
+            }            
 
             if( field_type == 'translation') {
                 // speak button

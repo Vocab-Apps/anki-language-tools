@@ -153,6 +153,17 @@ class EditorManager():
             typing_delay_ms = int(components[2])
             self.set_typing_delay(typing_delay_ms)
 
+        if components[1] == 'breakdown':
+            self.process_breakdown(editor, str)
+
+    def process_breakdown(self, editor, str):
+        components = str.split(':')
+        field_index = int(components[2])
+        field_value = ':'.join(components[3:])
+        deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
+        logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
+
+
 
     def process_forced_field_update(self, editor, str):
         # user is asking for fields to be regenerated
