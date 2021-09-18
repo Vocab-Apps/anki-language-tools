@@ -245,16 +245,5 @@ def voice_selection_dialog(languagetools, parent_window):
         languagetools.anki_utils.info_message('Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', parent_window)
         return
 
-    languagetools.anki_utils.show_progress_bar('retrieving voice list')
-    def get_complete_lambda(languagetools):
-        def voicelist_complete(fut_result):
-            languagetools.anki_utils.stop_progress_bar()
-            try:
-                voice_list = fut_result.result()
-                voice_selection_dialog = prepare_voice_selection_dialog(languagetools, voice_list)
-                voice_selection_dialog.exec_()            
-            except errors.LanguageToolsRequestError as e:
-                message = str(e)
-                languagetools.anki_utils.critical_message(message, parent_window)
-        return voicelist_complete
-    languagetools.anki_utils.run_in_background(languagetools.get_tts_voice_list, get_complete_lambda(languagetools))
+    voice_selection_dialog = prepare_voice_selection_dialog(languagetools, languagetools.voice_list)
+    voice_selection_dialog.exec_()            
