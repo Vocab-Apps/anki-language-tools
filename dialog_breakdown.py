@@ -36,6 +36,30 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # show translation options, with checkbox
         # show transliteration options, with checkbox
 
+        self.tokenization_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.translation_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.translation_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
+
+        vlayout.addWidget(self.tokenization_dropdown)
+        vlayout.addWidget(self.translation_checkbox)
+        vlayout.addWidget(self.translation_dropdown)
+        vlayout.addWidget(self.transliteration_checkbox)
+        vlayout.addWidget(self.transliteration_dropdown)
+
+        self.populate_controls()
+
+    def populate_controls(self):
+        self.tokenization_options = self.languagetools.get_tokenization_options(self.from_language)
+        tokenization_option_names = [x['tokenization_name'] for x in self.tokenization_options]
+        self.tokenization_dropdown.addItems(tokenization_option_names)
+
+
+
+
+
+
 
 def prepare_dialog(languagetools, text, from_language):
     dialog = BreakdownDialog(languagetools, text, from_language)

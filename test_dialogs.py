@@ -11,6 +11,7 @@ import dialog_choosetranslation
 import dialog_batchtransformation
 import dialog_apikey
 import dialog_textprocessing
+import dialog_breakdown
 import languagetools
 import constants
 import testing_utils
@@ -781,3 +782,21 @@ def test_dialog_textprocessing_simple(qtbot):
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234rep</b>'
+
+def test_dialog_breakdown_chinese(qtbot):
+    # pytest test_dialogs.py -rPP -k test_dialog_breakdown_chinese
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    source_text = '老人家'
+
+    dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn')
+
+    # there should be 2 tokenization options
+    assert dialog.tokenization_dropdown.count() == 2
+
+
+
+
+

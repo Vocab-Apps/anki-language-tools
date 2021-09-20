@@ -273,7 +273,26 @@ class MockCloudLanguageTools():
                     }
                 }
             ],
-            'tokenization_options': []
+            'tokenization_options': [
+                {
+                    "language_code": "zh_cn",
+                    "language_name": "Chinese (Simplified)",
+                    "service": "Spacy",
+                    "tokenization_key": {
+                        "model_name": "chinese_char"
+                    },
+                    "tokenization_name": "Chinese (Simplified) (Characters) Spacy"
+                },
+                {
+                    "language_code": "zh_cn",
+                    "language_name": "Chinese (Simplified)",
+                    "service": "Spacy",
+                    "tokenization_key": {
+                        "model_name": "chinese_jieba"
+                    },
+                    "tokenization_name": "Chinese (Simplified) (Jieba (words)) Spacy"
+                }                
+            ]
         }
 
         self.language_list = self.language_data['language_list']

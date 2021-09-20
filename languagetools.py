@@ -611,4 +611,7 @@ class LanguageTools():
         return translation_options
 
 
-
+    def get_tokenization_options(self, source_language):
+        tokenization_options = []
+        source_language_options = [x for x in self.tokenization_options if x['language_code'] == source_language]
+        return source_language_options
