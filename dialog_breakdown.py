@@ -51,13 +51,29 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(self.transliteration_checkbox)
         vlayout.addWidget(self.transliteration_dropdown)
 
+        self.populate_target_languages()
         self.populate_controls()
+
+    def populate_target_languages(self):
+        self.wanted_language_arrays = self.languagetools.get_wanted_language_arrays()
+        self.target_language_dropdown.addItems(self.wanted_language_arrays['language_name_list'])
+
+        self.target_language_dropdown.currentIndexChanged.connect(self.target_language_index_changed)
+        # run once
+        self.target_language_index_changed(0)
+
+    def target_language_index_changed(self, current_index):
+        # populate translation options
+        target_language = self.wanted_language_arrays['language_code_list'][current_index]
+        self.translation_options = self.languagetools.get_translation_options(self.from_language, target_language)
+        self.translation_dropdown.clear()
+        self.translation_dropdown.addItems([x['service'] for x in self.translation_options])
+
 
     def populate_controls(self):
         # target language
         # ===============
-        self.wanted_language_arrays = self.languagetools.get_wanted_language_arrays()
-        self.target_language_dropdown.addItems(self.wanted_language_arrays['language_name_list'])
+
 
         # tokenization
         # ============
@@ -65,7 +81,17 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         tokenization_option_names = [x['tokenization_name'] for x in self.tokenization_options]
         self.tokenization_dropdown.addItems(tokenization_option_names)
 
+        # translation
+        # ===========
+        # dropdown populated separately
         self.translation_checkbox.setChecked(True)
+
+        # transliteration
+        # ===============
+        self.transliteration_checkbox.setChecked(True)
+        self.transliteration_options = self.languagetools.get_transliteration_options(self.from_language)
+        self.transliteration_dropdown.addItems([x['transliteration_name'] for x in self.transliteration_options])
+
 
 
 

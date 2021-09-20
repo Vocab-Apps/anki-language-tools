@@ -170,7 +170,18 @@ class MockCloudLanguageTools():
                     'language_id': "zh-hans"
                 },            
             ],
-            'transliteration_options': [],
+            'transliteration_options': [
+                {
+                    'language_code': 'zh_cn',
+                    'transliteration_name': 'pinyin1',
+                    'transliteration_key': {'name': 'pinyin1'}
+                },
+                {
+                    'language_code': 'zh_cn',
+                    'transliteration_name': 'pinyin2',
+                    'transliteration_key': {'name': 'pinyin2'}
+                },                
+            ],
             'voice_list': [
                 {
                     "audio_language_code": "en_US",

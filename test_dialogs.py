@@ -793,14 +793,20 @@ def test_dialog_breakdown_chinese(qtbot):
 
     dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn')
 
-    # wanted languages should be populuated
+    # wanted languages should be populated
     assert_combobox_items_equal(dialog.target_language_dropdown, [
         'English',
         'Chinese'
     ])
+    assert dialog.target_language_dropdown.currentText() == 'Chinese'
+
+    # there should be 1 translation option (Azure)
+    assert_combobox_items_equal(dialog.translation_dropdown, ['Azure'])
+
+    # there should be 2 transliteration options
+    assert_combobox_items_equal(dialog.transliteration_dropdown, ['pinyin1', 'pinyin2'])
 
     # there should be 2 tokenization options
-    assert dialog.tokenization_dropdown.count() == 2
     assert_combobox_items_equal(dialog.tokenization_dropdown, ['Chinese (Simplified) (Characters) Spacy',
         'Chinese (Simplified) (Jieba (words)) Spacy'])
 
