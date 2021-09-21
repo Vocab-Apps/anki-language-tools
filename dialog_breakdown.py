@@ -44,15 +44,40 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
         self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
 
+        self.load_button = PyQt5.QtWidgets.QPushButton()
+
         vlayout.addWidget(self.target_language_dropdown)
         vlayout.addWidget(self.tokenization_dropdown)
         vlayout.addWidget(self.translation_checkbox)
         vlayout.addWidget(self.translation_dropdown)
         vlayout.addWidget(self.transliteration_checkbox)
         vlayout.addWidget(self.transliteration_dropdown)
+        vlayout.addWidget(self.load_button)
 
         self.populate_target_languages()
         self.populate_controls()
+
+        self.load_button.pressed.connect(self.load_breakdown)
+
+    def load_breakdown(self):
+        self.languagetools.anki_utils.run_in_background(self.query_breakdown, self.query_breakdown_done)
+
+    def query_breakdown(self):
+        # tokenization option
+        tokenization_option = self.tokenization_options[self.tokenization_dropdown.currentIndex()]
+        # transliteration option
+        transliteration_option = self.transliteration_options[self.transliteration_dropdown.currentIndex()]
+        # translation option
+        translation_option = self.translation_options[self.translation_dropdown.currentIndex()]
+
+        return self.languagetools.get_breakdown_async(self.text,
+            tokenization_option,
+            transliteration_option,
+            translation_option)
+
+    def query_breakdown_done(self, future_result):
+        breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
+        logging.info(breakdown_result)
 
     def populate_target_languages(self):
         self.wanted_language_arrays = self.languagetools.get_wanted_language_arrays()
@@ -73,7 +98,6 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
     def populate_controls(self):
         # target language
         # ===============
-
 
         # tokenization
         # ============

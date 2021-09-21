@@ -791,6 +791,24 @@ def test_dialog_breakdown_chinese(qtbot):
 
     source_text = '老人家'
 
+    # the response which should come
+    mock_language_tools.cloud_language_tools.breakdown_map = {
+        '老人家': [
+            {
+                'token': '老',
+                'lemma': '老',
+                'translation': 'old',
+                'transliteration': 'lao'
+            },
+            {
+                'token': '人家',
+                'lemma': '人家',
+                'translation': 'people',
+                'transliteration': 'renjia'
+            },            
+        ]
+    }
+
     dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn')
 
     # wanted languages should be populated
@@ -809,6 +827,9 @@ def test_dialog_breakdown_chinese(qtbot):
     # there should be 2 tokenization options
     assert_combobox_items_equal(dialog.tokenization_dropdown, ['Chinese (Simplified) (Characters) Spacy',
         'Chinese (Simplified) (Jieba (words)) Spacy'])
+
+    # run breakdown
+    qtbot.mouseClick(dialog.load_button, PyQt5.QtCore.Qt.LeftButton)
 
 
 

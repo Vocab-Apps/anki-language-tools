@@ -138,6 +138,11 @@ class MockTranslationResponse():
         self.status_code = status_code
         self.content = json.dumps(content_obj)
 
+class MockBreakdownResponse():
+    def __init__(self, status_code, content_obj):
+        self.status_code = status_code
+        self.content = json.dumps(content_obj)
+
 
 class MockCloudLanguageTools():
     def __init__(self):
@@ -373,6 +378,10 @@ class MockCloudLanguageTools():
         # if needed, error simulation can be added here
         transliterated_text = self.transliteration_map[source_text]
         return MockTranslationResponse(200, {'transliterated_text': transliterated_text})
+
+    def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
+        breakdown_response = self.breakdown_map[source_text]
+        return MockBreakdownResponse(200, {'breakdown': breakdown_response})
 
 class MockCard():
     def __init__(self, deck_id):

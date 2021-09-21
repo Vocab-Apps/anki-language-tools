@@ -479,6 +479,9 @@ class LanguageTools():
     def get_translation_all(self, source_text, from_language, to_language):
         return self.cloud_language_tools.get_translation_all(self.config['api_key'], source_text, from_language, to_language)
     
+    # transliteration
+    # ===============
+
     def get_transliteration_async(self, source_text, transliteration_option):
         processed_text = self.text_utils.process(source_text, constants.TransformationType.Transliteration)
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
@@ -501,6 +504,27 @@ class LanguageTools():
 
     def get_transliteration(self, source_text, transliteration_option):
         return self.interpret_transliteration_response_async(self.get_transliteration_async(source_text, transliteration_option))
+
+    # breakdown
+    # =========
+
+    def get_breakdown_async(self, source_text, tokenization_option, translation_option, transliteration_option):
+        return self.cloud_language_tools.get_breakdown(self.config['api_key'], source_text, tokenization_option, translation_option, transliteration_option)
+
+    def interpret_breakdown_response_async(self, response):
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            return data['breakdown'] 
+        if response.status_code == 400:
+            data = json.loads(response.content)
+            error_text = f"Could not load breakdown: {data['error']}"
+            raise errors.LanguageToolsRequestError(error_text)
+            return error_text
+        if response.status_code == 401:
+            data = json.loads(response.content)
+            raise errors.LanguageToolsRequestError(data['error'])
+        error_text = f"Could not load breakdown: {response.text}"
+        raise errors.LanguageToolsRequestError(error_text)
 
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = self.anki_utils.get_note_by_id(note_id)
