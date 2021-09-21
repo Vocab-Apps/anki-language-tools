@@ -44,6 +44,8 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
         self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
 
+        self.breakdown_result = PyQt5.QtWidgets.QLabel()
+
         self.load_button = PyQt5.QtWidgets.QPushButton()
 
         vlayout.addWidget(self.target_language_dropdown)
@@ -52,6 +54,7 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(self.translation_dropdown)
         vlayout.addWidget(self.transliteration_checkbox)
         vlayout.addWidget(self.transliteration_dropdown)
+        vlayout.addWidget(self.breakdown_result)
         vlayout.addWidget(self.load_button)
 
         self.populate_target_languages()
@@ -72,11 +75,18 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
 
         return self.languagetools.get_breakdown_async(self.text,
             tokenization_option,
-            transliteration_option,
-            translation_option)
+            translation_option,
+            transliteration_option)
 
     def query_breakdown_done(self, future_result):
         breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
+        lines = [f"<li>{line['token']} {line['lemma']} {line['translation']} {line['transliteration']}</li>" for line in breakdown_result]
+        result_html = f"""
+        <ul>
+            {'<br/>'.join(lines)}
+        </ul>
+        """
+        self.breakdown_result.setText(result_html)
         logging.info(breakdown_result)
 
     def populate_target_languages(self):
