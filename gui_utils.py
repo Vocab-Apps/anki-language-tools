@@ -19,3 +19,8 @@ def get_medium_label(text):
         font.setPointSize(label_font_size)
         label.setFont(font)
         return label
+
+def get_large_button_font():
+        font2 = PyQt5.QtGui.QFont()
+        font2.setPointSize(14)
+        return font2        

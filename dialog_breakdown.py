@@ -41,10 +41,8 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # create all widgets
         # ==================
 
-        label_font_size = 11
         font1 = PyQt5.QtGui.QFont()
         font1.setBold(True)
-        # font1.setPointSize(label_font_size)
 
         self.target_language_dropdown = PyQt5.QtWidgets.QComboBox()
         
@@ -58,6 +56,7 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
 
         self.breakdown_result = PyQt5.QtWidgets.QLabel()
         self.breakdown_result.setTextInteractionFlags(PyQt5.QtCore.Qt.TextSelectableByMouse)
+        self.breakdown_result.setText('<i>Press Load Breakdown to see result</i>')
 
         target_language_label = PyQt5.QtWidgets.QLabel()
         target_language_label.setText('Target Language:')
@@ -79,6 +78,9 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.load_button.setText('Load Breakdown')
         self.load_button.setDisabled(False)
         self.load_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
+        self.load_button.setFont(gui_utils.get_large_button_font())
+
+        vlayout.addWidget(gui_utils.get_medium_label('Options'))
 
         # place widgets on grid
         # =====================
@@ -98,12 +100,20 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         gridlayout.addWidget(transliteration_label, row, 0, 1, 1)
         gridlayout.addWidget(self.transliteration_checkbox, row, 1, 1, 1)
         gridlayout.addWidget(self.transliteration_dropdown, row, 2, 1, 1)
-        row = 4
-        gridlayout.addWidget(self.load_button, row, 0, 1, 3)
 
-
-        gridlayout.setContentsMargins(10, 20, 10, 0)
+        gridlayout.setContentsMargins(10, 10, 10, 10)
         vlayout.addLayout(gridlayout)
+
+        # add result label
+        # ================
+        vlayout.addWidget(gui_utils.get_medium_label('Breakdown Result'))
+        vlayout.addWidget(PyQt5.QtWidgets.QLabel('<i>You can select and copy the result to paste into your notes.</i>'))
+        self.breakdown_result.setContentsMargins(10, 10, 10, 10)
+        vlayout.addWidget(self.breakdown_result)
+
+        # load button
+        # ===========
+        vlayout.addWidget(self.load_button)
 
         self.populate_target_languages()
         self.populate_controls()
