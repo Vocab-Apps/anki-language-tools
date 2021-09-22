@@ -32,33 +32,78 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(gui_utils.get_header_label('Breakdown'))
         vlayout.addWidget(gui_utils.get_medium_label(f'{self.text} ({self.languagetools.get_language_name(self.from_language)})'))
 
+        gridlayout = PyQt5.QtWidgets.QGridLayout()
+
         # show tokenization options
         # show translation options, with checkbox
         # show transliteration options, with checkbox
+
+        # create all widgets
+        # ==================
+
+        label_font_size = 11
+        font1 = PyQt5.QtGui.QFont()
+        font1.setBold(True)
+        # font1.setPointSize(label_font_size)
 
         self.target_language_dropdown = PyQt5.QtWidgets.QComboBox()
         
         self.tokenization_dropdown = PyQt5.QtWidgets.QComboBox()
         self.translation_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.translation_checkbox.setText('Enable')
         self.translation_dropdown = PyQt5.QtWidgets.QComboBox()
         self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.transliteration_checkbox.setText('Enable')
         self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
 
         self.breakdown_result = PyQt5.QtWidgets.QLabel()
         self.breakdown_result.setTextInteractionFlags(PyQt5.QtCore.Qt.TextSelectableByMouse)
 
+        target_language_label = PyQt5.QtWidgets.QLabel()
+        target_language_label.setText('Target Language:')
+        target_language_label.setFont(font1)
+
+        segmentation_label = PyQt5.QtWidgets.QLabel()
+        segmentation_label.setText('Segmentation:')
+        segmentation_label.setFont(font1)
+
+        translation_label = PyQt5.QtWidgets.QLabel()
+        translation_label.setText('Translation:')
+        translation_label.setFont(font1)
+
+        transliteration_label = PyQt5.QtWidgets.QLabel()
+        transliteration_label.setText('Transliteration:')
+        transliteration_label.setFont(font1)
+
         self.load_button = PyQt5.QtWidgets.QPushButton()
         self.load_button.setText('Load Breakdown')
         self.load_button.setDisabled(False)
+        self.load_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
 
-        vlayout.addWidget(self.target_language_dropdown)
-        vlayout.addWidget(self.tokenization_dropdown)
-        vlayout.addWidget(self.translation_checkbox)
-        vlayout.addWidget(self.translation_dropdown)
-        vlayout.addWidget(self.transliteration_checkbox)
-        vlayout.addWidget(self.transliteration_dropdown)
-        vlayout.addWidget(self.breakdown_result)
-        vlayout.addWidget(self.load_button)
+        # place widgets on grid
+        # =====================
+
+        regular_width = 2
+        row = 0
+        gridlayout.addWidget(segmentation_label, row, 0, 1, 1)
+        gridlayout.addWidget(self.tokenization_dropdown, row, 1, 1, regular_width)
+        row = 1
+        gridlayout.addWidget(target_language_label, row, 0, 1, 1)
+        gridlayout.addWidget(self.target_language_dropdown, row, 1, 1, regular_width)
+        row = 2
+        gridlayout.addWidget(translation_label, row, 0, 1, 1)
+        gridlayout.addWidget(self.translation_checkbox, row, 1, 1, 1)
+        gridlayout.addWidget(self.translation_dropdown, row, 2, 1, 1)
+        row = 3
+        gridlayout.addWidget(transliteration_label, row, 0, 1, 1)
+        gridlayout.addWidget(self.transliteration_checkbox, row, 1, 1, 1)
+        gridlayout.addWidget(self.transliteration_dropdown, row, 2, 1, 1)
+        row = 4
+        gridlayout.addWidget(self.load_button, row, 0, 1, 3)
+
+
+        gridlayout.setContentsMargins(10, 20, 10, 0)
+        vlayout.addLayout(gridlayout)
 
         self.populate_target_languages()
         self.populate_controls()
