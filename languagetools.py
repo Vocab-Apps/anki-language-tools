@@ -526,6 +526,19 @@ class LanguageTools():
         error_text = f"Could not load breakdown: {response.text}"
         raise errors.LanguageToolsRequestError(error_text)
 
+    def format_breakdown_entry(self, breakdown_entry):
+        components = []
+        components.append('<b>'+breakdown_entry['token']+'</b>')
+        if breakdown_entry['lemma'] != breakdown_entry['token']:
+            components.append('[' + breakdown_entry['lemma'] + ']')
+        if 'transliteration' in breakdown_entry:
+            components.append('<i>' + breakdown_entry['transliteration'] + '</i>')
+        if 'translation' in breakdown_entry:
+            components.append(breakdown_entry['translation'])
+        if 'pos_description' in breakdown_entry:
+            components.append('<i>(' + breakdown_entry['pos_description'] + ')</i>')
+        return ' '.join(components)
+
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = self.anki_utils.get_note_by_id(note_id)
         source_text = note[from_field]

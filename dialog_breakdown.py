@@ -47,6 +47,7 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.breakdown_result = PyQt5.QtWidgets.QLabel()
 
         self.load_button = PyQt5.QtWidgets.QPushButton()
+        self.load_button.setText('Load Breakdown')
 
         vlayout.addWidget(self.target_language_dropdown)
         vlayout.addWidget(self.tokenization_dropdown)
@@ -80,11 +81,9 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
 
     def query_breakdown_done(self, future_result):
         breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
-        lines = [f"<li>{line['token']} {line['lemma']} {line['translation']} {line['transliteration']}</li>" for line in breakdown_result]
+        lines = [self.languagetools.format_breakdown_entry(x) for x in breakdown_result]
         result_html = f"""
-        <ul>
             {'<br/>'.join(lines)}
-        </ul>
         """
         self.breakdown_result.setText(result_html)
         logging.info(breakdown_result)
