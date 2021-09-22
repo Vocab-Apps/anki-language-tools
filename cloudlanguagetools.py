@@ -93,11 +93,12 @@ class CloudLanguageTools():
     def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
         breakdown_request = {
                 'text': source_text,
-                'service': transliteration_option['service'],
-                'tokenization_option': tokenization_option,
-                'translation_option': translation_option,
-                'transliteration_option': transliteration_option
+                'tokenization_option': tokenization_option
         }
+        if translation_option != None:
+            breakdown_request['translation_option'] = translation_option
+        if transliteration_option != None:
+            breakdown_request['transliteration_option'] = transliteration_option
         logging.debug(f'sending breakdown request: {breakdown_request}')
         response = requests.post(self.base_url + '/breakdown_v1', json=breakdown_request, headers={'api_key': api_key})
         return response        

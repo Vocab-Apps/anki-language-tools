@@ -74,9 +74,13 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # tokenization option
         tokenization_option = self.tokenization_options[self.tokenization_dropdown.currentIndex()]
         # transliteration option
-        transliteration_option = self.transliteration_options[self.transliteration_dropdown.currentIndex()]
+        transliteration_option = None
+        if self.transliteration_checkbox.isChecked() and len(self.transliteration_options) > 0:
+            transliteration_option = self.transliteration_options[self.transliteration_dropdown.currentIndex()]
         # translation option
-        translation_option = self.translation_options[self.translation_dropdown.currentIndex()]
+        translation_option = None
+        if self.translation_checkbox.isChecked() and len(self.translation_options) > 0:
+            translation_option = self.translation_options[self.translation_dropdown.currentIndex()]
 
         return self.languagetools.get_breakdown_async(self.text,
             tokenization_option,

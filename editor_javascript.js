@@ -45,7 +45,7 @@ function configure_languagetools_fields(options) {
 
         if( old_field_type != field_type ) {
             // need to clean up old elements
-            if(old_field_type == "language") {
+            if(old_field_type == 'language') {
                 var elements = field.getElementsByClassName("class-language-field");
                 elements[0].remove();
             }
