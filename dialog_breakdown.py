@@ -45,9 +45,11 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
 
         self.breakdown_result = PyQt5.QtWidgets.QLabel()
+        self.breakdown_result.setTextInteractionFlags(PyQt5.QtCore.Qt.TextSelectableByMouse)
 
         self.load_button = PyQt5.QtWidgets.QPushButton()
         self.load_button.setText('Load Breakdown')
+        self.load_button.setDisabled(False)
 
         vlayout.addWidget(self.target_language_dropdown)
         vlayout.addWidget(self.tokenization_dropdown)
@@ -64,6 +66,8 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.load_button.pressed.connect(self.load_breakdown)
 
     def load_breakdown(self):
+        self.load_button.setText('Loading Breakdown...')
+        self.load_button.setDisabled(True)
         self.languagetools.anki_utils.run_in_background(self.query_breakdown, self.query_breakdown_done)
 
     def query_breakdown(self):
@@ -80,13 +84,20 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
             transliteration_option)
 
     def query_breakdown_done(self, future_result):
-        breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
-        lines = [self.languagetools.format_breakdown_entry(x) for x in breakdown_result]
-        result_html = f"""
-            {'<br/>'.join(lines)}
-        """
-        self.breakdown_result.setText(result_html)
-        logging.info(breakdown_result)
+        try:
+
+            self.load_button.setText('Load Breakdown')
+            self.load_button.setDisabled(False)
+
+            breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
+            lines = [self.languagetools.format_breakdown_entry(x) for x in breakdown_result]
+            result_html = '<br/>\n'.join(lines)
+            self.breakdown_result.setText(result_html)
+
+            logging.info(breakdown_result)
+        except errors.LanguageToolsRequestError as err:
+            self.languagetools.anki_utils.critical_message(str(err), self)
+
 
     def populate_target_languages(self):
         self.wanted_language_arrays = self.languagetools.get_wanted_language_arrays()

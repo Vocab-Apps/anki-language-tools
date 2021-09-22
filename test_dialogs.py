@@ -831,6 +831,10 @@ def test_dialog_breakdown_chinese(qtbot):
     # run breakdown
     qtbot.mouseClick(dialog.load_button, PyQt5.QtCore.Qt.LeftButton)
 
+    # check that result label has been populated
+    result_text = dialog.breakdown_result.text()
+    result_lines = result_text.split('\n')
+    assert len(result_lines) == 2
 
 
 
