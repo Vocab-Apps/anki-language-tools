@@ -42,6 +42,8 @@ class LanguageTools():
         self.config = self.anki_utils.get_config()
         self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
 
+        self.language_data_load_error = False
+
         self.collectionLoaded = False
         self.mainWindowInitialized = False
         self.deckBrowserRendered = False
@@ -66,21 +68,29 @@ class LanguageTools():
             aqt.mw.taskman.run_in_background(self.initialize, self.initializeDone)
 
     def initialize(self):
-        self.initDone = True
+        try:
+            self.initDone = True
 
-        # get language lists
-        self.language_list = self.cloud_language_tools.get_language_list()
-        self.translation_language_list = self.cloud_language_tools.get_translation_language_list()
-        self.transliteration_language_list = self.cloud_language_tools.get_transliteration_language_list()
+            # get language data
+            self.language_data = self.cloud_language_tools.get_language_data()
+            self.language_list = self.language_data['language_list']
+            self.translation_language_list = self.language_data['translation_options']
+            self.transliteration_language_list = self.language_data['transliteration_options']
+            self.voice_list = self.language_data['voice_list']
+            self.tokenization_options = self.language_data['tokenization_options']
 
-        # do we have an API key in the config ?
-        if len(self.config['api_key']) > 0:
-            validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
-            if validation_result['key_valid'] == True:
-                self.api_key_checked = True
+            # do we have an API key in the config ?
+            if len(self.config['api_key']) > 0:
+                validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
+                if validation_result['key_valid'] == True:
+                    self.api_key_checked = True
+        except:
+            self.language_data_load_error = True
+            logging.exception(f'could not load language data')
 
     def initializeDone(self, future):
-        pass
+        if self.language_data_load_error:
+            self.anki_utils.critical_message('Could not load language data from server, please try to restart Anki.', aqt.mw)
 
     def get_config_api_key(self):
         return self.config['api_key']
@@ -469,6 +479,9 @@ class LanguageTools():
     def get_translation_all(self, source_text, from_language, to_language):
         return self.cloud_language_tools.get_translation_all(self.config['api_key'], source_text, from_language, to_language)
     
+    # transliteration
+    # ===============
+
     def get_transliteration_async(self, source_text, transliteration_option):
         processed_text = self.text_utils.process(source_text, constants.TransformationType.Transliteration)
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
@@ -491,6 +504,40 @@ class LanguageTools():
 
     def get_transliteration(self, source_text, transliteration_option):
         return self.interpret_transliteration_response_async(self.get_transliteration_async(source_text, transliteration_option))
+
+    # breakdown
+    # =========
+
+    def get_breakdown_async(self, source_text, tokenization_option, translation_option, transliteration_option):
+        return self.cloud_language_tools.get_breakdown(self.config['api_key'], source_text, tokenization_option, translation_option, transliteration_option)
+
+    def interpret_breakdown_response_async(self, response):
+        if response.status_code == 200:
+            data = json.loads(response.content)
+            return data['breakdown'] 
+        if response.status_code == 400:
+            data = json.loads(response.content)
+            error_text = f"Could not load breakdown: {data['error']}"
+            raise errors.LanguageToolsRequestError(error_text)
+            return error_text
+        if response.status_code == 401:
+            data = json.loads(response.content)
+            raise errors.LanguageToolsRequestError(data['error'])
+        error_text = f"Could not load breakdown: {response.text}"
+        raise errors.LanguageToolsRequestError(error_text)
+
+    def format_breakdown_entry(self, breakdown_entry):
+        components = []
+        components.append('<b>'+breakdown_entry['token']+'</b>')
+        if breakdown_entry['lemma'] != breakdown_entry['token']:
+            components.append('[' + breakdown_entry['lemma'] + ']')
+        if 'transliteration' in breakdown_entry:
+            components.append('<i>' + breakdown_entry['transliteration'] + '</i>')
+        if 'translation' in breakdown_entry:
+            components.append(breakdown_entry['translation'])
+        if 'pos_description' in breakdown_entry:
+            components.append('<i>(' + breakdown_entry['pos_description'] + ')</i>')
+        return ' '.join(components)
 
     def generate_audio_for_field(self, note_id, from_field, to_field, voice):
         note = self.anki_utils.get_note_by_id(note_id)
@@ -601,4 +648,7 @@ class LanguageTools():
         return translation_options
 
 
-
+    def get_tokenization_options(self, source_language):
+        tokenization_options = []
+        source_language_options = [x for x in self.tokenization_options if x['language_code'] == source_language]
+        return source_language_options

@@ -11,6 +11,7 @@ import dialog_choosetranslation
 import dialog_batchtransformation
 import dialog_apikey
 import dialog_textprocessing
+import dialog_breakdown
 import languagetools
 import constants
 import testing_utils
@@ -781,3 +782,60 @@ def test_dialog_textprocessing_simple(qtbot):
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234rep</b>'
+
+def test_dialog_breakdown_chinese(qtbot):
+    # pytest test_dialogs.py -rPP -k test_dialog_breakdown_chinese
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('default')
+
+    source_text = '老人家'
+
+    # the response which should come
+    mock_language_tools.cloud_language_tools.breakdown_map = {
+        '老人家': [
+            {
+                'token': '老',
+                'lemma': '老',
+                'translation': 'old',
+                'transliteration': 'lao'
+            },
+            {
+                'token': '人家',
+                'lemma': '人家',
+                'translation': 'people',
+                'transliteration': 'renjia'
+            },            
+        ]
+    }
+
+    dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn')
+
+    # wanted languages should be populated
+    assert_combobox_items_equal(dialog.target_language_dropdown, [
+        'English',
+        'Chinese'
+    ])
+    assert dialog.target_language_dropdown.currentText() == 'Chinese'
+
+    # there should be 1 translation option (Azure)
+    assert_combobox_items_equal(dialog.translation_dropdown, ['Azure'])
+
+    # there should be 2 transliteration options
+    assert_combobox_items_equal(dialog.transliteration_dropdown, ['pinyin1', 'pinyin2'])
+
+    # there should be 2 tokenization options
+    assert_combobox_items_equal(dialog.tokenization_dropdown, ['Chinese (Simplified) (Characters) Spacy',
+        'Chinese (Simplified) (Jieba (words)) Spacy'])
+
+    # run breakdown
+    qtbot.mouseClick(dialog.load_button, PyQt5.QtCore.Qt.LeftButton)
+
+    # check that result label has been populated
+    result_text = dialog.breakdown_result.text()
+    result_lines = result_text.split('\n')
+    assert len(result_lines) == 2
+
+
+
+

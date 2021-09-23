@@ -138,6 +138,11 @@ class MockTranslationResponse():
         self.status_code = status_code
         self.content = json.dumps(content_obj)
 
+class MockBreakdownResponse():
+    def __init__(self, status_code, content_obj):
+        self.status_code = status_code
+        self.content = json.dumps(content_obj)
+
 
 class MockCloudLanguageTools():
     def __init__(self):
@@ -150,130 +155,169 @@ class MockCloudLanguageTools():
         # used to simulate translation errors
         self.translation_error_map = {}
 
-        self.language_list = {
-            'en': 'English',
-            'zh_cn': 'Chinese',
-            'mg': 'Malagasy'
+        self.language_data = {
+            'language_list': {
+                'en': 'English',
+                'zh_cn': 'Chinese',
+                'mg': 'Malagasy'
+            },
+            'translation_options': [
+                {
+                    'service': "Azure",
+                    'language_code': "en",
+                    'language_name': "English",
+                    'language_id': "en"
+                },
+                {
+                    'service': "Azure",
+                    'language_code': "zh_cn",
+                    'language_name': "Chinese",
+                    'language_id': "zh-hans"
+                },            
+            ],
+            'transliteration_options': [
+                {
+                    'language_code': 'zh_cn',
+                    'transliteration_name': 'pinyin1',
+                    'transliteration_key': {'name': 'pinyin1'}
+                },
+                {
+                    'language_code': 'zh_cn',
+                    'transliteration_name': 'pinyin2',
+                    'transliteration_key': {'name': 'pinyin2'}
+                },                
+            ],
+            'voice_list': [
+                {
+                    "audio_language_code": "en_US",
+                    "audio_language_name": "English (US)",
+                    "gender": "Male",
+                    "language_code": "en",
+                    "options": {
+                        "pitch": {
+                            "default": 0,
+                            "max": 100,
+                            "min": -100,
+                            "type": "number"
+                        },
+                        "rate": {
+                            "default": 1.0,
+                            "max": 3.0,
+                            "min": 0.5,
+                            "type": "number"
+                        }
+                    },
+                    "service": "Azure",
+                    "voice_description": "English (US), Male, Guy (Neural), Azure",
+                    "voice_key": {
+                        "name": "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)"
+                    }
+                },            
+                {
+                    "audio_language_code": "en_US",
+                    "audio_language_name": "English (US)",
+                    "gender": "Female",
+                    "language_code": "en",
+                    "options": {
+                        "pitch": {
+                            "default": 0,
+                            "max": 100,
+                            "min": -100,
+                            "type": "number"
+                        },
+                        "rate": {
+                            "default": 1.0,
+                            "max": 3.0,
+                            "min": 0.5,
+                            "type": "number"
+                        }
+                    },
+                    "service": "Azure",
+                    "voice_description": "English (US), Female, Aria (Neural), Azure",
+                    "voice_key": {
+                        "name": "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
+                    }
+                },
+                {
+                    "audio_language_code": "zh_CN",
+                    "audio_language_name": "Chinese (Mandarin, Simplified)",
+                    "gender": "Female",
+                    "language_code": "zh_cn",
+                    "options": {
+                        "pitch": {
+                            "default": 0,
+                            "max": 100,
+                            "min": -100,
+                            "type": "number"
+                        },
+                        "rate": {
+                            "default": 1.0,
+                            "max": 3.0,
+                            "min": 0.5,
+                            "type": "number"
+                        }
+                    },
+                    "service": "Azure",
+                    "voice_description": "Chinese (Mandarin, Simplified), Female, Xiaoxiao 晓晓 (Neural), Azure",
+                    "voice_key": {
+                        "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)"
+                    }
+                },
+                {
+                    "audio_language_code": "zh_CN",
+                    "audio_language_name": "Chinese (Mandarin, Simplified)",
+                    "gender": "Male",
+                    "language_code": "zh_cn",
+                    "options": {
+                        "pitch": {
+                            "default": 0,
+                            "max": 100,
+                            "min": -100,
+                            "type": "number"
+                        },
+                        "rate": {
+                            "default": 1.0,
+                            "max": 3.0,
+                            "min": 0.5,
+                            "type": "number"
+                        }
+                    },
+                    "service": "Azure",
+                    "voice_description": "Chinese (Mandarin, Simplified), Male, Yunyang 云扬 (Neural), Azure",
+                    "voice_key": {
+                        "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunyangNeural)"
+                    }
+                }
+            ],
+            'tokenization_options': [
+                {
+                    "language_code": "zh_cn",
+                    "language_name": "Chinese (Simplified)",
+                    "service": "Spacy",
+                    "tokenization_key": {
+                        "model_name": "chinese_char"
+                    },
+                    "tokenization_name": "Chinese (Simplified) (Characters) Spacy"
+                },
+                {
+                    "language_code": "zh_cn",
+                    "language_name": "Chinese (Simplified)",
+                    "service": "Spacy",
+                    "tokenization_key": {
+                        "model_name": "chinese_jieba"
+                    },
+                    "tokenization_name": "Chinese (Simplified) (Jieba (words)) Spacy"
+                }                
+            ]
         }
-        self.translation_language_list = [
-            {
-                'service': "Azure",
-                'language_code': "en",
-                'language_name': "English",
-                'language_id': "en"
-            },
-            {
-                'service': "Azure",
-                'language_code': "zh_cn",
-                'language_name': "Chinese",
-                'language_id': "zh-hans"
-            },            
-        ]
-        self.transliteration_language_list = [] # todo fill this out
 
-        self.voice_list = [
-            {
-                "audio_language_code": "en_US",
-                "audio_language_name": "English (US)",
-                "gender": "Male",
-                "language_code": "en",
-                "options": {
-                    "pitch": {
-                        "default": 0,
-                        "max": 100,
-                        "min": -100,
-                        "type": "number"
-                    },
-                    "rate": {
-                        "default": 1.0,
-                        "max": 3.0,
-                        "min": 0.5,
-                        "type": "number"
-                    }
-                },
-                "service": "Azure",
-                "voice_description": "English (US), Male, Guy (Neural), Azure",
-                "voice_key": {
-                    "name": "Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)"
-                }
-            },            
-            {
-                "audio_language_code": "en_US",
-                "audio_language_name": "English (US)",
-                "gender": "Female",
-                "language_code": "en",
-                "options": {
-                    "pitch": {
-                        "default": 0,
-                        "max": 100,
-                        "min": -100,
-                        "type": "number"
-                    },
-                    "rate": {
-                        "default": 1.0,
-                        "max": 3.0,
-                        "min": 0.5,
-                        "type": "number"
-                    }
-                },
-                "service": "Azure",
-                "voice_description": "English (US), Female, Aria (Neural), Azure",
-                "voice_key": {
-                    "name": "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
-                }
-            },
-            {
-                "audio_language_code": "zh_CN",
-                "audio_language_name": "Chinese (Mandarin, Simplified)",
-                "gender": "Female",
-                "language_code": "zh_cn",
-                "options": {
-                    "pitch": {
-                        "default": 0,
-                        "max": 100,
-                        "min": -100,
-                        "type": "number"
-                    },
-                    "rate": {
-                        "default": 1.0,
-                        "max": 3.0,
-                        "min": 0.5,
-                        "type": "number"
-                    }
-                },
-                "service": "Azure",
-                "voice_description": "Chinese (Mandarin, Simplified), Female, Xiaoxiao 晓晓 (Neural), Azure",
-                "voice_key": {
-                    "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)"
-                }
-            },
-            {
-                "audio_language_code": "zh_CN",
-                "audio_language_name": "Chinese (Mandarin, Simplified)",
-                "gender": "Male",
-                "language_code": "zh_cn",
-                "options": {
-                    "pitch": {
-                        "default": 0,
-                        "max": 100,
-                        "min": -100,
-                        "type": "number"
-                    },
-                    "rate": {
-                        "default": 1.0,
-                        "max": 3.0,
-                        "min": 0.5,
-                        "type": "number"
-                    }
-                },
-                "service": "Azure",
-                "voice_description": "Chinese (Mandarin, Simplified), Male, Yunyang 云扬 (Neural), Azure",
-                "voice_key": {
-                    "name": "Microsoft Server Speech Text to Speech Voice (zh-CN, YunyangNeural)"
-                }
-            }
-        ]
+        self.language_list = self.language_data['language_list']
+        self.translation_language_list = self.language_data['translation_options']
+        self.transliteration_language_list = self.language_data['transliteration_options']
+        self.voice_list = self.language_data['voice_list']
 
+    def get_language_data(self):
+        return self.language_data
 
     def get_language_list(self):
         return self.language_list
@@ -334,6 +378,10 @@ class MockCloudLanguageTools():
         # if needed, error simulation can be added here
         transliterated_text = self.transliteration_map[source_text]
         return MockTranslationResponse(200, {'transliterated_text': transliterated_text})
+
+    def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
+        breakdown_response = self.breakdown_map[source_text]
+        return MockBreakdownResponse(200, {'breakdown': breakdown_response})
 
 class MockCard():
     def __init__(self, deck_id):

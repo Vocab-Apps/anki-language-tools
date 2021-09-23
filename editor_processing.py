@@ -5,11 +5,13 @@ if hasattr(sys, '_pytest_mode'):
     import constants
     import errors
     import dialog_choosetranslation
+    import dialog_breakdown
     import deck_utils
 else:
     from . import constants
     from . import errors
     from . import dialog_choosetranslation
+    from . import dialog_breakdown
     from . import deck_utils
 
 class FieldChangeTimer():
@@ -152,6 +154,24 @@ class EditorManager():
         if components[1] == 'typingdelay':
             typing_delay_ms = int(components[2])
             self.set_typing_delay(typing_delay_ms)
+
+        if components[1] == 'breakdown':
+            self.process_breakdown(editor, str)
+
+    def process_breakdown(self, editor, str):
+        components = str.split(':')
+        field_index = int(components[2])
+        field_value = ':'.join(components[3:])
+        deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
+        logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
+        field_language = self.languagetools.get_language(deck_note_type_field)
+        if field_language == None:
+            raise errors.AnkiNoteEditorError(f'No language set for field {deck_note_type_field}')
+
+        dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language)
+        dialog.exec_()
+
+
 
 
     def process_forced_field_update(self, editor, str):

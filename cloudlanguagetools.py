@@ -9,21 +9,12 @@ from . import version
 
 class CloudLanguageTools():
     def __init__(self):
-        self.base_url = 'https://cloud-language-tools-prod.anki.study'
+        self.base_url = 'https://cloud-language-tools-nlp-prod.anki.study'
         if constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL in os.environ:
             self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
 
-
-    def get_language_list(self):
-        response = requests.get(self.base_url + '/language_list')
-        return json.loads(response.content)
-
-    def get_translation_language_list(self):
-        response = requests.get(self.base_url + '/translation_language_list')
-        return json.loads(response.content)
-
-    def get_transliteration_language_list(self):
-        response = requests.get(self.base_url + '/transliteration_language_list')
+    def get_language_data(self):
+        response = requests.get(self.base_url + '/language_data_v1')
         return json.loads(response.content)
 
     def api_key_validate_query(self, api_key):
@@ -98,6 +89,20 @@ class CloudLanguageTools():
                 'transliteration_key': transliteration_option['transliteration_key']
         }, headers={'api_key': api_key})
         return response        
+
+    def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
+        breakdown_request = {
+                'text': source_text,
+                'tokenization_option': tokenization_option
+        }
+        if translation_option != None:
+            breakdown_request['translation_option'] = translation_option
+        if transliteration_option != None:
+            breakdown_request['transliteration_option'] = transliteration_option
+        logging.debug(f'sending breakdown request: {breakdown_request}')
+        response = requests.post(self.base_url + '/breakdown_v1', json=breakdown_request, headers={'api_key': api_key})
+        return response        
+
 
     def get_translation_all(self, api_key, source_text, from_language, to_language):
         response = requests.post(self.base_url + '/translate_all', json={
