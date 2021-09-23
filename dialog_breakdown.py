@@ -181,6 +181,11 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # tokenization
         # ============
         self.tokenization_options = self.languagetools.get_tokenization_options(self.from_language)
+        if len(self.tokenization_options) == 0:
+            message = f'breakdown not supported for {self.languagetools.get_language_name(self.from_language)}'
+            self.languagetools.anki_utils.critical_message(message, self)
+            # disable load button
+            self.load_button.setDisabled(True)
         tokenization_option_names = [x['tokenization_name'] for x in self.tokenization_options]
         self.tokenization_dropdown.addItems(tokenization_option_names)
 
