@@ -611,6 +611,8 @@ class LanguageTools():
     def get_tts_audio(self, source_text, service, language_code, voice_key, options):
         processed_text = self.text_utils.process(source_text, constants.TransformationType.Audio)
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        if self.text_utils.is_empty(processed_text):
+            raise errors.LanguageToolsValidationFieldEmpty()
         filename = self.get_audio_filename(processed_text, service, voice_key, options)
         if os.path.isfile(filename):
             return filename

@@ -394,6 +394,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
             self.generate_errors = []
             for note_id in self.note_id_list:
                 note = self.languagetools.anki_utils.get_note_by_id(note_id)
+                need_to_flush = False
                 for to_field, setting in translation_settings.items():
                     if self.target_field_checkbox_map[to_field].isChecked():
                         try:
@@ -408,6 +409,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             translation_result = self.languagetools.get_translation(field_data, translation_option)
                             note[to_field] = translation_result
                             self.success_count += 1
+                            need_to_flush = True
                         except Exception as err:
                             logging.error(f'error while getting translation for note_id {note_id}', exc_info=True)
                             self.generate_errors.append(str(err))
@@ -427,6 +429,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             transliteration_result = self.languagetools.get_transliteration(field_data, transliteration_option)
                             note[to_field] = transliteration_result
                             self.success_count += 1
+                            need_to_flush = True
                         except Exception as err:
                             logging.error(f'error while getting transliteration for note_id {note_id}', exc_info=True)
                             self.generate_errors.append(str(err))
@@ -447,6 +450,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             result = self.languagetools.generate_audio_tag_collection(field_data, voice)
                             note[to_field] = result['sound_tag']
                             self.success_count += 1
+                            need_to_flush = True
                         except Exception as err:
                             logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
                             self.generate_errors.append(str(err))
@@ -454,7 +458,8 @@ class RunRulesDialog(NoteSettingsDialogBase):
                         self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
 
                 # write output to note
-                note.flush()
+                if need_to_flush:
+                    note.flush()
 
 
         except:
