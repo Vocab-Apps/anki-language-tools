@@ -19,6 +19,11 @@ class AnkiNoteEditorError(LanguageToolsError):
 class LanguageMappingError(LanguageToolsError):
     pass
 
+class FieldNotFoundError(AnkiItemNotFoundError):
+    def __init__(self, dntf):
+        message = f'Field not found: {dntf}'
+        super().__init__(message)    
+
 class FieldLanguageMappingError(LanguageMappingError):
     def __init__(self, dntf):
         message = f'No language set for {dntf}. {constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING}'
