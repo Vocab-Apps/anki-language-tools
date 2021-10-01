@@ -371,6 +371,12 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
         self.languagetools.anki_utils.run_in_background(self.process_rules_task, self.process_rules_task_done)
 
+    def verify_to_from_fields(self, note, from_dntf, to_dntf):
+        if from_dntf.field_name not in note:
+            raise errors.FieldNotFoundError(from_dntf)
+        if to_dntf.field_name not in note:
+            raise errors.FieldNotFoundError(to_dntf)
+
 
 
     def process_rules_task(self):
@@ -402,6 +408,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             from_field = setting['from_field']
                             from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
                             to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                            self.verify_to_from_fields(note, from_dntf, to_dntf)
                             logging.info(f'generating translation from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -410,8 +417,10 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             note[to_field] = translation_result
                             self.success_count += 1
                             need_to_flush = True
+                        except errors.LanguageToolsError as err:
+                            self.generate_errors.append(str(err))
                         except Exception as err:
-                            logging.error(f'error while getting translation for note_id {note_id}', exc_info=True)
+                            logging.exception(f'error while getting translation for note_id {note_id}')
                             self.generate_errors.append(str(err))
                         progress_value += 1
                         self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
@@ -422,6 +431,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             from_field = setting['from_field']
                             from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
                             to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                            self.verify_to_from_fields(note, from_dntf, to_dntf)
                             logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -430,9 +440,11 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             note[to_field] = transliteration_result
                             self.success_count += 1
                             need_to_flush = True
-                        except Exception as err:
-                            logging.error(f'error while getting transliteration for note_id {note_id}', exc_info=True)
+                        except errors.LanguageToolsError as err:
                             self.generate_errors.append(str(err))
+                        except Exception as err:
+                            logging.exception(f'error while getting transliteration for note_id {note_id}')
+                            self.generate_errors.append(str(err))                            
                         progress_value += 1
                         self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
                 for to_field, from_field in audio_settings.items():
@@ -441,6 +453,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             self.attempt_count += 1
                             from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
                             to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                            self.verify_to_from_fields(note, from_dntf, to_dntf)
                             logging.info(f'generating audio from {from_dntf} to {to_dntf}')
 
                             field_data = note[from_field]
@@ -451,9 +464,11 @@ class RunRulesDialog(NoteSettingsDialogBase):
                             note[to_field] = result['sound_tag']
                             self.success_count += 1
                             need_to_flush = True
-                        except Exception as err:
-                            logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
+                        except errors.LanguageToolsError as err:
                             self.generate_errors.append(str(err))
+                        except Exception as err:
+                            logging.exception(f'error while getting audio for note_id {note_id}')
+                            self.generate_errors.append(str(err))                            
                         progress_value += 1
                         self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
 
