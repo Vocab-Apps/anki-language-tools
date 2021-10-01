@@ -1,3 +1,10 @@
+import unittest
+import pytest
+import pprint
+import PyQt5
+
+import dialogs
+
 import testing_utils
 import editor_processing
 import constants
@@ -28,7 +35,22 @@ def test_process_choosetranslation(qtbot):
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 1
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'second translation B'
 
+def test_process_choosetranslation_empty(qtbot):
+    # pytest test_editor.py -s -rPP -k test_process_choosetranslation_empty
 
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_translation')
+
+    bridge_str = 'choosetranslation:1'
+
+    editor = config_gen.get_mock_editor_with_note(config_gen.note_id_3)
+    editor_manager = editor_processing.EditorManager(mock_language_tools)
+    editor_manager.process_choosetranslation(editor,  bridge_str)
+
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 0
+
+    assert mock_language_tools.anki_utils.critical_message_received == 'Field is empty'
+    
 def test_process_choosetranslation_cancel(qtbot):
     # pytest test_editor.py -rPP -k test_process_choosetranslation_cancel
 
