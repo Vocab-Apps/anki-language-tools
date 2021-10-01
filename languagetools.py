@@ -456,6 +456,8 @@ class LanguageTools():
     def get_translation_async(self, source_text, translation_option):
         processed_text = self.text_utils.process(source_text, constants.TransformationType.Translation)
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        if self.text_utils.is_empty(processed_text):
+            raise errors.LanguageToolsValidationFieldEmpty()
         return self.cloud_language_tools.get_translation(self.config['api_key'], processed_text, translation_option)
 
     def interpret_translation_response_async(self, response):
@@ -485,6 +487,8 @@ class LanguageTools():
     def get_transliteration_async(self, source_text, transliteration_option):
         processed_text = self.text_utils.process(source_text, constants.TransformationType.Transliteration)
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
+        if self.text_utils.is_empty(processed_text):
+            raise errors.LanguageToolsValidationFieldEmpty()        
         return self.cloud_language_tools.get_transliteration(self.config['api_key'], processed_text, transliteration_option)
 
     def interpret_transliteration_response_async(self, response):

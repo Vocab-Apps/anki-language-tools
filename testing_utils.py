@@ -426,6 +426,7 @@ class TestConfigGenerator():
 
         self.note_id_1 = 42005
         self.note_id_2 = 43005
+        self.note_id_3 = 44005 # empty chinese note
 
         self.all_fields = [self.field_chinese, self.field_english, self.field_sound, self.field_pinyin]
 
@@ -439,6 +440,12 @@ class TestConfigGenerator():
             self.note_id_2: MockNote(self.note_id_2, self.model_id, {
                 self.field_chinese: '你好',
                 self.field_english: 'hello',
+                self.field_sound: '',
+                self.field_pinyin: ''
+            }, self.all_fields),
+            self.note_id_3: MockNote(self.note_id_3, self.model_id, {
+                self.field_chinese: '',
+                self.field_english: 'empty',
                 self.field_sound: '',
                 self.field_pinyin: ''
             }, self.all_fields)

@@ -465,7 +465,10 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
                 elif self.transformation_type == constants.TransformationType.Transliteration:
                     translation_result = self.languagetools.get_transliteration(field_data, self.transliteration_option)
                 self.languagetools.anki_utils.run_on_main(get_set_to_field_lambda(i, translation_result))
-            except errors.LanguageToolsRequestError as e:
+            except errors.LanguageToolsError as e:
+                self.load_errors.append(e)
+            except Exception as e:
+                logging.exception(e)
                 self.load_errors.append(e)
             i += 1
             self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(i))

@@ -504,6 +504,8 @@ def test_batch_transformation(qtbot):
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 1'
     index = dialog.noteTableModel.createIndex(1, column) # second row
     assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 2'
+    index = dialog.noteTableModel.createIndex(2, column) # third row
+    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
 
     # apply button should be enabled now
     assert dialog.applyButton.isEnabled() == True
@@ -519,6 +521,10 @@ def test_batch_transformation(qtbot):
     note_2 = config_gen.notes_by_id[config_gen.note_id_2]
     assert note_2.set_values == {'English': 'translation 2'}
     assert note_2.flush_called == True    
+
+    note_3 = config_gen.notes_by_id[config_gen.note_id_3]
+    assert note_3.set_values == {} # no values set
+    assert note_3.flush_called == False
 
 
     # dialog.exec_()
