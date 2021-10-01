@@ -550,6 +550,17 @@ class TestConfigGenerator():
         }
         return base_config        
 
+    def get_config_batch_audio_translation_transliteration(self):
+        config_batch_audio = self.get_config_batch_audio()
+        config_batch_translation = self.get_config_batch_translation()
+        config_batch_transliteration = self.get_config_batch_transliteration()
+        
+        config = config_batch_audio
+        config.update(config_batch_translation)
+        config.update(config_batch_transliteration)
+
+        return config
+
     def get_config_language_no_voices(self):
         base_config = self.get_default_config()
         base_config[constants.CONFIG_WANTED_LANGUAGES]['mg'] = True
@@ -578,6 +589,7 @@ class TestConfigGenerator():
             'batch_audio': self.get_config_batch_audio,
             'batch_translation': self.get_config_batch_translation,
             'batch_transliteration': self.get_config_batch_transliteration,
+            'batch_audio_translation_transliteration': self.get_config_batch_audio_translation_transliteration,
             'get_config_language_no_voices': self.get_config_language_no_voices,
             'text_replacement': self.get_config_text_replacement
         }

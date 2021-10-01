@@ -12,6 +12,7 @@ import dialog_batchtransformation
 import dialog_apikey
 import dialog_textprocessing
 import dialog_breakdown
+import dialog_notesettings
 import languagetools
 import constants
 import testing_utils
@@ -841,6 +842,54 @@ def test_dialog_breakdown_chinese(qtbot):
     result_text = dialog.breakdown_result.text()
     result_lines = result_text.split('\n')
     assert len(result_lines) == 2
+
+
+def test_dialog_runrules(qtbot):
+    # pytest test_dialogs.py -rPP -k test_dialog_runrules
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_audio_translation_transliteration')
+
+    deck_note_type = deck_utils.DeckNoteType(config_gen.deck_id, config_gen.deck_name, config_gen.model_id, config_gen.model_name)
+    note_id_list = config_gen.get_note_id_list()
+
+    # setup maps for translation / transliteration
+    mock_language_tools.cloud_language_tools.translation_map = {
+        '老人家': 'translation 1',
+        '你好': 'translation 2'
+    }
+    mock_language_tools.cloud_language_tools.transliteration_map = {
+        '老人家': 'transliteration 1',
+        '你好': 'transliteration 2'
+    }
+
+    dialog = dialog_notesettings.RunRulesDialog(mock_language_tools, deck_note_type, note_id_list)
+    dialog.setupUi()
+    # dialog.exec_()
+
+    # click apply button
+    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+
+    # ideally we would check things like buttons disabled, progress bar, etc
+    # but for now, just check the effect on notes
+
+    # verify effect on notes
+    note_1 = config_gen.notes_by_id[config_gen.note_id_1]
+    note_1_set_values = note_1.set_values
+    del note_1_set_values['Sound'] # look at sound separately
+    assert note_1_set_values == {'English': 'translation 1',
+                                 'Pinyin': 'transliteration 1'}
+    assert note_1.flush_called == True
+    note_2 = config_gen.notes_by_id[config_gen.note_id_2]
+    note_2_set_values = note_2.set_values
+    del note_2_set_values['Sound']
+    assert note_2_set_values == {'English': 'translation 2',
+                                 'Pinyin': 'transliteration 2'}
+    assert note_2.flush_called == True    
+
+    note_3 = config_gen.notes_by_id[config_gen.note_id_3]
+    assert note_3.set_values == {} # no values set
+    assert note_3.flush_called == False
 
 
 
