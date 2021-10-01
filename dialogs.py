@@ -17,6 +17,7 @@ if hasattr(sys, '_pytest_mode'):
     import dialog_voiceselection
     import dialog_apikey
     import dialog_batchtransformation
+    import dialog_notesettings
     from languagetools import LanguageTools
 else:
     from . import constants
@@ -27,6 +28,7 @@ else:
     from . import dialog_voiceselection
     from . import dialog_apikey
     from . import dialog_batchtransformation
+    from . import dialog_notesettings
     from .languagetools import LanguageTools
 
 
@@ -243,468 +245,6 @@ class AddAudioDialog(aqt.qt.QDialog):
 
 
 
-class NoteSettingsDialogBase(aqt.qt.QDialog):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType):
-        super(aqt.qt.QDialog, self).__init__()
-        self.languagetools = languagetools
-        self.deck_note_type = deck_note_type
-
-        self.remove_translation_map = {}
-        self.remove_transliteration_map = {}
-        self.remove_audio_map = {}
-
-        self.apply_updates_setting_changed = False
-        self.apply_updates_value = True
-
-    def layout_rules(self, vlayout):
-
-        font_bold = QtGui.QFont()
-        font_bold.setBold(True)
-
-        # do we have translation rules for this deck_note_type
-        translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
-        if len(translation_settings) > 0:
-            vlayout.addWidget(gui_utils.get_medium_label(f'Translation Rules'))
-            gridlayout = QtWidgets.QGridLayout()
-            i = 0
-            for to_field, setting in translation_settings.items():
-                from_field = setting['from_field']
-                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
-                to_language_name = self.languagetools.get_language_name(self.languagetools.get_language(to_dntf))
-
-                from_field_label = QtWidgets.QLabel(f'{from_field}')
-                from_field_label.setFont(font_bold)
-
-                to_field_label = QtWidgets.QLabel(f'{to_field}')
-                to_field_label.setFont(font_bold)
-
-                x_offset = 0
-                if self.add_rule_enable_checkbox():
-                    self.target_field_enabled_map[to_field] = True
-                    checkbox = QtWidgets.QCheckBox()
-                    checkbox.setChecked(True)
-                    self.target_field_checkbox_map[to_field] = checkbox
-                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
-                    x_offset = 1
-
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({to_language_name})'), i, x_offset + 5, 1, 1)
-                
-                if self.add_delete_button():
-                    delete_button = QtWidgets.QPushButton()
-                    delete_button.setText('Remove')
-                    def get_remove_lambda(to_dntf, button):
-                        def remove():
-                            button.setEnabled(False)
-                            button.setText('Removed')
-                            self.remove_translation(to_dntf)
-                        return remove
-                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
-                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
-                i += 1
-
-            x_offset = 0
-            if self.add_rule_enable_checkbox():
-                gridlayout.setColumnStretch(0, 10) # enable checkbox
-                x_offset = 1
-            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
-            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
-            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
-            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
-            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
-            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
-            if self.add_delete_button():
-                gridlayout.setColumnStretch(6, 10) # remove button
-            gridlayout.setContentsMargins(10, 0, 10, 0)
-            vlayout.addLayout(gridlayout)
-
-        # do we have transliteration rules for this deck_note_type
-        transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
-        if len(transliteration_settings) > 0:
-            vlayout.addWidget(gui_utils.get_medium_label(f'Transliteration Rules'))
-            gridlayout = QtWidgets.QGridLayout()
-            i = 0
-            for to_field, setting in transliteration_settings.items():
-                from_field = setting['from_field']
-                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
-                transliteration_name = setting['transliteration_option']['transliteration_name']
-
-                from_field_label = QtWidgets.QLabel(f'{from_field}')
-                from_field_label.setFont(font_bold)
-
-                to_field_label = QtWidgets.QLabel(f'{to_field}')
-                to_field_label.setFont(font_bold)
-
-                x_offset = 0
-                if self.add_rule_enable_checkbox():
-                    self.target_field_enabled_map[to_field] = True
-                    checkbox = QtWidgets.QCheckBox()
-                    checkbox.setChecked(True)
-                    self.target_field_checkbox_map[to_field] = checkbox
-                    gridlayout.addWidget(checkbox, i, 0, 1, 1)    
-                    x_offset = 1                
-
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({transliteration_name})'), i, x_offset + 5, 1, 1)
-                
-                if self.add_delete_button():
-                    delete_button = QtWidgets.QPushButton()
-                    delete_button.setText('Remove')
-                    def get_remove_lambda(to_dntf, button):
-                        def remove():
-                            button.setEnabled(False)
-                            button.setText('Removed')                        
-                            self.remove_transliteration(to_dntf)
-                        return remove
-                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))
-                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
-                i += 1
-
-            x_offset = 0
-            if self.add_rule_enable_checkbox():
-                gridlayout.setColumnStretch(0, 10) # enable checkbox
-                x_offset = 1
-            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
-            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
-            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
-            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
-            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
-            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
-            if self.add_delete_button():
-                gridlayout.setColumnStretch(6, 10) # remove button          
-            gridlayout.setContentsMargins(10, 0, 10, 0)      
-            vlayout.addLayout(gridlayout)            
-
-        # do we have any audio rules for this deck_note_type
-        audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
-        if len(audio_settings) > 0:
-            vlayout.addWidget(gui_utils.get_medium_label(f'Audio Rules'))
-            gridlayout = QtWidgets.QGridLayout()
-            i = 0
-            for to_field, from_field in audio_settings.items():
-                from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                from_language_code = self.languagetools.get_language(from_dntf)
-                from_language_name = self.languagetools.get_language_name(from_language_code)
-                # get the assigned voice for this langugae
-                voice_selection_settings = self.languagetools.get_voice_selection_settings()
-                voice_description = 'No Voice Selected'
-                if from_language_code in voice_selection_settings:
-                    voice_description = voice_selection_settings[from_language_code]['voice_description']
-
-                from_field_label = QtWidgets.QLabel(f'{from_field}')
-                from_field_label.setFont(font_bold)
-
-                to_field_label = QtWidgets.QLabel(f'{to_field}')
-                to_field_label.setFont(font_bold)
-
-                x_offset = 0
-                if self.add_rule_enable_checkbox():
-                    self.target_field_enabled_map[to_field] = True
-                    checkbox = QtWidgets.QCheckBox()
-                    checkbox.setChecked(True)
-                    self.target_field_checkbox_map[to_field] = checkbox
-                    gridlayout.addWidget(checkbox, i, 0, 1, 1)
-                    x_offset = 1                
-
-                gridlayout.addWidget(QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
-                gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
-                gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(QtWidgets.QLabel(f'({voice_description})'), i, x_offset + 5, 1, 1)
-                
-                if self.add_delete_button():
-                    delete_button = QtWidgets.QPushButton()
-                    delete_button.setText('Remove')
-                    def get_remove_lambda(to_dntf, button):
-                        def remove():
-                            button.setEnabled(False)
-                            button.setText('Removed')                        
-                            self.remove_audio(to_dntf)
-                        return remove
-                    delete_button.pressed.connect(get_remove_lambda(to_dntf, delete_button))                
-                    gridlayout.addWidget(delete_button, i, 6, 1, 1)
-                i += 1
-
-            x_offset = 0
-            if self.add_rule_enable_checkbox():
-                gridlayout.setColumnStretch(0, 10) # enable checkbox
-                x_offset = 1
-            gridlayout.setColumnStretch(x_offset + 0, 10) # from:
-            gridlayout.setColumnStretch(x_offset + 1, 20) # from field label
-            gridlayout.setColumnStretch(x_offset + 2, 30) # from language name
-            gridlayout.setColumnStretch(x_offset + 3, 10) # to:
-            gridlayout.setColumnStretch(x_offset + 4, 20) # to field label
-            gridlayout.setColumnStretch(x_offset + 5, 30) # to language name
-            if self.add_delete_button():
-                gridlayout.setColumnStretch(6, 10) # remove button
-            gridlayout.setContentsMargins(10, 0, 10, 0)    
-            vlayout.addLayout(gridlayout)                        
-
-
-
-
-class NoteSettingsDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType):
-        super(NoteSettingsDialog, self).__init__(languagetools, deck_note_type)
-
-    def get_header_text(self):
-        return f'Rules for {self.deck_note_type}'
-
-    def add_delete_button(self):
-        return True
-
-    def add_rule_enable_checkbox(self):
-        return False
-
-    def setupUi(self):
-        self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 500)
-
-        vlayout = QtWidgets.QVBoxLayout(self)
-
-        vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
-
-        vlayout.addWidget(aqt.qt.QLabel('You can visualize and remove Audio / Translation / Transliteration rules from here.'))
-
-        self.layout_rules(vlayout)
-
-        vlayout.addWidget(gui_utils.get_medium_label(f'Apply Changes While Typing'))
-        self.checkbox = QtWidgets.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
-        self.checkbox.setChecked(self.languagetools.get_apply_updates_automatically())
-        self.checkbox.setContentsMargins(10, 0, 10, 0)
-        vlayout.addWidget(self.checkbox)
-
-        vlayout.addStretch()
-
-        # buttom buttons
-        buttonBox = QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Save Settings", QtWidgets.QDialogButtonBox.AcceptRole)
-        self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
-        vlayout.addWidget(buttonBox)
-  
-        # wire events
-        self.checkbox.stateChanged.connect(self.apply_updates_state_changed)
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
-
-    def remove_translation(self, deck_note_type_field):
-        # print(f'remove_translation, dntf: {deck_note_type_field}')
-        self.remove_translation_map[deck_note_type_field] = True
-        self.enable_apply_button()
-
-    def remove_transliteration(self, deck_note_type_field):
-        # print(f'remove_transliteration, dntf: {deck_note_type_field}')
-        self.remove_transliteration_map[deck_note_type_field] = True
-        self.enable_apply_button()
-
-    def remove_audio(self, deck_note_type_field):
-        # print(f'remove_audio, dntf: {deck_note_type_field}')
-        self.remove_audio_map[deck_note_type_field] = True
-        self.enable_apply_button()
-
-    def apply_updates_state_changed(self, state):
-        self.apply_updates_setting_changed = True
-        self.apply_updates_value = self.checkbox.isChecked()
-        self.enable_apply_button()
-    
-    def enable_apply_button(self):
-        self.applyButton.setEnabled(True)
-        self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-
-
-    def accept(self):
-        if self.apply_updates_setting_changed:
-            self.languagetools.set_apply_updates_automatically(self.apply_updates_value)
-
-        for dntf in self.remove_translation_map.keys():
-            self.languagetools.remove_translation_setting(dntf)
-        for dntf in self.remove_transliteration_map.keys():
-            self.languagetools.remove_transliteration_setting(dntf)
-        for dntf in self.remove_audio_map.keys():
-            self.languagetools.remove_audio_setting(dntf)
-        
-        self.close()
-
-class RunRulesDialog(NoteSettingsDialogBase):
-    def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list):
-        super(RunRulesDialog, self).__init__(languagetools, deck_note_type)
-        self.note_id_list = note_id_list
-        self.target_field_enabled_map = {}
-        self.target_field_checkbox_map = {}
-
-    def get_header_text(self):
-        return f'Run Rules for {self.deck_note_type}'
-
-    def add_delete_button(self):
-        return False
-
-    def add_rule_enable_checkbox(self):
-        return True        
-
-    def setupUi(self):
-        self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(700, 300)
-
-        vlayout = QtWidgets.QVBoxLayout(self)
-
-        vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
-
-        vlayout.addWidget(aqt.qt.QLabel('Select the rules you want to run, then click Apply Rules.'))
-
-        self.layout_rules(vlayout)
-
-        # progress bar
-        hlayout = QtWidgets.QHBoxLayout()
-        hlayout.setContentsMargins(0, 20, 0, 0)
-        self.progress_bar = QtWidgets.QProgressBar()
-        hlayout.addWidget(self.progress_bar)
-        vlayout.addLayout(hlayout)
-
-        # buttom buttons
-        buttonBox = QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply Rules", QtWidgets.QDialogButtonBox.AcceptRole)
-        self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
-        self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
-        vlayout.addWidget(buttonBox)
-
-        vlayout.addStretch()        
-  
-        # wire events
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
-
-    def accept(self):
-        proceed = aqt.utils.askUser(f'Overwrite existing data in target fields ?')
-        if proceed == False:
-            # don't continue
-            return
-
-        aqt.mw.taskman.run_in_background(self.process_rules_task, self.process_rules_task_done)
-
-
-
-    def process_rules_task(self):
-        try:
-            translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
-            transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
-            audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
-
-            num_rules = 0
-            for rule_list in [translation_settings, transliteration_settings, audio_settings]:
-                for to_field, setting in rule_list.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        num_rules += 1
-
-            logging.debug(f'num rules enabled: {num_rules}')
-            aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
-
-            progress_value = 0
-            self.attempt_count = 0
-            self.success_count = 0
-            self.generate_errors = []
-            for note_id in self.note_id_list:
-                note = aqt.mw.col.getNote(note_id)
-                for to_field, setting in translation_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_field = setting['from_field']
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            logging.info(f'generating translation from {from_dntf} to {to_dntf}')
-
-                            field_data = note[from_field]
-                            translation_option = setting['translation_option']
-                            translation_result = self.languagetools.get_translation(field_data, translation_option)
-                            note[to_field] = translation_result
-                            self.success_count += 1
-                        except Exception as err:
-                            logging.error(f'error while getting translation for note_id {note_id}', exc_info=True)
-                            self.generate_errors.append(str(err))
-                        progress_value += 1
-                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-                for to_field, setting in transliteration_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_field = setting['from_field']
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
-
-                            field_data = note[from_field]
-                            transliteration_option = setting['transliteration_option']
-                            transliteration_result = self.languagetools.get_transliteration(field_data, transliteration_option)
-                            note[to_field] = transliteration_result
-                            self.success_count += 1
-                        except Exception as err:
-                            logging.error(f'error while getting transliteration for note_id {note_id}', exc_info=True)
-                            self.generate_errors.append(str(err))
-                        progress_value += 1
-                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-                for to_field, from_field in audio_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            logging.info(f'generating audio from {from_dntf} to {to_dntf}')
-
-                            field_data = note[from_field]
-                            from_language_code = self.languagetools.get_language(from_dntf)
-                            voice_selection_settings = self.languagetools.get_voice_selection_settings()
-                            voice = voice_selection_settings[from_language_code]
-                            result = self.languagetools.generate_audio_tag_collection(field_data, voice)
-                            note[to_field] = result['sound_tag']
-                            self.success_count += 1
-                        except Exception as err:
-                            logging.error(f'error while getting audio for note_id {note_id}', exc_info=True)
-                            self.generate_errors.append(str(err))
-                        progress_value += 1
-                        aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-
-                # write output to note
-                note.flush()
-
-
-        except:
-            logging.error('processing error', exc_info=True)
-
-
-
-    def process_rules_task_done(self, future_result):
-        # are there any errors ?
-        errors_str = ''
-        if len(self.generate_errors) > 0:
-            error_counts = {}
-            for error in self.generate_errors:
-                current_count = error_counts.get(error, 0)
-                error_counts[error] = current_count + 1
-            errors_str = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
-        completion_message = f"Generated data for <b>{len(self.note_id_list)}</b> notes. Success: <b>{self.success_count}</b> out of <b>{self.attempt_count}</b>.{errors_str}"
-        self.close()
-        if len(errors_str) > 0:
-            aqt.utils.showWarning(completion_message, title=constants.ADDON_NAME, parent=self)
-        else:
-            aqt.utils.showInfo(completion_message, title=constants.ADDON_NAME, parent=self)        
-
 
 class YomichanDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, japanese_voice):
@@ -848,6 +388,27 @@ def add_translation_dialog(languagetools, browser: aqt.browser.Browser, note_id_
 def add_transliteration_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     add_transformation_dialog(languagetools, browser, note_id_list, constants.TransformationType.Transliteration)
 
+def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
+    if deck_note_type == None:
+        return
+
+    dialog = dialog_notesettings.RunRulesDialog(languagetools, deck_note_type, note_id_list)
+    dialog.setupUi()
+    dialog.exec_()
+
+    # force browser to reload notes
+    browser.model.reset()        
+
+def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
+    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
+    if deck_note_type == None:
+        return
+
+    dialog = dialog_notesettings.NoteSettingsDialog(languagetools, deck_note_type)
+    dialog.setupUi()
+    dialog.exec_()
+
 def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     # did the user perform language mapping ? 
     if not languagetools.language_detection_done():
@@ -870,27 +431,6 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
         original_message = str(exception)
         final_message = original_message + '<br/>' + constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING
         aqt.utils.showCritical(final_message, title=constants.ADDON_NAME)
-
-def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
-    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
-    if deck_note_type == None:
-        return
-
-    dialog = RunRulesDialog(languagetools, deck_note_type, note_id_list)
-    dialog.setupUi()
-    dialog.exec_()
-
-    # force browser to reload notes
-    browser.model.reset()        
-
-def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
-    deck_note_type = verify_deck_note_type_consistent(note_id_list, languagetools.deck_utils)
-    if deck_note_type == None:
-        return
-
-    dialog = NoteSettingsDialog(languagetools, deck_note_type)
-    dialog.setupUi()
-    dialog.exec_()
 
 
 def show_api_key_dialog(languagetools):
