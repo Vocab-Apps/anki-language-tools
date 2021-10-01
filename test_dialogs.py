@@ -876,12 +876,14 @@ def test_dialog_runrules(qtbot):
     # verify effect on notes
     note_1 = config_gen.notes_by_id[config_gen.note_id_1]
     note_1_set_values = note_1.set_values
+    assert 'sound:' in note_1_set_values['Sound']
     del note_1_set_values['Sound'] # look at sound separately
     assert note_1_set_values == {'English': 'translation 1',
                                  'Pinyin': 'transliteration 1'}
     assert note_1.flush_called == True
     note_2 = config_gen.notes_by_id[config_gen.note_id_2]
     note_2_set_values = note_2.set_values
+    assert 'sound:' in note_2_set_values['Sound']
     del note_2_set_values['Sound']
     assert note_2_set_values == {'English': 'translation 2',
                                  'Pinyin': 'transliteration 2'}
@@ -890,6 +892,10 @@ def test_dialog_runrules(qtbot):
     note_3 = config_gen.notes_by_id[config_gen.note_id_3]
     assert note_3.set_values == {} # no values set
     assert note_3.flush_called == False
+
+    # check that we got a critical message
+    expected_error_message = 'Generated data for <b>3</b> notes. Success: <b>6</b> out of <b>9</b>.<p><b>Errors</b>: Field is empty (3 times)</p>'
+    assert mock_language_tools.anki_utils.critical_message_received == expected_error_message
 
 
 
