@@ -240,6 +240,8 @@ def prepare_voice_selection_dialog(languagetools, voice_list):
     return voice_selection_dialog
 
 def voice_selection_dialog(languagetools, parent_window):
+    raise Exception('yoyo')
+
     # did the user perform language mapping ? 
     if not languagetools.language_detection_done():
         languagetools.anki_utils.info_message('Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', parent_window)

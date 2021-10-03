@@ -22,8 +22,17 @@ else:
     )
 
     def excepthook(etype, val, tb) -> None:  # type: ignore
+        # do some filtering on exceptions
+        relevant_exception = False
+        stack_summary = traceback.extract_tb(tb)
+        for stack_frame in stack_summary:
+            filename = stack_frame.filename
+            if 'anki-language-tools' in filename or '771677663' in filename:
+                relevant_exception = True
         # report exception
-        sentry_sdk.capture_exception(val)
+        if relevant_exception:
+            sentry_sdk.capture_exception(val)
+
         # print exception to allow anki's logger to handle it
         sys.stderr.write(
             "Caught exception:\n%s\n"
