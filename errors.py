@@ -30,11 +30,20 @@ class FieldLanguageMappingError(LanguageMappingError):
         message = f'No language set for {dntf}. {constants.DOCUMENTATION_PERFORM_LANGUAGE_MAPPING}'
         super().__init__(message)
 
+class FieldLanguageSpecialMappingError(LanguageMappingError):
+    def __init__(self, dntf, language_code):
+        message = f'<b>{dntf}</b> is mapped to <b>{language_code}</b>. {constants.DOCUMENTATION_SPECIAL_LANGUAGE}'
+        super().__init__(message)
 
 class LanguageToolsValidationFieldEmpty(LanguageToolsError):
     def __init__(self):
         message = f'Field is empty'
         super().__init__(message)    
+
+class NoVoiceSetError(LanguageToolsError):
+    def __init__(self, language_name):
+        message = f'No voice set for {language_name}. {constants.DOCUMENTATION_VOICE_SELECTION}'
+        super().__init__(message)
 
 class LanguageToolsRequestError(LanguageToolsError):
     pass

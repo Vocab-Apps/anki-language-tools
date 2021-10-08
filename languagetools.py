@@ -433,6 +433,18 @@ class LanguageTools():
     def get_voice_selection_settings(self):
         return self.config.get(constants.CONFIG_VOICE_SELECTION, {})
 
+    def get_voice_for_field(self, dntf):
+        language_code = self.get_language(dntf)
+        if language_code == None:
+            raise errors.FieldLanguageMappingError(dntf)
+        if not self.language_available_for_translation(language_code):
+            raise errors.FieldLanguageSpecialMappingError(dntf, language_code)
+        language_name = self.get_language_name(language_code)
+        voice_selection_settings = self.get_voice_selection_settings()
+        if language_code not in voice_selection_settings:
+            raise errors.NoVoiceSetError(language_name)
+        return voice_selection_settings[language_code]
+
     def get_apply_updates_automatically(self):
         return self.config.get(constants.CONFIG_APPLY_UPDATES_AUTOMATICALLY, True)
 

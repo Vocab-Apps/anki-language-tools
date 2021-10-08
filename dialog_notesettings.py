@@ -441,9 +441,7 @@ class RunRulesDialog(NoteSettingsDialogBase):
                         logging.info(f'generating audio from {from_dntf} to {to_dntf}')
 
                         field_data = note[from_field]
-                        from_language_code = self.languagetools.get_language(from_dntf)
-                        voice_selection_settings = self.languagetools.get_voice_selection_settings()
-                        voice = voice_selection_settings[from_language_code]
+                        voice = self.languagetools.get_voice_for_field(from_dntf)
                         result = self.languagetools.generate_audio_tag_collection(field_data, voice)
                         note[to_field] = result['sound_tag']
                         need_to_flush = True
