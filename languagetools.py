@@ -39,6 +39,7 @@ class LanguageTools():
         self.anki_utils = anki_utils
         self.deck_utils = deck_utils
         self.cloud_language_tools = cloud_language_tools
+        self.error_manager = errors.ErrorManager(self.anki_utils)
         self.config = self.anki_utils.get_config()
         self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
         self.error_manager = errors.ErrorManager(self.anki_utils)
@@ -84,6 +85,7 @@ class LanguageTools():
             if len(self.config['api_key']) > 0:
                 validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
                 if validation_result['key_valid'] == True:
+                    self.anki_utils.set_reporting_user_id(self.config['api_key'])
                     self.api_key_checked = True
         except:
             self.language_data_load_error = True
@@ -104,6 +106,7 @@ class LanguageTools():
     def verify_api_key(self, api_key):
         result = self.cloud_language_tools.api_key_validate_query(api_key)
         if result['key_valid'] == True:
+            self.anki_utils.set_reporting_user_id(api_key)
             message = result['msg']
             return True, message
         else:

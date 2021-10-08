@@ -22,6 +22,7 @@ GREEN_STYLESHEET_NIGHTMODE = 'background-color: #2E7D32;'
 RED_STYLESHEET_NIGHTMODE = 'background-color: #B71C1C;'
 
 DOCUMENTATION_PERFORM_LANGUAGE_MAPPING = 'Please setup Language Mappings, from the Anki main screen: <b>Tools -> Language Tools: Language Mapping</b>'
+DOCUMENTATION_EDIT_RULES = 'Please edit rules by selecting a note and clicking <b>Language Tools -> Show Rules for Selected Notes</b>'
 
 CLIENT_NAME = 'languagetools'
 

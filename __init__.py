@@ -46,6 +46,7 @@ else:
     from . import anki_utils
     from . import deck_utils
     from . import cloudlanguagetools
+    from . import errors
 
     ankiutils = anki_utils.AnkiUtils()
     deckutils = deck_utils.DeckUtils(ankiutils)

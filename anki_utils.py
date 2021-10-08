@@ -2,6 +2,8 @@ import sys
 import aqt
 import anki.template
 import anki.sound
+import logging
+import sentry_sdk
 import PyQt5
 from . import constants    
 
@@ -143,4 +145,19 @@ class AnkiUtils():
     def display_dialog(self, dialog):
         return dialog.exec_()
 
-    
+    def report_known_exception_interactive(self, exception, action):
+        error_message = f'Encountered an error while {action}: {str(exception)}'
+        logging.warning(error_message)
+        self.critical_message(error_message, None)
+
+    def report_unknown_exception_interactive(self, exception, action):
+        error_message = f'Encountered an unknown error while {action}: {str(exception)}'
+        sentry_sdk.capture_exception(exception)
+        self.critical_message(error_message, None)
+
+    def report_unknown_exception_background(self, exception):
+        sentry_sdk.capture_exception(exception)
+
+    def set_reporting_user_id(self, user_id):
+        logging.info(f'setting user_id to: {user_id}')
+        sentry_sdk.set_user({'id': user_id})

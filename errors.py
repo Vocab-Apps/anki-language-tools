@@ -22,7 +22,7 @@ class LanguageMappingError(LanguageToolsError):
 
 class FieldNotFoundError(AnkiItemNotFoundError):
     def __init__(self, dntf):
-        message = f'Field not found: {dntf}'
+        message = f'Field not found: <b>{dntf}</b>. {constants.DOCUMENTATION_EDIT_RULES}'
         super().__init__(message)    
 
 class FieldLanguageMappingError(LanguageMappingError):
@@ -49,8 +49,9 @@ class VoiceListRequestError(LanguageToolsRequestError):
 # these ActionContext objects implement the "with " interface and help catch exceptions
 
 class SingleActionContext():
-    def __init__(self, error_manager):
+    def __init__(self, error_manager, action):
         self.error_manager = error_manager
+        self.action = action
 
     def __enter__(self):
         pass
@@ -58,9 +59,9 @@ class SingleActionContext():
     def __exit__(self, exception_type, exception_value, traceback):
         if exception_value != None:
             if isinstance(exception_value, LanguageToolsError):
-                self.error_manager.report_single_exception(exception_value)
+                self.error_manager.report_single_exception(exception_value, self.action)
             else:
-                self.error_manager.report_unknown_exception_interactive(exception_value)
+                self.error_manager.report_unknown_exception_interactive(exception_value, self.action)
             return True
         return False
 
@@ -104,20 +105,18 @@ class BatchErrorManager():
 class ErrorManager():
     def __init__(self, anki_utils):
         self.anki_utils = anki_utils
-        self.batch_mode = False
-        self.last_exception = None
 
-    def report_single_exception(self, exception):
-        self.anki_utils.critical_message(str(exception), None)
+    def report_single_exception(self, exception, action):
+        self.anki_utils.report_known_exception_interactive(exception, action)
 
-    def report_unknown_exception_interactive(self, exception):
-        self.anki_utils.critical_message('An unknown error has occured: ' + str(exception), None)
+    def report_unknown_exception_interactive(self, exception, action):
+        self.anki_utils.report_unknown_exception_interactive(exception, action)
 
     def report_unknown_exception_batch(self, exception):
-        pass
+        self.anki_utils.report_unknown_exception_background(exception)
 
-    def get_single_action_context(self):
-        return SingleActionContext(self)
+    def get_single_action_context(self, action):
+        return SingleActionContext(self, action)
 
     def get_batch_error_manager(self):
         return BatchErrorManager(self)

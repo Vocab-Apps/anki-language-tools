@@ -161,5 +161,7 @@ class DeckUtils():
         model = self.anki_utils.get_model(deck_note_type_field.deck_note_type.model_id)
         fields = model['flds']
         field_names = [x['name'] for x in fields]
+        if deck_note_type_field.field_name not in field_names:
+            raise errors.FieldNotFoundError(deck_note_type_field)
         field_index = field_names.index(deck_note_type_field.field_name)
         return field_index    
