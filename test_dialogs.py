@@ -893,9 +893,22 @@ def test_dialog_runrules(qtbot):
     assert note_3.set_values == {} # no values set
     assert note_3.flush_called == False
 
-    # check that we got a critical message
-    expected_error_message = 'Generated data for <b>3</b> notes. Success: <b>6</b> out of <b>9</b>.<p><b>Errors</b>: Field is empty (3 times)</p>'
-    assert mock_language_tools.anki_utils.critical_message_received == expected_error_message
+    # check action stats
+    expected_action_stats = {
+        'adding translation to field English': {
+            'success': 2, 'error': {'Field is empty': 1}
+        }, 
+        'adding transliteration to field Pinyin': {
+            'success': 2, 'error': {'Field is empty': 1}
+        }, 
+        'adding audio to field Sound': {
+            'success': 2, 'error': {'Field is empty': 1}
+        }
+    }
+    actual_action_stats = dialog.batch_error_manager.action_stats
+    logging.info(actual_action_stats)
+    assert expected_action_stats == actual_action_stats    
+    
 
 
 
