@@ -41,6 +41,7 @@ class LanguageTools():
         self.cloud_language_tools = cloud_language_tools
         self.config = self.anki_utils.get_config()
         self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
+        self.error_manager = errors.ErrorManager(self.anki_utils)
 
         self.language_data_load_error = False
 

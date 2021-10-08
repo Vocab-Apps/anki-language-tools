@@ -1,4 +1,5 @@
 import sys
+import logging
 if hasattr(sys, '_pytest_mode'):
     import constants
 else:
@@ -45,3 +46,60 @@ class VoiceListRequestError(LanguageToolsRequestError):
     pass
 
 
+# these ActionContext objects implement the "with " interface and help catch exceptions
+
+class SingleActionContext():
+    def __init__(self, error_manager):
+        self.error_manager = error_manager
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        if isinstance(exception_value, LanguageToolsError):
+            self.error_manager.report_single_exception(exception_value)
+            return True
+        return False
+
+class BatchActionContext():
+    def __init__(self, batch_error_manager):
+        self.batch_error_manager = batch_error_manager
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        logging.debug('ending batch')
+        if isinstance(exception_value, LanguageToolsError):
+            self.batch_error_manager.report_batch_exception(exception_value)
+            return True
+        return False
+
+class BatchErrorManager():
+    def __init__(self):
+        self.exception_count = {}
+
+    def get_batch_action_context(self):
+        return BatchActionContext(self)
+
+    def report_batch_exception(self, exception):
+        count = self.exception_count.get(str(exception), 0)
+        self.exception_count[str(exception)] = count + 1
+
+    def get_exception_count(self):
+        return self.exception_count
+
+class ErrorManager():
+    def __init__(self, anki_utils):
+        self.anki_utils = anki_utils
+        self.batch_mode = False
+        self.last_exception = None
+
+    def report_single_exception(self, exception):
+        self.anki_utils.critical_message(str(exception), None)
+
+    def get_single_action_context(self):
+        return SingleActionContext(self)
+
+    def get_batch_error_manager(self):
+        return BatchErrorManager()
