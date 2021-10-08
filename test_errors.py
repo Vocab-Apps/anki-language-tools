@@ -115,6 +115,8 @@ def test_error_manager(qtbot):
     actual_action_stats = batch_error_manager.action_stats
     assert expected_action_stats == actual_action_stats
 
+    # batch_error_manager.display_stats()
+
     # batch actions with unhandled exceptions
     # =======================================
 

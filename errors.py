@@ -117,6 +117,31 @@ class BatchErrorManager():
         self.track_error_stats(error_key, action)
         self.error_manager.report_unknown_exception_batch(exception)
 
+    # producing a human-readable error message
+    
+    def action_stats_error_str(self, action_errors):
+        error_list = []
+        for error_key, error_count in action_errors.items():
+            error_list.append(f"""{error_key}: {error_count}""")
+        return ', '.join(error_list)
+
+    def action_stats_str(self, action_name, action_data):
+        error_str = ' '
+        if len(action_data['error']) > 0:
+            error_str = ', errors: ' + self.action_stats_error_str(action_data['error'])
+        return f"""<b>{action_name}</b>: success: {action_data['success']}{error_str}"""
+
+    def get_stats_str(self):
+        action_html_list = [f'<b>{self.batch_action}</b>']
+        for action, action_data in self.action_stats.items():
+            action_html_list.append(self.action_stats_str(action, action_data))
+        action_html = '<br/>\n'.join(action_html_list)
+        return action_html
+
+    def display_stats(self):
+        # build string then display stats
+        self.error_manager.anki_utils.info_message(self.get_stats_str(), None)
+
 
 class ErrorManager():
     def __init__(self, anki_utils):
