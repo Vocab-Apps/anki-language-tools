@@ -128,19 +128,19 @@ class BatchErrorManager():
     def action_stats_str(self, action_name, action_data):
         error_str = ' '
         if len(action_data['error']) > 0:
-            error_str = ', errors: ' + self.action_stats_error_str(action_data['error'])
+            error_str = ', errors: (' + self.action_stats_error_str(action_data['error']) + ')'
         return f"""<b>{action_name}</b>: success: {action_data['success']}{error_str}"""
 
     def get_stats_str(self):
-        action_html_list = [f'<b>{self.batch_action}</b>']
+        action_html_list = [f'<b>Finished {self.batch_action}.</b><br/>']
         for action, action_data in self.action_stats.items():
             action_html_list.append(self.action_stats_str(action, action_data))
         action_html = '<br/>\n'.join(action_html_list)
         return action_html
 
-    def display_stats(self):
+    def display_stats(self, parent):
         # build string then display stats
-        self.error_manager.anki_utils.info_message(self.get_stats_str(), None)
+        self.error_manager.anki_utils.info_message(self.get_stats_str(), parent)
 
 
 class ErrorManager():

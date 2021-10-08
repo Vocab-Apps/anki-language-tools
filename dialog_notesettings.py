@@ -380,119 +380,82 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
 
     def process_rules_task(self):
-        try:
-            translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
-            transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
-            audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
+        self.batch_error_manager = self.languagetools.error_manager.get_batch_error_manager('processing rules')
 
-            num_rules = 0
-            for rule_list in [translation_settings, transliteration_settings, audio_settings]:
-                for to_field, setting in rule_list.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        num_rules += 1
+        translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
+        transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
+        audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
 
-            logging.debug(f'num rules enabled: {num_rules}')
-            self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
+        num_rules = 0
+        for rule_list in [translation_settings, transliteration_settings, audio_settings]:
+            for to_field, setting in rule_list.items():
+                if self.target_field_checkbox_map[to_field].isChecked():
+                    num_rules += 1
 
-            progress_value = 0
-            self.attempt_count = 0
-            self.success_count = 0
-            self.generate_errors = []
-            for note_id in self.note_id_list:
-                note = self.languagetools.anki_utils.get_note_by_id(note_id)
-                need_to_flush = False
-                for to_field, setting in translation_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_field = setting['from_field']
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            self.verify_to_from_fields(note, from_dntf, to_dntf)
-                            logging.info(f'generating translation from {from_dntf} to {to_dntf}')
+        logging.debug(f'num rules enabled: {num_rules}')
+        self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
 
-                            field_data = note[from_field]
-                            translation_option = setting['translation_option']
-                            translation_result = self.languagetools.get_translation(field_data, translation_option)
-                            note[to_field] = translation_result
-                            self.success_count += 1
-                            need_to_flush = True
-                        except errors.LanguageToolsError as err:
-                            self.generate_errors.append(str(err))
-                        except Exception as err:
-                            logging.exception(f'error while getting translation for note_id {note_id}')
-                            self.generate_errors.append(str(err))
-                        progress_value += 1
-                        self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-                for to_field, setting in transliteration_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_field = setting['from_field']
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            self.verify_to_from_fields(note, from_dntf, to_dntf)
-                            logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
+        progress_value = 0
+        self.generate_errors = []
+        for note_id in self.note_id_list:
+            note = self.languagetools.anki_utils.get_note_by_id(note_id)
+            need_to_flush = False
+            for to_field, setting in translation_settings.items():
+                if self.target_field_checkbox_map[to_field].isChecked():
+                    with self.batch_error_manager.get_batch_action_context(f'adding translation to field {to_field}'):
+                        from_field = setting['from_field']
+                        from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                        to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                        self.verify_to_from_fields(note, from_dntf, to_dntf)
+                        logging.info(f'generating translation from {from_dntf} to {to_dntf}')
 
-                            field_data = note[from_field]
-                            transliteration_option = setting['transliteration_option']
-                            transliteration_result = self.languagetools.get_transliteration(field_data, transliteration_option)
-                            note[to_field] = transliteration_result
-                            self.success_count += 1
-                            need_to_flush = True
-                        except errors.LanguageToolsError as err:
-                            self.generate_errors.append(str(err))
-                        except Exception as err:
-                            logging.exception(f'error while getting transliteration for note_id {note_id}')
-                            self.generate_errors.append(str(err))                            
-                        progress_value += 1
-                        self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
-                for to_field, from_field in audio_settings.items():
-                    if self.target_field_checkbox_map[to_field].isChecked():
-                        try:
-                            self.attempt_count += 1
-                            from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
-                            to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
-                            self.verify_to_from_fields(note, from_dntf, to_dntf)
-                            logging.info(f'generating audio from {from_dntf} to {to_dntf}')
+                        field_data = note[from_field]
+                        translation_option = setting['translation_option']
+                        translation_result = self.languagetools.get_translation(field_data, translation_option)
+                        note[to_field] = translation_result
+                        need_to_flush = True
+                    progress_value += 1
+                    self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
+            for to_field, setting in transliteration_settings.items():
+                if self.target_field_checkbox_map[to_field].isChecked():
+                    with self.batch_error_manager.get_batch_action_context(f'adding transliteration to field {to_field}'):
+                        from_field = setting['from_field']
+                        from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                        to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                        self.verify_to_from_fields(note, from_dntf, to_dntf)
+                        logging.info(f'generating transliteration from {from_dntf} to {to_dntf}')
 
-                            field_data = note[from_field]
-                            from_language_code = self.languagetools.get_language(from_dntf)
-                            voice_selection_settings = self.languagetools.get_voice_selection_settings()
-                            voice = voice_selection_settings[from_language_code]
-                            result = self.languagetools.generate_audio_tag_collection(field_data, voice)
-                            note[to_field] = result['sound_tag']
-                            self.success_count += 1
-                            need_to_flush = True
-                        except errors.LanguageToolsError as err:
-                            self.generate_errors.append(str(err))
-                        except Exception as err:
-                            logging.exception(f'error while getting audio for note_id {note_id}')
-                            self.generate_errors.append(str(err))                            
-                        progress_value += 1
-                        self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
+                        field_data = note[from_field]
+                        transliteration_option = setting['transliteration_option']
+                        transliteration_result = self.languagetools.get_transliteration(field_data, transliteration_option)
+                        note[to_field] = transliteration_result
+                        need_to_flush = True
+                    progress_value += 1
+                    self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
+            for to_field, from_field in audio_settings.items():
+                if self.target_field_checkbox_map[to_field].isChecked():
+                    with self.batch_error_manager.get_batch_action_context(f'adding audio to field {to_field}'):
+                        from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
+                        to_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, to_field)
+                        self.verify_to_from_fields(note, from_dntf, to_dntf)
+                        logging.info(f'generating audio from {from_dntf} to {to_dntf}')
 
-                # write output to note
-                if need_to_flush:
-                    note.flush()
+                        field_data = note[from_field]
+                        from_language_code = self.languagetools.get_language(from_dntf)
+                        voice_selection_settings = self.languagetools.get_voice_selection_settings()
+                        voice = voice_selection_settings[from_language_code]
+                        result = self.languagetools.generate_audio_tag_collection(field_data, voice)
+                        note[to_field] = result['sound_tag']
+                        need_to_flush = True
+                    progress_value += 1
+                    self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setValue(progress_value))
 
+            # write output to note
+            if need_to_flush:
+                note.flush()
 
-        except:
-            logging.error('processing error', exc_info=True)
 
     def process_rules_task_done(self, future_result):
-        # are there any errors ?
-        errors_str = ''
-        if len(self.generate_errors) > 0:
-            error_counts = {}
-            for error in self.generate_errors:
-                current_count = error_counts.get(error, 0)
-                error_counts[error] = current_count + 1
-            errors_str = '<p><b>Errors</b>: ' + ', '.join([f'{key} ({value} times)' for key, value in error_counts.items()]) + '</p>'
-        completion_message = f"Generated data for <b>{len(self.note_id_list)}</b> notes. Success: <b>{self.success_count}</b> out of <b>{self.attempt_count}</b>.{errors_str}"
         self.close()
-        if len(errors_str) > 0:
-            self.languagetools.anki_utils.critical_message(completion_message, self)
-        else:
-            self.languagetools.anki_utils.info_message(completion_message, self)
+        self.batch_error_manager.display_stats(self)
 
