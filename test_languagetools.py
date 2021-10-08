@@ -1,4 +1,6 @@
 import json
+import unittest
+import errors
 import testing_utils
 
 class EmptyFieldConfigGenerator(testing_utils.TestConfigGenerator):
@@ -145,3 +147,27 @@ def test_get_transliteration(qtbot):
 
     transliterated_text = mock_language_tools.get_transliteration(source_text, {'transliteration_key': 'de to en'})
     assert transliterated_text == 'ˈʊntɐ ˈɛtvas'
+
+def test_get_voice_for_field(qtbot):
+    # pytest test_languagetools.py -k test_get_voice_for_field
+
+    # valid voice
+    # ===========
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_audio')
+
+    dntf = config_gen.get_dntf_chinese()
+    voice = mock_language_tools.get_voice_for_field(dntf)
+    assert voice != None
+    assert voice['voice_key'] == config_gen.chinese_voice_key
+
+    # no language mapping
+    # ===================
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('no_language_mapping')
+
+    dntf = config_gen.get_dntf_chinese()
+    
+    testcase_instance = unittest.TestCase()
+    testcase_instance.assertRaises(errors.FieldLanguageMappingError, mock_language_tools.get_voice_for_field, dntf)

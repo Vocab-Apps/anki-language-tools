@@ -675,6 +675,11 @@ class TestConfigGenerator():
         }
         return self.notes_by_id, notes
 
+    def get_dntf_chinese(self):
+        dnt = deck_utils.DeckNoteType(self.deck_id, self.deck_name, self.model_id, self.model_name)
+        dntf = deck_utils.DeckNoteTypeField(dnt, self.field_chinese)
+        return dntf
+
     def get_mock_editor_with_note(self, note_id):
         editor = MockEditor()
         editor.card = MockCard(self.deck_id)
