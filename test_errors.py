@@ -64,13 +64,13 @@ def test_error_manager(qtbot):
     assert mock_language_tools.anki_utils.critical_message_received == None
     mock_language_tools.anki_utils.critical_message_received = None
 
-    def unhandled_exception():
-        with error_manager.get_single_action_context():
-            logging.info('single action 3')
-            raise Exception('this is unhandled')
+    # unhandled exception
+    with error_manager.get_single_action_context():
+        logging.info('single action 3')
+        raise Exception('this is unhandled')
     
-    testcase_instance = unittest.TestCase()
-    testcase_instance.assertRaises(Exception, unhandled_exception)
+    assert mock_language_tools.anki_utils.critical_message_received == 'An unknown error has occured: this is unhandled'
+    mock_language_tools.anki_utils.critical_message_received = None    
 
 
     # batch actions
@@ -102,14 +102,16 @@ def test_error_manager(qtbot):
 
     batch_error_manager = error_manager.get_batch_error_manager()
 
-    def run_batch():
-        with batch_error_manager.get_batch_action_context():
-            logging.info('batch iteration 1')
-            logging.info('ok')
+    with batch_error_manager.get_batch_action_context():
+        logging.info('batch iteration 1')
+        logging.info('ok')
 
-        with batch_error_manager.get_batch_action_context():
-            logging.info('batch iteration 2')
-            raise Exception('this is unhandled')
+    with batch_error_manager.get_batch_action_context():
+        logging.info('batch iteration 2')
+        raise Exception('this is unhandled')
 
-    testcase_instance = unittest.TestCase()
-    testcase_instance.assertRaises(Exception, run_batch)
+    actual_exception_count = batch_error_manager.get_exception_count()
+    expected_exception_count = {
+        'Unknown Error: this is unhandled': 1
+    }
+    assert actual_exception_count == expected_exception_count

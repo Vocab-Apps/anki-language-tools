@@ -56,8 +56,11 @@ class SingleActionContext():
         pass
 
     def __exit__(self, exception_type, exception_value, traceback):
-        if isinstance(exception_value, LanguageToolsError):
-            self.error_manager.report_single_exception(exception_value)
+        if exception_value != None:
+            if isinstance(exception_value, LanguageToolsError):
+                self.error_manager.report_single_exception(exception_value)
+            else:
+                self.error_manager.report_unknown_exception_interactive(exception_value)
             return True
         return False
 
@@ -69,14 +72,17 @@ class BatchActionContext():
         pass
 
     def __exit__(self, exception_type, exception_value, traceback):
-        logging.debug('ending batch')
-        if isinstance(exception_value, LanguageToolsError):
-            self.batch_error_manager.report_batch_exception(exception_value)
+        if exception_value != None:
+            if isinstance(exception_value, LanguageToolsError):
+                self.batch_error_manager.report_batch_exception(exception_value)
+            else:
+                self.batch_error_manager.report_unknown_exception(exception_value)
             return True
         return False
 
 class BatchErrorManager():
-    def __init__(self):
+    def __init__(self, error_manager):
+        self.error_manager = error_manager
         self.exception_count = {}
 
     def get_batch_action_context(self):
@@ -85,6 +91,12 @@ class BatchErrorManager():
     def report_batch_exception(self, exception):
         count = self.exception_count.get(str(exception), 0)
         self.exception_count[str(exception)] = count + 1
+
+    def report_unknown_exception(self, exception):
+        error_name = f'Unknown Error: {str(exception)}'
+        count = self.exception_count.get(error_name, 0)
+        self.exception_count[error_name] = count + 1
+        self.error_manager.report_unknown_exception_batch(exception)
 
     def get_exception_count(self):
         return self.exception_count
@@ -98,8 +110,14 @@ class ErrorManager():
     def report_single_exception(self, exception):
         self.anki_utils.critical_message(str(exception), None)
 
+    def report_unknown_exception_interactive(self, exception):
+        self.anki_utils.critical_message('An unknown error has occured: ' + str(exception), None)
+
+    def report_unknown_exception_batch(self, exception):
+        pass
+
     def get_single_action_context(self):
         return SingleActionContext(self)
 
     def get_batch_error_manager(self):
-        return BatchErrorManager()
+        return BatchErrorManager(self)
