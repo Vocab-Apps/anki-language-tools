@@ -80,42 +80,61 @@ def test_error_manager(qtbot):
     # batch actions
     # =============
 
-    batch_error_manager = error_manager.get_batch_error_manager()
+    batch_error_manager = error_manager.get_batch_error_manager('batch test 1')
 
-    with batch_error_manager.get_batch_action_context():
+    with batch_error_manager.get_batch_action_context('batch iteration 1'):
         logging.info('batch iteration 1')
         raise errors.LanguageToolsValidationFieldEmpty()
 
-    with batch_error_manager.get_batch_action_context():
+    with batch_error_manager.get_batch_action_context('batch iteration 2'):
         logging.info('batch iteration 2')
         logging.info('ok')
 
-    with batch_error_manager.get_batch_action_context():
+    with batch_error_manager.get_batch_action_context('batch iteration 3'):
         logging.info('batch iteration 3')
         raise errors.FieldLanguageMappingError(dntf)
 
-    actual_exception_count = batch_error_manager.get_exception_count()
-    expected_exception_count = {
-        'Field is empty': 1,
-        'No language set for NoteType / Deck / field1. Please setup Language Mappings, from the Anki main screen: <b>Tools -> Language Tools: Language Mapping</b>': 1
+    expected_action_stats = {
+        'batch iteration 1': {
+            'success': 0,
+            'error': {
+                'Field is empty': 1
+            }
+        },
+        'batch iteration 2': {
+            'success': 1,
+            'error': {}
+        },
+        'batch iteration 3': {
+            'success': 0,
+            'error': {
+                'No language set for NoteType / Deck / field1. Please setup Language Mappings, from the Anki main screen: <b>Tools -> Language Tools: Language Mapping</b>': 1
+            }
+        }        
     }
-    assert actual_exception_count == expected_exception_count
+    actual_action_stats = batch_error_manager.action_stats
+    assert expected_action_stats == actual_action_stats
 
     # batch actions with unhandled exceptions
     # =======================================
 
-    batch_error_manager = error_manager.get_batch_error_manager()
+    batch_error_manager = error_manager.get_batch_error_manager('batch test 2')
 
-    with batch_error_manager.get_batch_action_context():
+    with batch_error_manager.get_batch_action_context('batch iteration 1'):
         logging.info('batch iteration 1')
         logging.info('ok')
 
-    with batch_error_manager.get_batch_action_context():
+    with batch_error_manager.get_batch_action_context('batch iteration 2'):
         logging.info('batch iteration 2')
         raise Exception('this is unhandled')
 
-    actual_exception_count = batch_error_manager.get_exception_count()
-    expected_exception_count = {
-        'Unknown Error: this is unhandled': 1
+    expected_action_stats = {
+        'batch iteration 1': {
+            'success': 1,
+            'error': {}
+        },
+        'batch iteration 2': {
+            'success': 0,
+            'error': {'Unknown Error: this is unhandled': 1}
+        }        
     }
-    assert actual_exception_count == expected_exception_count

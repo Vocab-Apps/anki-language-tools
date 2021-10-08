@@ -66,8 +66,9 @@ class SingleActionContext():
         return False
 
 class BatchActionContext():
-    def __init__(self, batch_error_manager):
+    def __init__(self, batch_error_manager, action):
         self.batch_error_manager = batch_error_manager
+        self.action = action
 
     def __enter__(self):
         pass
@@ -75,32 +76,47 @@ class BatchActionContext():
     def __exit__(self, exception_type, exception_value, traceback):
         if exception_value != None:
             if isinstance(exception_value, LanguageToolsError):
-                self.batch_error_manager.report_batch_exception(exception_value)
+                self.batch_error_manager.report_batch_exception(exception_value, self.action)
             else:
-                self.batch_error_manager.report_unknown_exception(exception_value)
+                self.batch_error_manager.report_unknown_exception(exception_value, self.action)
             return True
+        # no error, report success
+        self.batch_error_manager.report_success(self.action)
         return False
 
 class BatchErrorManager():
-    def __init__(self, error_manager):
+    def __init__(self, error_manager, batch_action):
         self.error_manager = error_manager
-        self.exception_count = {}
+        self.batch_action = batch_action
+        self.action_stats = {}
 
-    def get_batch_action_context(self):
-        return BatchActionContext(self)
+    def get_batch_action_context(self, action):
+        return BatchActionContext(self, action)
 
-    def report_batch_exception(self, exception):
-        count = self.exception_count.get(str(exception), 0)
-        self.exception_count[str(exception)] = count + 1
+    def init_action(self, action):
+        if action not in self.action_stats:
+            self.action_stats[action] = {
+                'success': 0,
+                'error': {}
+            }
 
-    def report_unknown_exception(self, exception):
-        error_name = f'Unknown Error: {str(exception)}'
-        count = self.exception_count.get(error_name, 0)
-        self.exception_count[error_name] = count + 1
+    def report_success(self, action):
+        self.init_action(action)
+        self.action_stats[action]['success'] = self.action_stats[action]['success'] + 1
+
+    def track_error_stats(self, error_key, action):
+        self.init_action(action)
+        error_count = self.action_stats[action]['error'].get(error_key, 0)
+        self.action_stats[action]['error'][error_key] = error_count + 1
+
+    def report_batch_exception(self, exception, action):
+        self.track_error_stats(str(exception), action)
+
+    def report_unknown_exception(self, exception, action):
+        error_key = f'Unknown Error: {str(exception)}'
+        self.track_error_stats(error_key, action)
         self.error_manager.report_unknown_exception_batch(exception)
 
-    def get_exception_count(self):
-        return self.exception_count
 
 class ErrorManager():
     def __init__(self, anki_utils):
@@ -118,5 +134,5 @@ class ErrorManager():
     def get_single_action_context(self, action):
         return SingleActionContext(self, action)
 
-    def get_batch_error_manager(self):
-        return BatchErrorManager(self)
+    def get_batch_error_manager(self, batch_action):
+        return BatchErrorManager(self, batch_action)
