@@ -22,6 +22,10 @@ class MockAnkiUtils():
         self.show_loading_indicator_called = None
         self.hide_loading_indicator_called = None
 
+        # exception handling
+        self.last_exception = None
+        self.last_action = None
+
     def get_config(self):
         return self.config
 
@@ -132,6 +136,24 @@ class MockAnkiUtils():
 
     def checkpoint(self, action_str):
         self.checkpoint_name = action_str
+
+    def set_reporting_user_id(self, user_id):
+        pass
+
+    def reset_exceptions(self):
+        self.last_exception = None
+        self.last_action = None
+
+    def report_known_exception_interactive(self, exception, action):
+        self.last_exception = exception
+        self.last_action = action
+
+    def report_unknown_exception_interactive(self, exception, action):
+        self.last_exception = exception
+        self.last_action = action
+
+    def report_unknown_exception_background(self, exception):
+        self.last_exception = exception
 
 class MockTranslationResponse():
     def __init__(self, status_code, content_obj):

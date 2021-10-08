@@ -4,6 +4,7 @@ import pprint
 import logging
 import PyQt5
 
+import constants
 import dialogs
 import errors
 import deck_utils
@@ -24,7 +25,7 @@ def test_exceptions(qtbot):
         raise errors.FieldNotFoundError(dntf)
     except Exception as e:
         error_message = str(e)
-        assert error_message == 'Field not found: NoteType / Deck / field1'
+        assert error_message == f'Field not found: <b>NoteType / Deck / field1</b>. {constants.DOCUMENTATION_EDIT_RULES}'
 
 def test_exception_operators(qtbot):
     dnt = deck_utils.DeckNoteType(1, 'Deck', 1, 'NoteType')
@@ -50,27 +51,30 @@ def test_error_manager(qtbot):
     # single actions
     # ==============
 
-    with error_manager.get_single_action_context():
+    with error_manager.get_single_action_context('single action 1'):
         logging.info('single action 1')
         raise errors.LanguageToolsValidationFieldEmpty()
 
-    assert mock_language_tools.anki_utils.critical_message_received == 'Field is empty'
-    mock_language_tools.anki_utils.critical_message_received = None
 
-    with error_manager.get_single_action_context():
+    assert isinstance(mock_language_tools.anki_utils.last_exception, errors.LanguageToolsValidationFieldEmpty)
+    assert mock_language_tools.anki_utils.last_action == 'single action 1'
+    mock_language_tools.anki_utils.reset_exceptions()
+
+    with error_manager.get_single_action_context('single action 2'):
         logging.info('single action 2')
         logging.info('successful')
 
-    assert mock_language_tools.anki_utils.critical_message_received == None
-    mock_language_tools.anki_utils.critical_message_received = None
+    assert mock_language_tools.anki_utils.last_exception == None
+    mock_language_tools.anki_utils.reset_exceptions()
 
     # unhandled exception
-    with error_manager.get_single_action_context():
+    with error_manager.get_single_action_context('single action 3'):
         logging.info('single action 3')
         raise Exception('this is unhandled')
     
-    assert mock_language_tools.anki_utils.critical_message_received == 'An unknown error has occured: this is unhandled'
-    mock_language_tools.anki_utils.critical_message_received = None    
+    assert isinstance(mock_language_tools.anki_utils.last_exception, Exception)
+    assert mock_language_tools.anki_utils.last_action == 'single action 3'
+    mock_language_tools.anki_utils.reset_exceptions()
 
 
     # batch actions
