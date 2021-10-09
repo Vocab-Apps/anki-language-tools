@@ -21,24 +21,26 @@ else:
         environment=os.environ.get('SENTRY_ENV', 'production')
     )
 
-    def excepthook(etype, val, tb) -> None:  # type: ignore
-        # do some filtering on exceptions
-        relevant_exception = False
-        stack_summary = traceback.extract_tb(tb)
-        for stack_frame in stack_summary:
-            filename = stack_frame.filename
-            if 'anki-language-tools' in filename or '771677663' in filename:
-                relevant_exception = True
-        # report exception
-        if relevant_exception:
-            sentry_sdk.capture_exception(val)
+    def get_excepthook(previous_excepthook):
+        def excepthook(etype, val, tb) -> None:  # type: ignore
+            # do some filtering on exceptions
+            relevant_exception = False
+            stack_summary = traceback.extract_tb(tb)
+            for stack_frame in stack_summary:
+                filename = stack_frame.filename
+                if 'anki-language-tools' in filename or '771677663' in filename:
+                    relevant_exception = True
+            # report exception
+            if relevant_exception:
+                sentry_sdk.capture_exception(val)
 
-        # print exception to allow anki's logger to handle it
-        sys.stderr.write(
-            "Caught exception:\n%s\n"
-            % ("".join(traceback.format_exception(etype, val, tb)))
-        )
-    sys.excepthook = excepthook
+            if previous_excepthook != None:
+                # there was already an unhandled exception callback (probably the one from anki)
+                previous_excepthook(etype, val, tb)
+
+        return excepthook
+
+    sys.excepthook = get_excepthook(sys.excepthook)
 
     from . import languagetools
     from . import gui
