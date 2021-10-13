@@ -8,6 +8,7 @@ import dialogs
 import testing_utils
 import editor_processing
 import constants
+import errors
 
 def test_process_choosetranslation(qtbot):
     # pytest test_editor.py -rPP -k test_process_choosetranslation
@@ -49,8 +50,32 @@ def test_process_choosetranslation_empty(qtbot):
 
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 0
 
-    assert mock_language_tools.anki_utils.critical_message_received == 'Field is empty'
+    assert mock_language_tools.anki_utils.last_action == 'choosing translation'
+    assert isinstance(mock_language_tools.anki_utils.last_exception, errors.LanguageToolsValidationFieldEmpty)
     
+
+def test_process_choosetranslation_request_error(qtbot):
+    # pytest test_editor.py -s -rPP -k test_process_choosetranslation_request_error
+
+    config_gen = testing_utils.TestConfigGenerator()
+    mock_language_tools = config_gen.build_languagetools_instance('batch_translation')
+
+    bridge_str = 'choosetranslation:1'
+
+    mock_language_tools.cloud_language_tools.translation_unhandled_exception_map = {
+        '老人家': 'unhandled exception translate all'
+    }
+
+    editor = config_gen.get_mock_editor_with_note(config_gen.note_id_1)
+    editor_manager = editor_processing.EditorManager(mock_language_tools)
+    editor_manager.process_choosetranslation(editor,  bridge_str)
+
+    assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 0
+
+    assert mock_language_tools.anki_utils.last_action == 'choosing translation'
+    assert isinstance(mock_language_tools.anki_utils.last_exception, Exception)
+    assert str(mock_language_tools.anki_utils.last_exception) == 'unhandled exception translate all'
+
 def test_process_choosetranslation_cancel(qtbot):
     # pytest test_editor.py -rPP -k test_process_choosetranslation_cancel
 

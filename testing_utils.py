@@ -177,6 +177,9 @@ class MockCloudLanguageTools():
         # used to simulate translation errors
         self.translation_error_map = {}
 
+        # unhandled exceptions
+        self.translation_unhandled_exception_map = {}
+
         self.language_data = {
             'language_list': {
                 'en': 'English',
@@ -388,6 +391,8 @@ class MockCloudLanguageTools():
         return encoded_dict
 
     def get_translation_all(self, api_key, source_text, from_language, to_language):
+        if source_text in self.translation_unhandled_exception_map:
+            raise Exception(self.translation_unhandled_exception_map[source_text])
         return self.translate_all_result[source_text]
 
     def get_translation(self, api_key, source_text, translation_option):

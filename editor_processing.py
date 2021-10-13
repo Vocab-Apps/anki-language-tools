@@ -38,7 +38,7 @@ class EditorManager():
         self.field_change_timer = FieldChangeTimer(delay_ms)
 
     def process_choosetranslation(self, editor, input):
-        try:
+        with self.languagetools.error_manager.get_single_action_context(f'choosing translation'):
             logging.debug(f'choosetranslation command: [{input}]')
             components = input.split(':')
             field_index_str = components[1]
@@ -70,7 +70,7 @@ class EditorManager():
 
             def get_done_callback(from_text, from_language, to_language, editor, field_index):
                 def load_translation_all_done(fut):
-                    try:
+                    with self.languagetools.error_manager.get_single_action_context(f'retrieving all translations'):
                         self.languagetools.anki_utils.stop_progress_bar()
                         data = fut.result()
                         # logging.debug(f'all translations: {data}')
@@ -80,15 +80,11 @@ class EditorManager():
                             chosen_translation = dialog.selected_translation
                             #logging.debug(f'chosen translation: {chosen_translation}')
                             self.languagetools.anki_utils.editor_set_field_value(editor, field_index, chosen_translation)
-                    except errors.LanguageToolsError as e:
-                        self.languagetools.anki_utils.critical_message(str(e), None)                        
 
                 return load_translation_all_done
 
             self.languagetools.anki_utils.show_progress_bar("retrieving all translations")
             self.languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_index))
-        except errors.LanguageToolsError as e:
-            self.languagetools.anki_utils.critical_message(str(e), None)
 
     def process_all_field_changes(self):
         logging.info('processing all field changes')
