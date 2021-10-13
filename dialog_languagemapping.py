@@ -53,7 +53,7 @@ class LanguageMappingDialog_UI(object):
 
     def setupUi(self, Dialog, deck_map: Dict[str, deck_utils.Deck]):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(700, 800)
+        Dialog.resize(700, 900)
 
         self.Dialog = Dialog
 

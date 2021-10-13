@@ -1,5 +1,6 @@
 import sys
 import PyQt5
+import webbrowser
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -49,6 +50,19 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
 
         self.account_info_label = PyQt5.QtWidgets.QLabel()
         vlayout.addWidget(self.account_info_label)
+
+        # plan update / cancel buttons
+        self.account_update_button = PyQt5.QtWidgets.QPushButton()
+        self.account_update_button.setText('Upgrade / Downgrade / Payment options')
+        self.account_update_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
+        self.account_cancel_button = PyQt5.QtWidgets.QPushButton()
+        self.account_cancel_button.setText('Cancel Plan')
+        self.account_cancel_button.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
+        vlayout.addWidget(self.account_update_button)
+        vlayout.addWidget(self.account_cancel_button)
+        self.account_update_button.setVisible(False)
+        self.account_cancel_button.setVisible(False)
+
 
         self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
         self.applyButton = self.buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
@@ -105,9 +119,17 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         result = future_result.result()
         lines = []
         for key, value in result.items():
-            lines.append(f'<b>{key}</b>: {value}')
+            if key == 'update_url':
+                self.account_update_button.setVisible(True)
+                self.account_update_url = value
+                self.account_update_button.pressed.connect(lambda: webbrowser.open(self.account_update_url))
+            elif key == 'cancel_url':
+                self.account_cancel_button.setVisible(True)
+                self.account_cancel_url = value
+                self.account_cancel_button.pressed.connect(lambda: webbrowser.open(self.account_cancel_url))
+            else:
+                lines.append(f'<b>{key}</b>: {value}')
         self.account_info_label.setText('<br/>'.join(lines))
-
 
     def accept(self):
         # store api key into config
