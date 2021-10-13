@@ -22,7 +22,7 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
-        self.resize(350, 320)
+        self.resize(350, 400)
 
         vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
 
