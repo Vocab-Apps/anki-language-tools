@@ -18,7 +18,8 @@ else:
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
         traces_sample_rate=1.0,
         release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}-{anki.version}',
-        environment=os.environ.get('SENTRY_ENV', 'production')
+        environment=os.environ.get('SENTRY_ENV', 'production'),
+        shutdown_timeout=0
     )
 
     def get_excepthook(previous_excepthook):
