@@ -85,7 +85,6 @@ class LanguageTools():
             if len(self.config['api_key']) > 0:
                 validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
                 if validation_result['key_valid'] == True:
-                    self.anki_utils.set_reporting_user_id(self.config['api_key'])
                     self.api_key_checked = True
         except:
             self.language_data_load_error = True
@@ -106,7 +105,6 @@ class LanguageTools():
     def verify_api_key(self, api_key):
         result = self.cloud_language_tools.api_key_validate_query(api_key)
         if result['key_valid'] == True:
-            self.anki_utils.set_reporting_user_id(api_key)
             message = result['msg']
             return True, message
         else:

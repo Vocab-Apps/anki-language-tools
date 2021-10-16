@@ -137,9 +137,6 @@ class MockAnkiUtils():
     def checkpoint(self, action_str):
         self.checkpoint_name = action_str
 
-    def set_reporting_user_id(self, user_id):
-        pass
-
     def reset_exceptions(self):
         self.last_exception = None
         self.last_action = None
