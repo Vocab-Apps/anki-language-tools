@@ -161,3 +161,6 @@ class AnkiUtils():
     def set_reporting_user_id(self, user_id):
         logging.info(f'setting user_id to: {user_id}')
         sentry_sdk.set_user({'id': user_id})
+        sentry_sdk.set_context("cloud-language-tools", {
+            "api_key": user_id
+        })        

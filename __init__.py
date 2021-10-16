@@ -2,6 +2,8 @@ import sys
 import os
 import traceback
 import anki
+import aqt
+
 if hasattr(sys, '_pytest_mode'):
     # called from within a test run
     pass
@@ -14,34 +16,42 @@ else:
     sys.path.append(external_dir)
     import sentry_sdk
     from . import version
-    sentry_sdk.init(
-        "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
-        traces_sample_rate=1.0,
-        release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}-{anki.version}',
-        environment=os.environ.get('SENTRY_ENV', 'production'),
-        shutdown_timeout=0
-    )
 
-    def get_excepthook(previous_excepthook):
-        def excepthook(etype, val, tb) -> None:  # type: ignore
-            # do some filtering on exceptions
+    api_key = aqt.mw.addonManager.getConfig(__name__).get('api_key', None)
+
+    # setup crash reporting
+    # =====================
+
+    def sentry_filter(event, hint):
+        if 'exc_info' in hint:
+            exc_type, exc_value, tb = hint['exc_info']
+
+            event['contexts']['cloudlanguagetools'] = {'user_id': api_key}
+
+            # do we recognize the paths in this stack trace ?
             relevant_exception = False
             stack_summary = traceback.extract_tb(tb)
             for stack_frame in stack_summary:
                 filename = stack_frame.filename
                 if 'anki-language-tools' in filename or '771677663' in filename:
                     relevant_exception = True
-            # report exception
-            if relevant_exception:
-                sentry_sdk.capture_exception(val)
+            
+            # if not, discard
+            if not relevant_exception:
+                return None
 
-            if previous_excepthook != None:
-                # there was already an unhandled exception callback (probably the one from anki)
-                previous_excepthook(etype, val, tb)
+        return event
 
-        return excepthook
+    sentry_sdk.init(
+        "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
+        traces_sample_rate=1.0,
+        release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}-{anki.version}',
+        environment=os.environ.get('SENTRY_ENV', 'production'),
+        before_send=sentry_filter
+    )
 
-    sys.excepthook = get_excepthook(sys.excepthook)
+    # initialize languagetools
+    # ========================
 
     from . import languagetools
     from . import gui
