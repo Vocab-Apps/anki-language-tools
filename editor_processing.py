@@ -162,17 +162,16 @@ class EditorManager():
             self.process_breakdown(editor, str)
 
     def process_breakdown(self, editor, str):
-        components = str.split(':')
-        field_index = int(components[2])
-        field_value = ':'.join(components[3:])
-        deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
-        logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
-        field_language = self.languagetools.get_language(deck_note_type_field)
-        if field_language == None:
-            raise errors.AnkiNoteEditorError(f'No language set for field {deck_note_type_field}')
+        with self.languagetools.error_manager.get_single_action_context(f'preparing breakdown dialog'):
+            components = str.split(':')
+            field_index = int(components[2])
+            field_value = ':'.join(components[3:])
+            deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
+            logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
+            field_language = self.languagetools.get_language_validate(deck_note_type_field)
 
-        dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language)
-        dialog.exec_()
+            dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language)
+            dialog.exec_()
 
 
 

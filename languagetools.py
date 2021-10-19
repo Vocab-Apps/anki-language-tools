@@ -464,6 +464,14 @@ class LanguageTools():
         field_name = deck_note_type_field.field_name
         return self.config.get(constants.CONFIG_DECK_LANGUAGES, {}).get(model_name, {}).get(deck_name, {}).get(field_name, None)
 
+    def get_language_validate(self, deck_note_type_field: deck_utils.DeckNoteTypeField):
+        language_code = self.get_language(deck_note_type_field)
+        if language_code == None:
+            raise errors.FieldLanguageMappingError(deck_note_type_field)
+        if not self.language_available_for_translation(language_code):
+            raise errors.FieldLanguageSpecialMappingError(deck_note_type_field, language_code)
+        return language_code
+
     def get_wanted_languages(self):
         return self.config[constants.CONFIG_WANTED_LANGUAGES].keys()
 
