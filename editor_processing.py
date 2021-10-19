@@ -170,7 +170,7 @@ class EditorManager():
             logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
             field_language = self.languagetools.get_language_validate(deck_note_type_field)
 
-            dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language)
+            dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language, editor, deck_note_type_field.deck_note_type)
             dialog.exec_()
 
 

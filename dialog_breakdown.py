@@ -17,12 +17,14 @@ else:
 
 
 class BreakdownDialog(PyQt5.QtWidgets.QDialog):
-    def __init__(self, languagetools: LanguageTools, text, from_language):
+    def __init__(self, languagetools: LanguageTools, text, from_language, editor, deck_note_type):
         super(PyQt5.QtWidgets.QDialog, self).__init__()
         self.languagetools = languagetools
 
         self.text = text
         self.from_language = from_language
+        self.editor = editor
+        self.deck_note_type = deck_note_type
 
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
@@ -53,6 +55,8 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
         self.transliteration_checkbox.setText('Enable')
         self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.target_field_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.target_field_dropdown.setDisabled(True)
 
         self.breakdown_result = PyQt5.QtWidgets.QLabel()
         self.breakdown_result.setTextInteractionFlags(PyQt5.QtCore.Qt.TextSelectableByMouse)
@@ -79,6 +83,10 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.load_button.setDisabled(False)
         self.load_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.load_button.setFont(gui_utils.get_large_button_font())
+
+        self.copy_to_field_button = PyQt5.QtWidgets.QPushButton()
+        self.copy_to_field_button.setText('Copy to Field')
+        self.copy_to_field_button.setDisabled(True)
 
         vlayout.addWidget(gui_utils.get_medium_label('Options'))
 
@@ -107,7 +115,6 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # add result label
         # ================
         vlayout.addWidget(gui_utils.get_medium_label('Breakdown Result'))
-        vlayout.addWidget(PyQt5.QtWidgets.QLabel('<i>You can select and copy the result to paste into your notes.</i>'))
         self.breakdown_result.setContentsMargins(10, 10, 10, 10)
         vlayout.addWidget(self.breakdown_result)
 
@@ -115,10 +122,22 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # ===========
         vlayout.addWidget(self.load_button)
 
+        hlayout = PyQt5.QtWidgets.QHBoxLayout(self)
+        hlayout.addWidget(self.copy_to_field_button)
+        hlayout.addWidget(self.target_field_dropdown)
+        vlayout.addLayout(hlayout)
+
         self.populate_target_languages()
         self.populate_controls()
 
         self.load_button.pressed.connect(self.load_breakdown)
+        self.copy_to_field_button.pressed.connect(self.copy_to_field)
+
+    def copy_to_field(self):
+        # get index of field selected
+        target_field_index = self.target_field_dropdown.currentIndex()
+        self.languagetools.anki_utils.editor_set_field_value(self.editor, target_field_index, self.result_html)
+        self.accept()
 
     def load_breakdown(self):
         self.load_button.setText('Loading Breakdown...')
@@ -148,10 +167,13 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
             self.load_button.setText('Load Breakdown')
             self.load_button.setDisabled(False)
 
+            self.target_field_dropdown.setDisabled(False)
+            self.copy_to_field_button.setDisabled(False)
+
             breakdown_result = self.languagetools.interpret_breakdown_response_async(future_result.result())
             lines = [self.languagetools.format_breakdown_entry(x) for x in breakdown_result]
-            result_html = '<br/>\n'.join(lines)
-            self.breakdown_result.setText(result_html)
+            self.result_html = '<br/>'.join(lines)
+            self.breakdown_result.setText(self.result_html)
 
             logging.info(breakdown_result)
         except errors.LanguageToolsRequestError as err:
@@ -200,6 +222,9 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.transliteration_options = self.languagetools.get_transliteration_options(self.from_language)
         self.transliteration_dropdown.addItems([x['transliteration_name'] for x in self.transliteration_options])
 
+        # target field
+        # ============
+        self.target_field_dropdown.addItems(self.languagetools.deck_utils.get_field_names(self.deck_note_type))
 
 
 
@@ -208,7 +233,8 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
 
 
 
-def prepare_dialog(languagetools, text, from_language):
-    dialog = BreakdownDialog(languagetools, text, from_language)
+
+def prepare_dialog(languagetools, text, from_language, editor, deck_note_type):
+    dialog = BreakdownDialog(languagetools, text, from_language, editor, deck_note_type)
     dialog.setupUi()
     return dialog

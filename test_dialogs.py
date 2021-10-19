@@ -816,7 +816,8 @@ def test_dialog_breakdown_chinese(qtbot):
         ]
     }
 
-    dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn')
+    deck_note_type = deck_utils.DeckNoteType(config_gen.deck_id, config_gen.deck_name, config_gen.model_id, config_gen.model_name)
+    dialog = dialog_breakdown.prepare_dialog(mock_language_tools, source_text, 'zh_cn', None, deck_note_type)
 
     # wanted languages should be populated
     assert_combobox_items_equal(dialog.target_language_dropdown, [
@@ -840,7 +841,7 @@ def test_dialog_breakdown_chinese(qtbot):
 
     # check that result label has been populated
     result_text = dialog.breakdown_result.text()
-    result_lines = result_text.split('\n')
+    result_lines = result_text.split('<br/>')
     assert len(result_lines) == 2
 
 
