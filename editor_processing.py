@@ -228,7 +228,8 @@ class EditorManager():
 
 
     # generic function to load a transformation asynchronously (translation / transliteration / audio)
-    def load_transformation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, request_transformation_fn, interpret_response_fn):
+    def load_transformation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, 
+        request_transformation_fn, interpret_response_fn, transformation_type):
         field_index = self.languagetools.deck_utils.get_field_id(to_deck_note_type_field)
 
         # is the source field empty ?
@@ -236,29 +237,28 @@ class EditorManager():
             self.languagetools.anki_utils.editor_set_field_value(editor, field_index, '')
             return
 
-        def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, original_field_value, interpret_response_fn):
+        def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, original_field_value, 
+            interpret_response_fn, transformation_type, to_deck_note_type_field):
             def apply_transformation(future_result):
-                if editor.note == None:
-                    # user has left the editor
-                    return
-                if original_note_id != 0:
-                    if editor.note.id != original_note_id:
-                        # user switched to a different note, ignore
+                with self.languagetools.error_manager.get_single_action_context(f'loading {transformation_type.name.lower()} for field {to_deck_note_type_field}'):
+                    if editor.note == None:
+                        # user has left the editor
                         return
+                    if original_note_id != 0:
+                        if editor.note.id != original_note_id:
+                            # user switched to a different note, ignore
+                            return
 
-                languagetools.anki_utils.hide_loading_indicator(editor, field_index, original_field_value)
-                transformation_response = future_result.result()
-                try:
+                    languagetools.anki_utils.hide_loading_indicator(editor, field_index, original_field_value)
+                    transformation_response = future_result.result()
                     result_text = interpret_response_fn(transformation_response)
                     self.languagetools.anki_utils.editor_set_field_value(editor, field_index, result_text)
-                except errors.LanguageToolsRequestError as e:
-                    self.languagetools.anki_utils.critical_message(str(e), None)
             return apply_transformation
 
         self.languagetools.anki_utils.show_loading_indicator(editor, field_index)
 
         self.languagetools.anki_utils.run_in_background(request_transformation_fn, 
-                                        get_apply_transformation_lambda(self.languagetools, editor, field_index, original_note_id, field_value, interpret_response_fn))
+            get_apply_transformation_lambda(self.languagetools, editor, field_index, original_note_id, field_value, interpret_response_fn, transformation_type, to_deck_note_type_field))
 
 
     def load_translation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, translation_option):
@@ -272,7 +272,8 @@ class EditorManager():
                                  original_note_id, 
                                  field_value, 
                                  to_deck_note_type_field, 
-                                 get_request_translation_lambda(self.languagetools, field_value, translation_option), interpret_response_fn)
+                                 get_request_translation_lambda(self.languagetools, field_value, translation_option), interpret_response_fn,
+                                 constants.TransformationType.Translation)
 
 
     def load_transliteration(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, transliteration_option):
@@ -286,7 +287,8 @@ class EditorManager():
                                  original_note_id, 
                                  field_value, 
                                  to_deck_note_type_field, 
-                                 get_request_transliteration_lambda(self.languagetools, field_value, transliteration_option), interpret_response_fn)
+                                 get_request_transliteration_lambda(self.languagetools, field_value, transliteration_option), interpret_response_fn,
+                                 constants.TransformationType.Transliteration)
 
 
     def load_audio(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, voice):
@@ -315,4 +317,5 @@ class EditorManager():
                                  original_note_id, 
                                  field_value, 
                                  to_deck_note_type_field, 
-                                 get_request_audio_lambda(self.languagetools, field_value, voice), interpret_response_fn)
+                                 get_request_audio_lambda(self.languagetools, field_value, voice), interpret_response_fn,
+                                 constants.TransformationType.Audio)
