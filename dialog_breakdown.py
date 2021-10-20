@@ -162,7 +162,7 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
             transliteration_option)
 
     def query_breakdown_done(self, future_result):
-        try:
+        with self.languagetools.error_manager.get_single_action_context(f'loading breakdown'):
 
             self.load_button.setText('Load Breakdown')
             self.load_button.setDisabled(False)
@@ -176,8 +176,6 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
             self.breakdown_result.setText(self.result_html)
 
             logging.info(breakdown_result)
-        except errors.LanguageToolsRequestError as err:
-            self.languagetools.anki_utils.critical_message(str(err), self)
 
 
     def populate_target_languages(self):
