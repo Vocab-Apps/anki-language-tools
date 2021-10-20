@@ -123,6 +123,8 @@ class AnkiUtils():
         aqt.mw.progress.finish()
 
     def editor_set_field_value(self, editor, field_index, text):
+        if field_index >= len(editor.note.fields):
+            raise Exception(f'there are {len(editor.note.fields)} fields in this note, field index {field_index} not found')
         # set the field value on the note
         editor.note.fields[field_index] = text
         # update the webview
