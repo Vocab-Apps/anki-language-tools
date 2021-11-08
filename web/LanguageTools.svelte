@@ -49,8 +49,7 @@
     border-width: 1px;
     border-color: #b6b6b6;
     border-radius: 3px;
-    background-color: white;
-    margin-top: 3px;    
+  margin-top: 3px;    
 }
 div {
     padding-left: 5px;
