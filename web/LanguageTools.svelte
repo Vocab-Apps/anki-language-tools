@@ -40,14 +40,15 @@
 
 <style>
 .language-tools-block {
-    display: flex;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     font-size: 12px;
     align-items: center;
     border-style: solid;
     border-width: 1px;
     border-color: #b6b6b6;
     border-radius: 3px;
-    height: 28px;
     background-color: white;
     margin-top: 3px;    
 }
