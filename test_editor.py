@@ -1,7 +1,7 @@
 import unittest
 import pytest
 import pprint
-import PyQt5
+import aqt.qt
 
 import dialogs
 

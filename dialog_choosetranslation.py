@@ -1,6 +1,6 @@
 import sys
 import logging
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -16,9 +16,9 @@ else:
     from .languagetools import LanguageTools
 
 
-class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
+class ChooseTranslationDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, original_text, from_language, to_language, all_translations):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
 
         self.original_text = original_text
@@ -31,23 +31,23 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(500, 350)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
         vlayout.addWidget(gui_utils.get_header_label('Choose Translation'))
 
         # add the source text / languages
-        translation_info_gridlayout = PyQt5.QtWidgets.QGridLayout()
+        translation_info_gridlayout = aqt.qt.QGridLayout()
         vlayout.addLayout(translation_info_gridlayout)
 
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('Source Text'), 0, 0, 1, 1)
         
-        self.original_text_label = PyQt5.QtWidgets.QLabel(self.original_text)
+        self.original_text_label = aqt.qt.QLabel(self.original_text)
         translation_info_gridlayout.addWidget(self.original_text_label, 1, 0, 1, 1)
         
-        self.from_language_label = PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.from_language))
+        self.from_language_label = aqt.qt.QLabel(self.languagetools.get_language_name(self.from_language))
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('From'), 0, 1, 1, 1)
         translation_info_gridlayout.addWidget(self.from_language_label, 1, 1, 1, 1)
         
-        self.to_language_label = PyQt5.QtWidgets.QLabel(self.languagetools.get_language_name(self.to_language))
+        self.to_language_label = aqt.qt.QLabel(self.languagetools.get_language_name(self.to_language))
         translation_info_gridlayout.addWidget(gui_utils.get_medium_label('To'), 0, 2, 1, 1)
         translation_info_gridlayout.addWidget(self.to_language_label, 1, 2, 1, 1)
 
@@ -60,18 +60,18 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
 
         # add grid with translations
         vlayout.addWidget(gui_utils.get_medium_label('Translations Available'))
-        translation_gridlayout = PyQt5.QtWidgets.QGridLayout()
+        translation_gridlayout = aqt.qt.QGridLayout()
 
         i = 0
         for key, value in self.all_translations.items():
-            service_radio_button = PyQt5.QtWidgets.QRadioButton()
+            service_radio_button = aqt.qt.QRadioButton()
             service_radio_button.setObjectName(f'radio_button_{i}')
             service_radio_button.service = key
             service_radio_button.toggled.connect(self.on_translation_selected)
-            service_label = PyQt5.QtWidgets.QLabel()
+            service_label = aqt.qt.QLabel()
             service_label.setText(f'<b>{key}</b>')
             service_label.setObjectName(f'service_label_{i}')
-            translation_label = PyQt5.QtWidgets.QLabel()
+            translation_label = aqt.qt.QLabel()
             translation_label.setText(f'{value}')
             translation_label.setObjectName(f'translation_label_{i}')
             translation_gridlayout.addWidget(service_radio_button, i, 0, 1, 1)
@@ -86,11 +86,11 @@ class ChooseTranslationDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addStretch()
 
         # buttom buttons
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.apply_button = buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.apply_button = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
         self.apply_button.setObjectName('apply')
         self.apply_button.setEnabled(False)
-        self.cancel_button = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancel_button = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancel_button.setObjectName('cancel')
         self.cancel_button.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         buttonBox.accepted.connect(self.accept)

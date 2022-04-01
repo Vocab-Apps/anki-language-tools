@@ -2,7 +2,7 @@ import unittest
 import pytest
 import pprint
 import logging
-import PyQt5
+import aqt.qt
 
 import constants
 import dialogs

@@ -1,5 +1,5 @@
 import sys
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -14,9 +14,9 @@ else:
     from . import errors
     from .languagetools import LanguageTools
 
-class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
+class VoiceSelectionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, voice_list):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         
         # get list of languages
@@ -37,52 +37,52 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label('Audio Voice Selection'))
 
         # setup grid
         # ==========
 
-        gridlayout = PyQt5.QtWidgets.QGridLayout()
+        gridlayout = aqt.qt.QGridLayout()
 
         label_font_size = 13
-        font1 = PyQt5.QtGui.QFont()
+        font1 = aqt.qt.QFont()
         font1.setBold(True)
         font1.setPointSize(label_font_size)
 
         # language
 
-        language_label = PyQt5.QtWidgets.QLabel()
+        language_label = aqt.qt.QLabel()
         language_label.setText('Language:')
         language_label.setFont(font1)
         gridlayout.addWidget(language_label, 0, 0, 1, 1)
 
-        language_combobox = PyQt5.QtWidgets.QComboBox()
+        language_combobox = aqt.qt.QComboBox()
         language_combobox.addItems(self.language_name_list)
         language_combobox.setObjectName('languages_combobox')
         gridlayout.addWidget(language_combobox, 0, 1, 1, 1)
 
         # voices
 
-        voice_label = PyQt5.QtWidgets.QLabel()
+        voice_label = aqt.qt.QLabel()
         voice_label.setText('Voice:')
         voice_label.setFont(font1)
         gridlayout.addWidget(voice_label, 1, 0, 1, 1)
 
-        self.voice_combobox = PyQt5.QtWidgets.QComboBox()
+        self.voice_combobox = aqt.qt.QComboBox()
         self.voice_combobox.setMaxVisibleItems(15)
         self.voice_combobox.setStyleSheet("combobox-popup: 0;")        
         self.voice_combobox.setObjectName('voices_combobox')
         gridlayout.addWidget(self.voice_combobox, 1, 1, 1, 1)
 
         # button to refresh samples
-        samples_label = PyQt5.QtWidgets.QLabel()
+        samples_label = aqt.qt.QLabel()
         samples_label.setText('Random Samples:')
         samples_label.setFont(font1)
         gridlayout.addWidget(samples_label, 2, 0, 1, 1)
 
-        samples_reload_button = PyQt5.QtWidgets.QPushButton()
+        samples_reload_button = aqt.qt.QPushButton()
         samples_reload_button.setText('Reload Random Samples')
         gridlayout.addWidget(samples_reload_button, 2, 1, 1, 1)
 
@@ -90,14 +90,14 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addLayout(gridlayout)
 
         # samples, 
-        self.samples_gridlayout = PyQt5.QtWidgets.QGridLayout()
+        self.samples_gridlayout = aqt.qt.QGridLayout()
         self.sample_labels = []
         self.sample_play_buttons = []
         for i in range(self.sample_size):
-            sample_label = PyQt5.QtWidgets.QLabel()
+            sample_label = aqt.qt.QLabel()
             sample_label.setText('sample')
             self.sample_labels.append(sample_label)
-            sample_button = PyQt5.QtWidgets.QPushButton()
+            sample_button = aqt.qt.QPushButton()
             sample_button.setText('Play Audio')
             sample_button.setObjectName(f'play_sample_{i}')
             def get_play_lambda(i):
@@ -116,11 +116,11 @@ class VoiceSelectionDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addStretch()
 
         # buttom buttons
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Save Voice Selection", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Save Voice Selection", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)

@@ -2,7 +2,7 @@ import unittest
 import pytest
 import pprint
 import logging
-import PyQt5
+import aqt.qt
 
 import dialogs
 import dialog_languagemapping
@@ -110,23 +110,23 @@ def test_language_mapping(qtbot):
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
     
     # assert deck name, note type, and 3 fields
-    deck_frame = mapping_dialog.findChild(PyQt5.QtWidgets.QFrame, f'frame_{config_gen.deck_name}')
+    deck_frame = mapping_dialog.findChild(aqt.qt.QFrame, f'frame_{config_gen.deck_name}')
     assert deck_frame != None
-    deck_name_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'deck_name_{config_gen.deck_name}')
+    deck_name_label = mapping_dialog.findChild(aqt.qt.QLabel, f'deck_name_{config_gen.deck_name}')
     assert deck_name_label.text() == config_gen.deck_name
-    note_type_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, f'note_type_name_{config_gen.deck_name}_{config_gen.model_name}')
+    note_type_label = mapping_dialog.findChild(aqt.qt.QLabel, f'note_type_name_{config_gen.deck_name}_{config_gen.model_name}')
     assert note_type_label.text() == config_gen.model_name
 
     # look for labels on all 3 fields
     for field_name in config_gen.all_fields:
         field_label_obj_name = f'field_label_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
-        field_label = mapping_dialog.findChild(PyQt5.QtWidgets.QLabel, field_label_obj_name)
+        field_label = mapping_dialog.findChild(aqt.qt.QLabel, field_label_obj_name)
         assert field_label.text() == field_name
 
     # none of the languages should be set
     for field_name in config_gen.all_fields:
         field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {field_name}'
-        field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+        field_language = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
         assert field_language != None
         # ensure the "not set" option is selected
         assert field_language.currentText() == 'Not Set'
@@ -135,14 +135,14 @@ def test_language_mapping(qtbot):
     # ---------------------------
 
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
-    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    field_language_combobox = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
     qtbot.keyClicks(field_language_combobox, 'Chinese')
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
-    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    field_language_combobox = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
     qtbot.keyClicks(field_language_combobox, 'English')
 
-    apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
-    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+    apply_button = mapping_dialog.findChild(aqt.qt.QPushButton, 'apply')
+    qtbot.mouseClick(apply_button, aqt.qt.Qt.LeftButton)
 
     # ensure configuration has been modified
     model_name = config_gen.model_name
@@ -155,26 +155,26 @@ def test_language_mapping(qtbot):
     
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
     # apply button should be disabled
-    apply_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    apply_button = mapping_dialog.findChild(aqt.qt.QPushButton, 'apply')
     assert apply_button.isEnabled() == False
 
-    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'run_autodetect')
-    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
+    autodetect_button = mapping_dialog.findChild(aqt.qt.QPushButton, 'run_autodetect')
+    qtbot.mouseClick(autodetect_button, aqt.qt.Qt.LeftButton)
     
     # assert languages detected
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
-    field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    field_language = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
     assert field_language.currentText() == 'Chinese'
 
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
-    field_language = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    field_language = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
     assert field_language.currentText() == 'English'
 
     # apply button should be enabled
     assert apply_button.isEnabled() == True
 
     # now , click the apply button
-    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(apply_button, aqt.qt.Qt.LeftButton)
 
     # ensure configuration has been modified
     model_name = config_gen.model_name
@@ -192,26 +192,26 @@ def test_language_mapping(qtbot):
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(mock_language_tools)
 
     field_samples_button_obj_name = f'field_samples_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_english}'
-    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, field_samples_button_obj_name)
-    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)
+    autodetect_button = mapping_dialog.findChild(aqt.qt.QPushButton, field_samples_button_obj_name)
+    qtbot.mouseClick(autodetect_button, aqt.qt.Qt.LeftButton)
 
     assert 'old people' in mock_language_tools.anki_utils.info_message_received
     assert 'hello' in mock_language_tools.anki_utils.info_message_received
 
     field_samples_button_obj_name = f'field_samples_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_sound}'
-    autodetect_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, field_samples_button_obj_name)
-    qtbot.mouseClick(autodetect_button, PyQt5.QtCore.Qt.LeftButton)    
+    autodetect_button = mapping_dialog.findChild(aqt.qt.QPushButton, field_samples_button_obj_name)
+    qtbot.mouseClick(autodetect_button, aqt.qt.Qt.LeftButton)    
 
     assert 'No usable field data found' in mock_language_tools.anki_utils.info_message_received
 
     # set one language manually
     field_language_obj_name = f'field_language_{config_gen.model_name} / {config_gen.deck_name} / {config_gen.field_chinese}'
-    field_language_combobox = mapping_dialog.findChild(PyQt5.QtWidgets.QComboBox, field_language_obj_name)
+    field_language_combobox = mapping_dialog.findChild(aqt.qt.QComboBox, field_language_obj_name)
     qtbot.keyClicks(field_language_combobox, 'Sound')
 
     # hit cancel
-    cancel_button = mapping_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'cancel')
-    qtbot.mouseClick(cancel_button, PyQt5.QtCore.Qt.LeftButton)
+    cancel_button = mapping_dialog.findChild(aqt.qt.QPushButton, 'cancel')
+    qtbot.mouseClick(cancel_button, aqt.qt.Qt.LeftButton)
     # there should not be any config change
     assert mock_language_tools.anki_utils.written_config == None
 
@@ -231,12 +231,12 @@ def test_voice_selection(qtbot):
     # for each language, there should be two voices
     # they should both have two samples each
 
-    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    languages_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'languages_combobox')
     assert languages_combobox.count() == 2
     assert languages_combobox.itemText(0) == 'Chinese'
     assert languages_combobox.itemText(1) == 'English'
 
-    voices_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'voices_combobox')
+    voices_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'voices_combobox')
     assert voices_combobox.count() == 2
     assert 'Xiaoxiao' in voices_combobox.itemText(0)
     assert 'Yunyang' in voices_combobox.itemText(1)
@@ -261,14 +261,14 @@ def test_voice_selection(qtbot):
     qtbot.keyClicks(voices_combobox, guy_voice)
 
     # listen to samples
-    play_sample_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, f'play_sample_0')
-    qtbot.mouseClick(play_sample_button, PyQt5.QtCore.Qt.LeftButton)
+    play_sample_button = voice_selection_dialog.findChild(aqt.qt.QPushButton, f'play_sample_0')
+    qtbot.mouseClick(play_sample_button, aqt.qt.Qt.LeftButton)
     # check that sample has been played
     assert mock_language_tools.anki_utils.played_sound['text'] == 'old people'
     assert 'Guy' in mock_language_tools.anki_utils.played_sound['voice_key']['name']
 
-    apply_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
-    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+    apply_button = voice_selection_dialog.findChild(aqt.qt.QPushButton, 'apply')
+    qtbot.mouseClick(apply_button, aqt.qt.Qt.LeftButton)
 
     assert 'en' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]
     assert 'Guy' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
@@ -280,15 +280,15 @@ def test_voice_selection(qtbot):
     # =========================
 
     voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
-    apply_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, 'apply')
+    apply_button = voice_selection_dialog.findChild(aqt.qt.QPushButton, 'apply')
     assert apply_button.isEnabled() == False # should be disabled
 
     # switch language to english
-    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    languages_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'languages_combobox')
     qtbot.keyClicks(languages_combobox, 'English')
 
     # choose different voice
-    voices_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'voices_combobox')
+    voices_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'voices_combobox')
     current_index = voices_combobox.currentIndex()
     assert voices_combobox.count() == 2
     assert 'Guy' in voices_combobox.itemText(current_index)  # check current english voice
@@ -296,7 +296,7 @@ def test_voice_selection(qtbot):
     qtbot.keyClicks(voices_combobox, voice_wanted)
 
     assert apply_button.isEnabled() == True
-    qtbot.mouseClick(apply_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(apply_button, aqt.qt.Qt.LeftButton)
 
     assert 'Aria' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
 
@@ -315,15 +315,15 @@ def test_voice_selection_no_voices(qtbot):
     voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
     voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
 
-    languages_combobox = voice_selection_dialog.findChild(PyQt5.QtWidgets.QComboBox, 'languages_combobox')
+    languages_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'languages_combobox')
     assert languages_combobox.count() == 3
     assert languages_combobox.itemText(2) == 'Malagasy'
 
     qtbot.keyClicks(languages_combobox, 'Malagasy')
 
     # try to play audio
-    play_sample_button = voice_selection_dialog.findChild(PyQt5.QtWidgets.QPushButton, f'play_sample_0')
-    qtbot.mouseClick(play_sample_button, PyQt5.QtCore.Qt.LeftButton)    
+    play_sample_button = voice_selection_dialog.findChild(aqt.qt.QPushButton, f'play_sample_0')
+    qtbot.mouseClick(play_sample_button, aqt.qt.Qt.LeftButton)    
 
     # should have been a critical messages
     assert mock_language_tools.anki_utils.critical_message_received == 'No voice available for Malagasy'
@@ -357,23 +357,23 @@ def test_choose_translation(qtbot):
 
     # check that services and translations are present
     # services
-    service_1 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'service_label_0')
+    service_1 = dialog.findChild(aqt.qt.QLabel, 'service_label_0')
     assert service_1.text() == '<b>serviceA</b>'
-    service_2 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'service_label_1')
+    service_2 = dialog.findChild(aqt.qt.QLabel, 'service_label_1')
     assert service_2.text() == '<b>serviceB</b>'
     # translations
-    translation_1 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'translation_label_0')
+    translation_1 = dialog.findChild(aqt.qt.QLabel, 'translation_label_0')
     assert translation_1.text() == 'first translation'
-    translation_2 = dialog.findChild(PyQt5.QtWidgets.QLabel, 'translation_label_1')
+    translation_2 = dialog.findChild(aqt.qt.QLabel, 'translation_label_1')
     assert translation_2.text() == 'second translation'
 
     # pick second translation
-    radio_button = dialog.findChild(PyQt5.QtWidgets.QRadioButton, 'radio_button_1')
+    radio_button = dialog.findChild(aqt.qt.QRadioButton, 'radio_button_1')
     radio_button.click()
 
     # apply button should be enabled
     assert dialog.apply_button.isEnabled() == True
-    qtbot.mouseClick(dialog.apply_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.apply_button, aqt.qt.Qt.LeftButton)
 
     # verify translation retained
     assert dialog.selected_translation == 'second translation'
@@ -394,7 +394,7 @@ def test_api_key(qtbot):
     assert mock_language_tools.cloud_language_tools.verify_api_key_input == 'yoyo'
 
     assert dialog.applyButton.isEnabled() == True
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # verify that API key in config is correct
     assert mock_language_tools.anki_utils.written_config['api_key'] == 'yoyo'
@@ -436,7 +436,7 @@ def test_api_key(qtbot):
     assert dialog.applyButton.isEnabled() == True
 
     # click OK
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # verify that API key in config is correct
     assert mock_language_tools.anki_utils.written_config['api_key'] == 'validkey1'
@@ -475,20 +475,20 @@ def test_batch_transformation(qtbot):
     # =================
 
     # headers
-    assert dialog.noteTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Chinese'
-    assert dialog.noteTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'English'
+    assert dialog.noteTableModel.headerData(0, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Chinese'
+    assert dialog.noteTableModel.headerData(1, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'English'
     # data - input
     column = 0
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '老人家'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == '老人家'
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '你好'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == '你好'
     # data - output
     column = 1
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None
 
     # load translations
     # =================
@@ -496,24 +496,24 @@ def test_batch_transformation(qtbot):
         '老人家': 'translation 1',
         '你好': 'translation 2'
     }
-    qtbot.mouseClick(dialog.load_translations_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.load_translations_button, aqt.qt.Qt.LeftButton)
 
     # ensure translations are displayed on the table
     # data - output
     column = 1
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 1'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'translation 1'
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 2'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'translation 2'
     index = dialog.noteTableModel.createIndex(2, column) # third row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None
 
     # apply button should be enabled now
     assert dialog.applyButton.isEnabled() == True
 
     # apply to notes
     # ==============
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # verify effect on notes
     note_1 = config_gen.notes_by_id[config_gen.note_id_1]
@@ -563,20 +563,20 @@ def test_batch_transformation_error_handling(qtbot):
     # =================
 
     # headers
-    assert dialog.noteTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Chinese'
-    assert dialog.noteTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'English'
+    assert dialog.noteTableModel.headerData(0, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Chinese'
+    assert dialog.noteTableModel.headerData(1, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'English'
     # data - input
     column = 0
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '老人家'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == '老人家'
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == '你好'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == '你好'
     # data - output
     column = 1
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None
 
     # load translations
     # =================
@@ -585,15 +585,15 @@ def test_batch_transformation_error_handling(qtbot):
         '你好': 'translation 2'
     }
 
-    qtbot.mouseClick(dialog.load_translations_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.load_translations_button, aqt.qt.Qt.LeftButton)
 
     # ensure translations are displayed on the table
     # data - output
     column = 1
     index = dialog.noteTableModel.createIndex(0, column)
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == None # should be empty, there was an error
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == None # should be empty, there was an error
     index = dialog.noteTableModel.createIndex(1, column) # second row
-    assert dialog.noteTableModel.data(index, PyQt5.QtCore.Qt.DisplayRole) == 'translation 2'
+    assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'translation 2'
 
     # dialog.exec_()
 
@@ -602,7 +602,7 @@ def test_batch_transformation_error_handling(qtbot):
 
     # apply to notes
     # ==============
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # verify error message
     assert 'Could not load translation: translation error 42 (1 times)' in mock_language_tools.anki_utils.critical_message_received
@@ -628,12 +628,12 @@ def test_dialog_textprocessing(qtbot):
     # check table model
     # =================
     # headers
-    assert dialog.textReplacementTableModel.headerData(0, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Type'
-    assert dialog.textReplacementTableModel.headerData(1, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Pattern'
-    assert dialog.textReplacementTableModel.headerData(2, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Replacement'
-    assert dialog.textReplacementTableModel.headerData(3, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Translation'
-    assert dialog.textReplacementTableModel.headerData(4, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Transliteration'
-    assert dialog.textReplacementTableModel.headerData(5, PyQt5.QtCore.Qt.Horizontal, PyQt5.QtCore.Qt.DisplayRole) == 'Audio'
+    assert dialog.textReplacementTableModel.headerData(0, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Type'
+    assert dialog.textReplacementTableModel.headerData(1, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Pattern'
+    assert dialog.textReplacementTableModel.headerData(2, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Replacement'
+    assert dialog.textReplacementTableModel.headerData(3, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Translation'
+    assert dialog.textReplacementTableModel.headerData(4, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Transliteration'
+    assert dialog.textReplacementTableModel.headerData(5, aqt.qt.Qt.Orientation.Horizontal, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'Audio'
     # should have 0 rows
     assert dialog.textReplacementTableModel.rowCount(None) == 0
 
@@ -642,25 +642,25 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
     # add a text transformation rule
-    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, aqt.qt.Qt.LeftButton)
     # enter pattern and replacement
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, '1234', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, '1234', aqt.qt.Qt.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, '5678', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, '5678', aqt.qt.Qt.EditRole)
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
 
     # add another transformation rule
-    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, aqt.qt.Qt.LeftButton)
     # enter pattern and replacement
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, ' / ', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, ' / ', aqt.qt.Qt.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, ' ', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, ' ', aqt.qt.Qt.EditRole)
 
     # check processing preview
     dialog.sample_text_input.clear()
@@ -675,8 +675,8 @@ def test_dialog_textprocessing(qtbot):
     # remove the first rule
     dialog.table_view.selectRow(0)
     index_first_row = dialog.textReplacementTableModel.createIndex(0, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.table_view.selectionModel().select(index_first_row, PyQt5.QtCore.QItemSelectionModel.Select)
-    qtbot.mouseClick(dialog.remove_replace_button, PyQt5.QtCore.Qt.LeftButton)
+    dialog.table_view.selectionModel().select(index_first_row, aqt.qt.QItemSelectionModel.Select)
+    qtbot.mouseClick(dialog.remove_replace_button, aqt.qt.Qt.LeftButton)
 
     # there should only be one row left
     assert dialog.textReplacementTableModel.rowCount(None) == 1
@@ -684,27 +684,27 @@ def test_dialog_textprocessing(qtbot):
     # check the rule at row 0
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    assert dialog.textReplacementTableModel.data(index_pattern, PyQt5.QtCore.Qt.DisplayRole) == '\" / \"'
+    assert dialog.textReplacementTableModel.data(index_pattern, aqt.qt.Qt.ItemDataRole.DisplayRole) == '\" / \"'
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    assert dialog.textReplacementTableModel.data(index_replacement, PyQt5.QtCore.Qt.DisplayRole) == '\" \"'
+    assert dialog.textReplacementTableModel.data(index_replacement, aqt.qt.Qt.ItemDataRole.DisplayRole) == '\" \"'
     
     # check the preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
     # try a regexp rule
-    qtbot.mouseClick(dialog.add_replace_regex_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_regex_button, aqt.qt.Qt.LeftButton)
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', aqt.qt.Qt.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, 'number', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, 'number', aqt.qt.Qt.EditRole)
     # this transformation will only apply to transliteration
     index_translation = dialog.textReplacementTableModel.createIndex(row, 3)
-    dialog.textReplacementTableModel.setData(index_translation, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_translation, aqt.qt.Qt.Unchecked, aqt.qt.Qt.CheckStateRole)
     index_transliteration = dialog.textReplacementTableModel.createIndex(row, 4)
-    dialog.textReplacementTableModel.setData(index_transliteration, PyQt5.QtCore.Qt.Checked, PyQt5.QtCore.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_transliteration, aqt.qt.Qt.Checked, aqt.qt.Qt.CheckStateRole)
     index_audio = dialog.textReplacementTableModel.createIndex(row, 5)
-    dialog.textReplacementTableModel.setData(index_audio, PyQt5.QtCore.Qt.Unchecked, PyQt5.QtCore.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_audio, aqt.qt.Qt.Unchecked, aqt.qt.Qt.CheckStateRole)
 
     # check the preview in different transformation types
     dialog.sample_transformation_type_combo_box.setCurrentText('Transliteration')
@@ -717,7 +717,7 @@ def test_dialog_textprocessing(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234</b>'
 
     # now, click OK to the dialog
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # ensure that config has been written
     actual_written_config = mock_language_tools.anki_utils.written_config
@@ -777,13 +777,13 @@ def test_dialog_textprocessing_simple(qtbot):
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234 [9]+</b>'
 
     # add a text transformation rule
-    qtbot.mouseClick(dialog.add_replace_simple_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.add_replace_simple_button, aqt.qt.Qt.LeftButton)
     # enter pattern and replacement
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, ' [9]+', PyQt5.QtCore.Qt.EditRole) # should not get interpreted as regexp
+    dialog.textReplacementTableModel.setData(index_pattern, ' [9]+', aqt.qt.Qt.EditRole) # should not get interpreted as regexp
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, 'rep', PyQt5.QtCore.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, 'rep', aqt.qt.Qt.EditRole)
 
     # dialog.exec_()
 
@@ -837,7 +837,7 @@ def test_dialog_breakdown_chinese(qtbot):
         'Chinese (Simplified) (Jieba (words)) Spacy'])
 
     # run breakdown
-    qtbot.mouseClick(dialog.load_button, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.load_button, aqt.qt.Qt.LeftButton)
 
     # check that result label has been populated
     result_text = dialog.breakdown_result.text()
@@ -869,7 +869,7 @@ def test_dialog_runrules(qtbot):
     # dialog.exec_()
 
     # click apply button
-    qtbot.mouseClick(dialog.applyButton, PyQt5.QtCore.Qt.LeftButton)
+    qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.LeftButton)
 
     # ideally we would check things like buttons disabled, progress bar, etc
     # but for now, just check the effect on notes

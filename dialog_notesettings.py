@@ -1,6 +1,6 @@
 import sys
 import logging
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -15,9 +15,9 @@ else:
     from . import errors
     from .languagetools import LanguageTools
 
-class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
+class NoteSettingsDialogBase(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
 
@@ -30,14 +30,14 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
 
     def layout_rules(self, vlayout):
 
-        font_bold = PyQt5.QtGui.QFont()
+        font_bold = aqt.qt.QFont()
         font_bold.setBold(True)
 
         # do we have translation rules for this deck_note_type
         translation_settings = self.languagetools.get_batch_translation_settings(self.deck_note_type)
         if len(translation_settings) > 0:
             vlayout.addWidget(gui_utils.get_medium_label(f'Translation Rules'))
-            gridlayout = PyQt5.QtWidgets.QGridLayout()
+            gridlayout = aqt.qt.QGridLayout()
             i = 0
             for to_field, setting in translation_settings.items():
                 from_field = setting['from_field']
@@ -46,30 +46,30 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 to_language_name = self.languagetools.get_language_name(self.languagetools.get_language(to_dntf))
 
-                from_field_label = PyQt5.QtWidgets.QLabel(f'{from_field}')
+                from_field_label = aqt.qt.QLabel(f'{from_field}')
                 from_field_label.setFont(font_bold)
 
-                to_field_label = PyQt5.QtWidgets.QLabel(f'{to_field}')
+                to_field_label = aqt.qt.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
                     self.target_field_enabled_map[to_field] = True
-                    checkbox = PyQt5.QtWidgets.QCheckBox()
+                    checkbox = aqt.qt.QCheckBox()
                     checkbox.setChecked(True)
                     self.target_field_checkbox_map[to_field] = checkbox
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1
 
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'From:'), i, x_offset + 0, 1, 1)
                 gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'To:'), i, x_offset + 3, 1, 1)
                 gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({to_language_name})'), i, x_offset + 5, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({to_language_name})'), i, x_offset + 5, 1, 1)
                 
                 if self.add_delete_button():
-                    delete_button = PyQt5.QtWidgets.QPushButton()
+                    delete_button = aqt.qt.QPushButton()
                     delete_button.setText('Remove')
                     def get_remove_lambda(to_dntf, button):
                         def remove():
@@ -100,7 +100,7 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
         transliteration_settings = self.languagetools.get_batch_transliteration_settings(self.deck_note_type)
         if len(transliteration_settings) > 0:
             vlayout.addWidget(gui_utils.get_medium_label(f'Transliteration Rules'))
-            gridlayout = PyQt5.QtWidgets.QGridLayout()
+            gridlayout = aqt.qt.QGridLayout()
             i = 0
             for to_field, setting in transliteration_settings.items():
                 from_field = setting['from_field']
@@ -109,30 +109,30 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
                 from_language_name = self.languagetools.get_language_name(self.languagetools.get_language(from_dntf))
                 transliteration_name = setting['transliteration_option']['transliteration_name']
 
-                from_field_label = PyQt5.QtWidgets.QLabel(f'{from_field}')
+                from_field_label = aqt.qt.QLabel(f'{from_field}')
                 from_field_label.setFont(font_bold)
 
-                to_field_label = PyQt5.QtWidgets.QLabel(f'{to_field}')
+                to_field_label = aqt.qt.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
                     self.target_field_enabled_map[to_field] = True
-                    checkbox = PyQt5.QtWidgets.QCheckBox()
+                    checkbox = aqt.qt.QCheckBox()
                     checkbox.setChecked(True)
                     self.target_field_checkbox_map[to_field] = checkbox
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)    
                     x_offset = 1                
 
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'From:'), i, x_offset + 0, 1, 1)
                 gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'To:'), i, x_offset + 3, 1, 1)
                 gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({transliteration_name})'), i, x_offset + 5, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({transliteration_name})'), i, x_offset + 5, 1, 1)
                 
                 if self.add_delete_button():
-                    delete_button = PyQt5.QtWidgets.QPushButton()
+                    delete_button = aqt.qt.QPushButton()
                     delete_button.setText('Remove')
                     def get_remove_lambda(to_dntf, button):
                         def remove():
@@ -163,7 +163,7 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
         audio_settings = self.languagetools.get_batch_audio_settings(self.deck_note_type)
         if len(audio_settings) > 0:
             vlayout.addWidget(gui_utils.get_medium_label(f'Audio Rules'))
-            gridlayout = PyQt5.QtWidgets.QGridLayout()
+            gridlayout = aqt.qt.QGridLayout()
             i = 0
             for to_field, from_field in audio_settings.items():
                 from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(self.deck_note_type, from_field)
@@ -176,30 +176,30 @@ class NoteSettingsDialogBase(PyQt5.QtWidgets.QDialog):
                 if from_language_code in voice_selection_settings:
                     voice_description = voice_selection_settings[from_language_code]['voice_description']
 
-                from_field_label = PyQt5.QtWidgets.QLabel(f'{from_field}')
+                from_field_label = aqt.qt.QLabel(f'{from_field}')
                 from_field_label.setFont(font_bold)
 
-                to_field_label = PyQt5.QtWidgets.QLabel(f'{to_field}')
+                to_field_label = aqt.qt.QLabel(f'{to_field}')
                 to_field_label.setFont(font_bold)
 
                 x_offset = 0
                 if self.add_rule_enable_checkbox():
                     self.target_field_enabled_map[to_field] = True
-                    checkbox = PyQt5.QtWidgets.QCheckBox()
+                    checkbox = aqt.qt.QCheckBox()
                     checkbox.setChecked(True)
                     self.target_field_checkbox_map[to_field] = checkbox
                     gridlayout.addWidget(checkbox, i, 0, 1, 1)
                     x_offset = 1                
 
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'From:'), i, x_offset + 0, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'From:'), i, x_offset + 0, 1, 1)
                 gridlayout.addWidget(from_field_label, i, x_offset + 1, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'To:'), i, x_offset + 3, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({from_language_name})'), i, x_offset + 2, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'To:'), i, x_offset + 3, 1, 1)
                 gridlayout.addWidget(to_field_label, i, x_offset + 4, 1, 1)
-                gridlayout.addWidget(PyQt5.QtWidgets.QLabel(f'({voice_description})'), i, x_offset + 5, 1, 1)
+                gridlayout.addWidget(aqt.qt.QLabel(f'({voice_description})'), i, x_offset + 5, 1, 1)
                 
                 if self.add_delete_button():
-                    delete_button = PyQt5.QtWidgets.QPushButton()
+                    delete_button = aqt.qt.QPushButton()
                     delete_button.setText('Remove')
                     def get_remove_lambda(to_dntf, button):
                         def remove():
@@ -245,16 +245,16 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
 
-        vlayout.addWidget(PyQt5.QtWidgets.QLabel('You can visualize and remove Audio / Translation / Transliteration rules from here.'))
+        vlayout.addWidget(aqt.qt.QLabel('You can visualize and remove Audio / Translation / Transliteration rules from here.'))
 
         self.layout_rules(vlayout)
 
         vlayout.addWidget(gui_utils.get_medium_label(f'Apply Changes While Typing'))
-        self.checkbox = PyQt5.QtWidgets.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
+        self.checkbox = aqt.qt.QCheckBox("Language Tools will automatically apply field translations / transliterations / audio when typing into the From field")
         self.checkbox.setChecked(self.languagetools.get_apply_updates_automatically())
         self.checkbox.setContentsMargins(10, 0, 10, 0)
         vlayout.addWidget(self.checkbox)
@@ -262,10 +262,10 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
         vlayout.addStretch()
 
         # buttom buttons
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Save Settings", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Save Settings", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
   
@@ -334,26 +334,26 @@ class RunRulesDialog(NoteSettingsDialogBase):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 300)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label(self.get_header_text()))
 
-        vlayout.addWidget(PyQt5.QtWidgets.QLabel('Select the rules you want to run, then click Apply Rules.'))
+        vlayout.addWidget(aqt.qt.QLabel('Select the rules you want to run, then click Apply Rules.'))
 
         self.layout_rules(vlayout)
 
         # progress bar
-        hlayout = PyQt5.QtWidgets.QHBoxLayout()
+        hlayout = aqt.qt.QHBoxLayout()
         hlayout.setContentsMargins(0, 20, 0, 0)
-        self.progress_bar = PyQt5.QtWidgets.QProgressBar()
+        self.progress_bar = aqt.qt.QProgressBar()
         hlayout.addWidget(self.progress_bar)
         vlayout.addLayout(hlayout)
 
         # buttom buttons
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply Rules", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply Rules", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
 

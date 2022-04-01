@@ -1,5 +1,5 @@
 import sys
-import PyQt5
+import aqt.qt
 import webbrowser
 
 if hasattr(sys, '_pytest_mode'):
@@ -15,20 +15,20 @@ else:
     from . import errors
     from .languagetools import LanguageTools
 
-class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
+class ApiKeyDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         
     def setupUi(self):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(350, 400)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label('Enter API Key'))
 
-        description_label = PyQt5.QtWidgets.QLabel("""<b>Why is Language Tools a paid addon and not free ?</b> """
+        description_label = aqt.qt.QLabel("""<b>Why is Language Tools a paid addon and not free ?</b> """
         """ this addon makes use of cloud services such as Google Cloud and Microsoft Azure to generate premium text to speech, translations and transliterations. """
         """These service cost money and hence this addon cannot be provided for free. """
         """You can sign up for a free trial at the link below""")
@@ -36,26 +36,26 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         vlayout.addWidget(description_label)
 
         urlLink="<a href=\"https://languagetools.anki.study/language-tools-signup?utm_campaign=langtools_apikey&utm_source=languagetools&utm_medium=addon\">Don't have an API Key? Sign up here</a>"
-        signup_label=PyQt5.QtWidgets.QLabel()
+        signup_label=aqt.qt.QLabel()
         signup_label.setText(urlLink)
         signup_label.setOpenExternalLinks(True)
         vlayout.addWidget(signup_label)
 
-        self.api_text_input = PyQt5.QtWidgets.QLineEdit()
+        self.api_text_input = aqt.qt.QLineEdit()
         self.api_text_input.setText(self.languagetools.get_config_api_key())
         vlayout.addWidget(self.api_text_input)
 
-        self.status_label = PyQt5.QtWidgets.QLabel('Enter API Key')
+        self.status_label = aqt.qt.QLabel('Enter API Key')
         vlayout.addWidget(self.status_label)
 
-        self.account_info_label = PyQt5.QtWidgets.QLabel()
+        self.account_info_label = aqt.qt.QLabel()
         vlayout.addWidget(self.account_info_label)
 
         # plan update / cancel buttons
-        self.account_update_button = PyQt5.QtWidgets.QPushButton()
+        self.account_update_button = aqt.qt.QPushButton()
         self.account_update_button.setText('Upgrade / Downgrade / Payment options')
         self.account_update_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-        self.account_cancel_button = PyQt5.QtWidgets.QPushButton()
+        self.account_cancel_button = aqt.qt.QPushButton()
         self.account_cancel_button.setText('Cancel Plan')
         self.account_cancel_button.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(self.account_update_button)
@@ -64,11 +64,11 @@ class ApiKeyDialog(PyQt5.QtWidgets.QDialog):
         self.account_cancel_button.setVisible(False)
 
 
-        self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = self.buttonBox.addButton("OK", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = self.buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
-        self.cancelButton = self.buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)

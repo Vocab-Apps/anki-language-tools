@@ -1,7 +1,7 @@
 import sys
 import logging
 from typing import List, Dict
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -57,19 +57,19 @@ class LanguageMappingDialog_UI(object):
 
         self.Dialog = Dialog
 
-        self.topLevel = PyQt5.QtWidgets.QVBoxLayout(Dialog)
+        self.topLevel = aqt.qt.QVBoxLayout(Dialog)
 
-        self.scrollArea = PyQt5.QtWidgets.QScrollArea()
+        self.scrollArea = aqt.qt.QScrollArea()
         
-        self.scrollArea.setVerticalScrollBarPolicy(PyQt5.QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(PyQt5.QtCore.Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setVerticalScrollBarPolicy(aqt.qt.Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(aqt.qt.Qt.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
 
-        self.layoutWidget = PyQt5.QtWidgets.QWidget()
+        self.layoutWidget = aqt.qt.QWidget()
         self.layoutWidget.setObjectName("layoutWidget")
 
-        all_decks = PyQt5.QtWidgets.QVBoxLayout(self.layoutWidget)
+        all_decks = aqt.qt.QVBoxLayout(self.layoutWidget)
         all_decks.setContentsMargins(20, 20, 20, 20)
         all_decks.setObjectName("all_decks")
 
@@ -77,15 +77,15 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(gui_utils.get_header_label('Language Mapping'))
 
         # add auto-detection widgets
-        hlayout_global = PyQt5.QtWidgets.QHBoxLayout()
-        vlayout_left_side = PyQt5.QtWidgets.QVBoxLayout()
-        self.autodetect_progressbar = PyQt5.QtWidgets.QProgressBar()
+        hlayout_global = aqt.qt.QHBoxLayout()
+        vlayout_left_side = aqt.qt.QVBoxLayout()
+        self.autodetect_progressbar = aqt.qt.QProgressBar()
         vlayout_left_side.addWidget(self.autodetect_progressbar)
         hlayout_global.addLayout(vlayout_left_side)
 
-        font2 = PyQt5.QtGui.QFont()
+        font2 = aqt.qt.QFont()
         font2.setPointSize(14)
-        self.autodetect_button = PyQt5.QtWidgets.QPushButton()
+        self.autodetect_button = aqt.qt.QPushButton()
         self.autodetect_button.setText('Run Auto Detection\n(all decks)')
         self.autodetect_button.setObjectName('run_autodetect')
         self.autodetect_button.setFont(font2)
@@ -94,14 +94,14 @@ class LanguageMappingDialog_UI(object):
         hlayout_global.addWidget(self.autodetect_button)
 
         # add filter bar
-        hlayout = PyQt5.QtWidgets.QHBoxLayout()
-        filter_label = PyQt5.QtWidgets.QLabel('Filter Decks:')
+        hlayout = aqt.qt.QHBoxLayout()
+        filter_label = aqt.qt.QLabel('Filter Decks:')
         hlayout.addWidget(filter_label)
         self.filter_text = None
-        self.filter_text_input = PyQt5.QtWidgets.QLineEdit()
+        self.filter_text_input = aqt.qt.QLineEdit()
         self.filter_text_input.textChanged.connect(self.filterTextChanged)
         hlayout.addWidget(self.filter_text_input)
-        self.filter_result_label = PyQt5.QtWidgets.QLabel(self.getFilterResultText(len(deck_map), len(deck_map)))
+        self.filter_result_label = aqt.qt.QLabel(self.getFilterResultText(len(deck_map), len(deck_map)))
         hlayout.addWidget(self.filter_result_label)
         
         vlayout_left_side.addLayout(hlayout)
@@ -111,7 +111,7 @@ class LanguageMappingDialog_UI(object):
         self.deck_name_widget_map = {}
         for deck_name, deck in deck_map.items():
             deck_layout = self.layoutDecks(deck_name, deck)
-            frame = PyQt5.QtWidgets.QFrame()
+            frame = aqt.qt.QFrame()
             frame.setObjectName(f'frame_{deck_name}')
             frame.setLayout(deck_layout)
             self.deck_name_widget_map[deck_name] = frame
@@ -121,11 +121,11 @@ class LanguageMappingDialog_UI(object):
         self.scrollArea.setWidget(self.layoutWidget)
         self.topLevel.addWidget(self.scrollArea)
 
-        self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = self.buttonBox.addButton("Apply", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = self.buttonBox.addButton("Apply", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.disableApplyButton()
-        cancelButton = self.buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         cancelButton.setObjectName('cancel')
         cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)
@@ -134,20 +134,20 @@ class LanguageMappingDialog_UI(object):
 
 
     def layoutDecks(self, deck_name, deck: deck_utils.Deck):
-        layout = PyQt5.QtWidgets.QVBoxLayout()
+        layout = aqt.qt.QVBoxLayout()
 
         deckWidgets = LanguageMappingDeckWidgets()
         self.deckWidgetMap[deck_name] = deckWidgets
         self.deckNoteTypeWidgetMap[deck_name] = {}
         self.fieldWidgetMap[deck_name] = {}
 
-        deckWidgets.deck_info = PyQt5.QtWidgets.QHBoxLayout()
+        deckWidgets.deck_info = aqt.qt.QHBoxLayout()
         deckWidgets.deck_info.setObjectName("deck_info")
         
         fontSize = 14
 
-        deckWidgets.deck_label = PyQt5.QtWidgets.QLabel(self.layoutWidget)
-        font1 = PyQt5.QtGui.QFont()
+        deckWidgets.deck_label = aqt.qt.QLabel(self.layoutWidget)
+        font1 = aqt.qt.QFont()
         font1.setBold(True)
         font1.setPointSize(fontSize)
         deckWidgets.deck_label.setFont(font1)
@@ -155,9 +155,9 @@ class LanguageMappingDialog_UI(object):
         deckWidgets.deck_label.setText('Deck:')
         deckWidgets.deck_info.addWidget(deckWidgets.deck_label)
 
-        font2 = PyQt5.QtGui.QFont()
+        font2 = aqt.qt.QFont()
         font2.setPointSize(fontSize)
-        deckWidgets.deck_name = PyQt5.QtWidgets.QLabel(self.layoutWidget)
+        deckWidgets.deck_name = aqt.qt.QLabel(self.layoutWidget)
         deckWidgets.deck_name.setObjectName(f'deck_name_{deck_name}')
         deckWidgets.deck_name.setText(deck_name)
         deckWidgets.deck_name.setFont(font2)
@@ -184,24 +184,24 @@ class LanguageMappingDialog_UI(object):
         self.deckNoteTypeWidgetMap[deck_name][note_type_name] = noteTypeWidgets
         self.fieldWidgetMap[deck_name][note_type_name] = {}
 
-        noteTypeWidgets.note_type_info = PyQt5.QtWidgets.QHBoxLayout()
+        noteTypeWidgets.note_type_info = aqt.qt.QHBoxLayout()
         noteTypeWidgets.note_type_info.setObjectName("note_type_info")
 
         fontSize = 12
 
-        font1 = PyQt5.QtGui.QFont()
+        font1 = aqt.qt.QFont()
         font1.setBold(True)
         font1.setPointSize(fontSize)
 
-        noteTypeWidgets.note_type_label = PyQt5.QtWidgets.QLabel(self.layoutWidget)
+        noteTypeWidgets.note_type_label = aqt.qt.QLabel(self.layoutWidget)
         noteTypeWidgets.note_type_label.setObjectName("note_type_label")
         noteTypeWidgets.note_type_label.setText('Note Type:')
         noteTypeWidgets.note_type_label.setFont(font1)
         noteTypeWidgets.note_type_info.addWidget(noteTypeWidgets.note_type_label)
 
-        font2 = PyQt5.QtGui.QFont()
+        font2 = aqt.qt.QFont()
         font2.setPointSize(fontSize)
-        noteTypeWidgets.note_type_name = PyQt5.QtWidgets.QLabel(self.layoutWidget)
+        noteTypeWidgets.note_type_name = aqt.qt.QLabel(self.layoutWidget)
         noteTypeWidgets.note_type_name.setObjectName(f"note_type_name_{deck_name}_{note_type_name}")
         noteTypeWidgets.note_type_name.setText(note_type_name)
         noteTypeWidgets.note_type_name.setFont(font2)
@@ -211,7 +211,7 @@ class LanguageMappingDialog_UI(object):
 
         layout.addLayout(noteTypeWidgets.note_type_info)
 
-        noteTypeWidgets.field_info = PyQt5.QtWidgets.QGridLayout()
+        noteTypeWidgets.field_info = aqt.qt.QGridLayout()
         noteTypeWidgets.field_info.setContentsMargins(20, 0, 0, 0)
         # set stretch factors
         noteTypeWidgets.field_info.setColumnStretch(0, 50)
@@ -227,20 +227,20 @@ class LanguageMappingDialog_UI(object):
         layout.addLayout(noteTypeWidgets.field_info)
 
 
-    def layoutField(self, row:int, deck_note_type_field: deck_utils.DeckNoteTypeField, gridLayout: PyQt5.QtWidgets.QGridLayout):
+    def layoutField(self, row:int, deck_note_type_field: deck_utils.DeckNoteTypeField, gridLayout: aqt.qt.QGridLayout):
 
         fieldWidgets = LanguageMappingFieldWidgets()
         self.fieldWidgetMap[deck_note_type_field.deck_note_type.deck_name][deck_note_type_field.deck_note_type.model_name][deck_note_type_field.field_name] = fieldWidgets
 
         language_set = self.languagetools.get_language(deck_note_type_field)
 
-        fieldWidgets.field_label = PyQt5.QtWidgets.QLabel(self.layoutWidget)
+        fieldWidgets.field_label = aqt.qt.QLabel(self.layoutWidget)
         field_label_obj_name = f'field_label_{str(deck_note_type_field)}'
         fieldWidgets.field_label.setObjectName(field_label_obj_name)
         fieldWidgets.field_label.setText(deck_note_type_field.field_name)
         gridLayout.addWidget(fieldWidgets.field_label, row, 0, 1, 1)
 
-        fieldWidgets.field_language = PyQt5.QtWidgets.QComboBox(self.layoutWidget)
+        fieldWidgets.field_language = aqt.qt.QComboBox(self.layoutWidget)
         field_language_obj_name = f'field_language_{str(deck_note_type_field)}'
         fieldWidgets.field_language.setObjectName(field_language_obj_name)
         fieldWidgets.field_language.addItems(self.language_name_list)
@@ -259,7 +259,7 @@ class LanguageMappingDialog_UI(object):
 
         gridLayout.addWidget(fieldWidgets.field_language, row, 1, 1, 1)
 
-        fieldWidgets.field_samples_button = PyQt5.QtWidgets.QPushButton(self.layoutWidget)
+        fieldWidgets.field_samples_button = aqt.qt.QPushButton(self.layoutWidget)
         field_samples_button_obj_name = f'field_samples_{str(deck_note_type_field)}'
         fieldWidgets.field_samples_button.setObjectName(field_samples_button_obj_name)
         fieldWidgets.field_samples_button.setText('Show Samples')
@@ -419,7 +419,7 @@ class LanguageMappingDialog_UI(object):
 def prepare_language_mapping_dialogue(languagetools):
     deck_map: Dict[str, Deck] = languagetools.get_populated_decks()
 
-    mapping_dialog = PyQt5.QtWidgets.QDialog()
+    mapping_dialog = aqt.qt.QDialog()
     mapping_dialog.ui = LanguageMappingDialog_UI(languagetools, mapping_dialog)
     mapping_dialog.ui.setupUi(mapping_dialog, deck_map)
     return mapping_dialog

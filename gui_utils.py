@@ -1,9 +1,9 @@
-import PyQt5
+import aqt.qt
 
 def get_header_label(text):
-        header = PyQt5.QtWidgets.QLabel()
+        header = aqt.qt.QLabel()
         header.setText(text)
-        font = PyQt5.QtGui.QFont()
+        font = aqt.qt.QFont()
         font.setBold(True)
         font.setWeight(75)  
         font.setPointSize(20)
@@ -11,9 +11,9 @@ def get_header_label(text):
         return header
 
 def get_medium_label(text):
-        label = PyQt5.QtWidgets.QLabel()
+        label = aqt.qt.QLabel()
         label.setText(text)
-        font = PyQt5.QtGui.QFont()
+        font = aqt.qt.QFont()
         label_font_size = 13
         font.setBold(True)
         font.setPointSize(label_font_size)
@@ -21,6 +21,6 @@ def get_medium_label(text):
         return label
 
 def get_large_button_font():
-        font2 = PyQt5.QtGui.QFont()
+        font2 = aqt.qt.QFont()
         font2.setPointSize(14)
         return font2        

@@ -1,6 +1,6 @@
 import sys
 import logging
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -16,9 +16,9 @@ else:
     from .languagetools import LanguageTools
 
 
-class BreakdownDialog(PyQt5.QtWidgets.QDialog):
+class BreakdownDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, text, from_language, editor, deck_note_type):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
 
         self.text = text
@@ -30,11 +30,11 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(500, 350)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
         vlayout.addWidget(gui_utils.get_header_label('Breakdown'))
         vlayout.addWidget(gui_utils.get_medium_label(f'{self.text} ({self.languagetools.get_language_name(self.from_language)})'))
 
-        gridlayout = PyQt5.QtWidgets.QGridLayout()
+        gridlayout = aqt.qt.QGridLayout()
 
         # show tokenization options
         # show translation options, with checkbox
@@ -43,48 +43,48 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # create all widgets
         # ==================
 
-        font1 = PyQt5.QtGui.QFont()
+        font1 = aqt.qt.QFont()
         font1.setBold(True)
 
-        self.target_language_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.target_language_dropdown = aqt.qt.QComboBox()
         
-        self.tokenization_dropdown = PyQt5.QtWidgets.QComboBox()
-        self.translation_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.tokenization_dropdown = aqt.qt.QComboBox()
+        self.translation_checkbox = aqt.qt.QCheckBox()
         self.translation_checkbox.setText('Enable')
-        self.translation_dropdown = PyQt5.QtWidgets.QComboBox()
-        self.transliteration_checkbox = PyQt5.QtWidgets.QCheckBox()
+        self.translation_dropdown = aqt.qt.QComboBox()
+        self.transliteration_checkbox = aqt.qt.QCheckBox()
         self.transliteration_checkbox.setText('Enable')
-        self.transliteration_dropdown = PyQt5.QtWidgets.QComboBox()
-        self.target_field_dropdown = PyQt5.QtWidgets.QComboBox()
+        self.transliteration_dropdown = aqt.qt.QComboBox()
+        self.target_field_dropdown = aqt.qt.QComboBox()
         self.target_field_dropdown.setDisabled(True)
 
-        self.breakdown_result = PyQt5.QtWidgets.QLabel()
-        self.breakdown_result.setTextInteractionFlags(PyQt5.QtCore.Qt.TextSelectableByMouse)
+        self.breakdown_result = aqt.qt.QLabel()
+        self.breakdown_result.setTextInteractionFlags(aqt.qt.Qt.TextSelectableByMouse)
         self.breakdown_result.setText('<i>Press Load Breakdown to see result</i>')
 
-        target_language_label = PyQt5.QtWidgets.QLabel()
+        target_language_label = aqt.qt.QLabel()
         target_language_label.setText('Target Language:')
         target_language_label.setFont(font1)
 
-        segmentation_label = PyQt5.QtWidgets.QLabel()
+        segmentation_label = aqt.qt.QLabel()
         segmentation_label.setText('Segmentation:')
         segmentation_label.setFont(font1)
 
-        translation_label = PyQt5.QtWidgets.QLabel()
+        translation_label = aqt.qt.QLabel()
         translation_label.setText('Translation:')
         translation_label.setFont(font1)
 
-        transliteration_label = PyQt5.QtWidgets.QLabel()
+        transliteration_label = aqt.qt.QLabel()
         transliteration_label.setText('Transliteration:')
         transliteration_label.setFont(font1)
 
-        self.load_button = PyQt5.QtWidgets.QPushButton()
+        self.load_button = aqt.qt.QPushButton()
         self.load_button.setText('Load Breakdown')
         self.load_button.setDisabled(False)
         self.load_button.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
         self.load_button.setFont(gui_utils.get_large_button_font())
 
-        self.copy_to_field_button = PyQt5.QtWidgets.QPushButton()
+        self.copy_to_field_button = aqt.qt.QPushButton()
         self.copy_to_field_button.setText('Copy to Field')
         self.copy_to_field_button.setDisabled(True)
 
@@ -122,7 +122,7 @@ class BreakdownDialog(PyQt5.QtWidgets.QDialog):
         # ===========
         vlayout.addWidget(self.load_button)
 
-        hlayout = PyQt5.QtWidgets.QHBoxLayout(self)
+        hlayout = aqt.qt.QHBoxLayout(self)
         hlayout.addWidget(self.copy_to_field_button)
         hlayout.addWidget(self.target_field_dropdown)
         vlayout.addLayout(hlayout)

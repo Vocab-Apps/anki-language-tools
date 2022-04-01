@@ -1,7 +1,7 @@
 import sys
 import logging
 from typing import List, Dict
-import PyQt5
+import aqt.qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -16,9 +16,9 @@ else:
     from . import errors
     from .languagetools import LanguageTools
 
-class NoteTableModel(PyQt5.QtCore.QAbstractTableModel):
+class NoteTableModel(aqt.qt.QAbstractTableModel):
     def __init__(self):
-        PyQt5.QtCore.QAbstractTableModel.__init__(self, None)
+        aqt.qt.QAbstractTableModel.__init__(self, None)
         self.from_field_data = []
         self.to_field_data = []
         self.from_field = 'From'
@@ -26,17 +26,17 @@ class NoteTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def flags(self, index):
         if index.column() == 1: # second column is editable
-            return PyQt5.QtCore.Qt.ItemIsEditable | PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
+            return aqt.qt.Qt.ItemIsEditable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
         # return default
-        return PyQt5.QtCore.Qt.ItemIsSelectable | PyQt5.QtCore.Qt.ItemIsEnabled
+        return aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
 
     def setFromField(self, field_name):
         self.from_field = field_name
-        self.headerDataChanged.emit(PyQt5.QtCore.Qt.Horizontal, 0, 1)
+        self.headerDataChanged.emit(aqt.qt.Qt.Orientation.Horizontal, 0, 1)
     
     def setToField(self, field_name):
         self.to_field = field_name
-        self.headerDataChanged.emit(PyQt5.QtCore.Qt.Horizontal, 0, 1)
+        self.headerDataChanged.emit(aqt.qt.Qt.Orientation.Horizontal, 0, 1)
 
     def setFromFieldData(self, data):
         self.from_field_data = data
@@ -61,20 +61,20 @@ class NoteTableModel(PyQt5.QtCore.QAbstractTableModel):
 
     def data(self, index, role):
         if not index.isValid():
-            return PyQt5.QtCore.QVariant()
-        elif role != PyQt5.QtCore.Qt.DisplayRole and role != PyQt5.QtCore.Qt.EditRole: # only support display and edit
-           return PyQt5.QtCore.QVariant()
+            return aqt.qt.QVariant()
+        elif role != aqt.qt.Qt.ItemDataRole.DisplayRole and role != aqt.qt.Qt.EditRole: # only support display and edit
+           return aqt.qt.QVariant()
         if index.column() == 0:
             # from field
-            return PyQt5.QtCore.QVariant(self.from_field_data[index.row()])
+            return aqt.qt.QVariant(self.from_field_data[index.row()])
         else:
             # result field
-            return PyQt5.QtCore.QVariant(self.to_field_data[index.row()])
+            return aqt.qt.QVariant(self.to_field_data[index.row()])
 
     def setData(self, index, value, role):
         if index.column() != 1:
             return False
-        if index.isValid() and role == PyQt5.QtCore.Qt.EditRole:
+        if index.isValid() and role == aqt.qt.Qt.EditRole:
             # memorize the value
             row = index.row()
             self.to_field_data[row] = value
@@ -87,16 +87,16 @@ class NoteTableModel(PyQt5.QtCore.QAbstractTableModel):
             return False
 
     def headerData(self, col, orientation, role):
-        if orientation == PyQt5.QtCore.Qt.Horizontal and role == PyQt5.QtCore.Qt.DisplayRole:
+        if orientation == aqt.qt.Qt.Orientation.Horizontal and role == aqt.qt.Qt.ItemDataRole.DisplayRole:
             if col == 0:
-                return PyQt5.QtCore.QVariant(self.from_field)
+                return aqt.qt.QVariant(self.from_field)
             else:
-                return PyQt5.QtCore.QVariant(self.to_field)
-        return PyQt5.QtCore.QVariant()
+                return aqt.qt.QVariant(self.to_field)
+        return aqt.qt.QVariant()
 
-class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
+class BatchConversionDialog(aqt.qt.QDialog):
     def __init__(self, languagetools: LanguageTools, deck_note_type: deck_utils.DeckNoteType, note_id_list, transformation_type):
-        super(PyQt5.QtWidgets.QDialog, self).__init__()
+        super(aqt.qt.QDialog, self).__init__()
         self.languagetools = languagetools
         self.deck_note_type = deck_note_type
         self.note_id_list = note_id_list
@@ -147,7 +147,7 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 500)
 
-        vlayout = PyQt5.QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         header_label_text_map = {
             constants.TransformationType.Translation: 'Add Translation',
@@ -156,51 +156,51 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
 
         vlayout.addWidget(gui_utils.get_header_label(header_label_text_map[self.transformation_type]))
 
-        description_label = PyQt5.QtWidgets.QLabel(f'After adding {self.transformation_type.name.lower()} to notes, the setting will be memorized.')
+        description_label = aqt.qt.QLabel(f'After adding {self.transformation_type.name.lower()} to notes, the setting will be memorized.')
         vlayout.addWidget(description_label)
 
         # setup to/from fields
         # ====================
 
-        gridlayout = PyQt5.QtWidgets.QGridLayout()
+        gridlayout = aqt.qt.QGridLayout()
 
         # "from" side
         # -----------
 
         label_font_size = 13
-        font1 = PyQt5.QtGui.QFont()
+        font1 = aqt.qt.QFont()
         font1.setBold(True)
         font1.setPointSize(label_font_size)
 
-        from_label = PyQt5.QtWidgets.QLabel()
+        from_label = aqt.qt.QLabel()
         from_label.setText('From Field:')
         from_label.setFont(font1)
         gridlayout.addWidget(from_label, 0, 0, 1, 1)
 
-        self.from_combobox = PyQt5.QtWidgets.QComboBox()
+        self.from_combobox = aqt.qt.QComboBox()
         self.from_combobox.addItems(self.field_name_list)
         gridlayout.addWidget(self.from_combobox, 0, 1, 1, 1)
 
-        gridlayout.addWidget(PyQt5.QtWidgets.QLabel('Language:'), 1, 0, 1, 1)
+        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 0, 1, 1)
 
-        self.from_language_label = PyQt5.QtWidgets.QLabel()
+        self.from_language_label = aqt.qt.QLabel()
         gridlayout.addWidget(self.from_language_label, 1, 1, 1, 1)
 
 
         # "to" side
         # ---------
 
-        to_label = PyQt5.QtWidgets.QLabel()
+        to_label = aqt.qt.QLabel()
         to_label.setText('To Field:')
         to_label.setFont(font1)
         gridlayout.addWidget(to_label, 0, 3, 1, 1)
 
-        self.to_combobox = PyQt5.QtWidgets.QComboBox()
+        self.to_combobox = aqt.qt.QComboBox()
         self.to_combobox.addItems(self.field_name_list)
         gridlayout.addWidget(self.to_combobox, 0, 4, 1, 1)
 
-        gridlayout.addWidget(PyQt5.QtWidgets.QLabel('Language:'), 1, 3, 1, 1)
-        self.to_language_label = PyQt5.QtWidgets.QLabel()
+        gridlayout.addWidget(aqt.qt.QLabel('Language:'), 1, 3, 1, 1)
+        self.to_language_label = aqt.qt.QLabel()
         gridlayout.addWidget(self.to_language_label, 1, 4, 1, 1)
 
         gridlayout.setColumnStretch(0, 50)
@@ -216,17 +216,17 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
         # setup translation service
         # =========================
 
-        gridlayout = PyQt5.QtWidgets.QGridLayout()
-        service_label = PyQt5.QtWidgets.QLabel()
+        gridlayout = aqt.qt.QGridLayout()
+        service_label = aqt.qt.QLabel()
         service_label.setFont(font1)
         service_label.setText('Service:')
         gridlayout.addWidget(service_label, 0, 0, 1, 1)
 
-        self.service_combobox = PyQt5.QtWidgets.QComboBox()
+        self.service_combobox = aqt.qt.QComboBox()
         gridlayout.addWidget(self.service_combobox, 0, 1, 1, 1)
 
 
-        self.load_translations_button = PyQt5.QtWidgets.QPushButton()
+        self.load_translations_button = aqt.qt.QPushButton()
         self.load_button_text_map = {
             constants.TransformationType.Translation: 'Load Translations',
             constants.TransformationType.Transliteration: 'Load Transliterations'
@@ -256,26 +256,26 @@ class BatchConversionDialog(PyQt5.QtWidgets.QDialog):
         # setup progress bar
         # ==================
 
-        self.progress_bar = PyQt5.QtWidgets.QProgressBar()
+        self.progress_bar = aqt.qt.QProgressBar()
         vlayout.addWidget(self.progress_bar)
 
         # setup preview table
         # ===================
 
-        self.table_view = PyQt5.QtWidgets.QTableView()
+        self.table_view = aqt.qt.QTableView()
         self.table_view.setModel(self.noteTableModel)
         header = self.table_view.horizontalHeader()       
-        header.setSectionResizeMode(0, PyQt5.QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, PyQt5.QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(0, aqt.qt.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, aqt.qt.QHeaderView.Stretch)
         vlayout.addWidget(self.table_view)
 
         # setup bottom buttons
         # ====================
 
-        buttonBox = PyQt5.QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply To Notes", PyQt5.QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", PyQt5.QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         
