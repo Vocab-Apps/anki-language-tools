@@ -52,7 +52,6 @@ def init(languagetools):
         ]
         css_path =  [
             f"/_addons/{addon_package}/languagetools.css",
-            f"/_addons/{addon_package}/editor_style.css"
         ]
         web_content.js.extend(javascript_path)
         web_content.css.extend(css_path)

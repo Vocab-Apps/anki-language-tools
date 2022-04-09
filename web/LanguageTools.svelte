@@ -39,17 +39,18 @@
 </script>
 
 <style>
+.rounded-corners {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #b6b6b6;
+    border-radius: 3px;
+}
 .language-tools-block {
     display: inline-flex;
     flex-direction: row;
     flex-wrap: wrap;
     font-size: 12px;
     align-items: center;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #b6b6b6;
-    border-radius: 3px;
-  margin-top: 3px;    
 }
 div {
     padding-left: 5px;
@@ -63,11 +64,14 @@ div {
     color: #757575;
     font-weight: bold;
 }
+.delay-input {
+    height: 15px;
+}
 
 </style>
 
 
-<div class="language-tools-block">
+<div class="language-tools-block rounded-corners">
     <div>
         <b>Language Tools</b>
     </div>
@@ -79,11 +83,11 @@ div {
         {/if}
     </div>
 
-    <button on:click={toggleLiveUpdates} class="lt-field-button">
+    <button on:click={toggleLiveUpdates} class="lt-field-button rounded-corners">
         turn {$liveUpdatesEnabledStore === true ? 'off' : 'on'}
     </button>
-    <button on:click={triggerAllFieldUpdate} class="lt-field-button">run now</button>
+    <button on:click={triggerAllFieldUpdate} class="lt-field-button rounded-corners">run now</button>
     <div>delay (ms):
-        <input type=number bind:value={$typingDelayStore} on:input={typingDelayChange} min=250 max=4000 step=250>
+        <input class="delay-input" type=number bind:value={$typingDelayStore} on:input={typingDelayChange} min=250 max=4000 step=250>
     </div>
 </div>
