@@ -1,5 +1,5 @@
 pytest
 pytest-qt
-aqt
+aqt[qt6]
 anki
 coverage
