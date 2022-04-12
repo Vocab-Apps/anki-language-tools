@@ -3,6 +3,7 @@ import os
 import traceback
 import anki
 import aqt
+import logging
 
 if hasattr(sys, '_pytest_mode'):
     # called from within a test run
@@ -49,6 +50,14 @@ else:
         environment=os.environ.get('SENTRY_ENV', 'production'),
         before_send=sentry_filter
     )
+
+    # initialize logging
+    # ==================
+    if os.environ['LANGUAGETOOLS_DEBUG_LOGGING'] == 'enable':
+        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
+                            datefmt='%Y%m%d-%H:%M:%S',
+                            stream=sys.stdout, 
+                            level=logging.DEBUG)    
 
     # initialize languagetools
     # ========================
