@@ -6,7 +6,6 @@ import json
 import urllib.parse
 
 import aqt.qt
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -81,7 +80,7 @@ class AddAudioDialog(aqt.qt.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 200)
 
-        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label('Add Audio'))
 
@@ -89,16 +88,16 @@ class AddAudioDialog(aqt.qt.QDialog):
         vlayout.addWidget(description_label)        
 
         # from/ to field
-        gridlayout = QtWidgets.QGridLayout()
+        gridlayout = aqt.qt.QGridLayout()
 
         # from
         gridlayout.addWidget(gui_utils.get_medium_label('From Field:'), 0, 0, 1, 1)
-        self.from_field_combobox = QtWidgets.QComboBox()
+        self.from_field_combobox = aqt.qt.QComboBox()
         self.from_field_combobox.addItems(self.from_field_name_list)
         gridlayout.addWidget(self.from_field_combobox, 0, 1, 1, 1)
         # to
         gridlayout.addWidget(gui_utils.get_medium_label('To Field:'), 0, 3, 1, 1)
-        self.to_field_combobox = QtWidgets.QComboBox()
+        self.to_field_combobox = aqt.qt.QComboBox()
         self.to_field_combobox.addItems(self.to_field_name_list)
         gridlayout.addWidget(self.to_field_combobox, 0, 4, 1, 1)
 
@@ -106,20 +105,20 @@ class AddAudioDialog(aqt.qt.QDialog):
         gridlayout.addWidget(gui_utils.get_medium_label('Voice:'), 1, 0, 1, 2)
         self.voice_label = aqt.qt.QLabel()
         self.voice_label.setText('undefined')
-        self.voice = QtWidgets.QComboBox()
+        self.voice = aqt.qt.QComboBox()
         gridlayout.addWidget(self.voice_label, 1, 1, 1, 4)
 
         vlayout.addLayout(gridlayout)
 
-        self.progress_bar = QtWidgets.QProgressBar()
+        self.progress_bar = aqt.qt.QProgressBar()
         vlayout.addWidget(self.progress_bar)        
 
         vlayout.addStretch()
 
-        buttonBox = QtWidgets.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply To Notes", QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         vlayout.addWidget(buttonBox)
@@ -256,7 +255,7 @@ class YomichanDialog(aqt.qt.QDialog):
         self.setWindowTitle(constants.ADDON_NAME)
         self.resize(700, 250)
 
-        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout = aqt.qt.QVBoxLayout(self)
 
         vlayout.addWidget(gui_utils.get_header_label('Yomichan Integration'))
 
@@ -274,11 +273,11 @@ class YomichanDialog(aqt.qt.QDialog):
         </ol>
         """
 
-        label = QtWidgets.QLabel(label_text1)
+        label = aqt.qt.QLabel(label_text1)
         label.setWordWrap(True)
         vlayout.addWidget(label)
 
-        label = QtWidgets.QLabel(label_text2)
+        label = aqt.qt.QLabel(label_text2)
         vlayout.addWidget(label)        
 
         # compute URL
@@ -290,16 +289,16 @@ class YomichanDialog(aqt.qt.QDialog):
         url_end = f'yomichan_audio?{url_params}'        
         full_url = self.languagetools.cloud_language_tools.base_url + '/' + url_end
 
-        QtWidgets.QApplication.clipboard().setText(full_url)
+        aqt.qt.QApplication.clipboard().setText(full_url)
 
-        line_edit = QtWidgets.QLineEdit(full_url)
+        line_edit = aqt.qt.QLineEdit(full_url)
         vlayout.addWidget(line_edit)
         
         vlayout.addStretch()
 
         # add buttons
-        buttonBox = QtWidgets.QDialogButtonBox()
-        self.okButton = buttonBox.addButton("OK", QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox = aqt.qt.QDialogButtonBox()
+        self.okButton = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
         vlayout.addWidget(buttonBox)
 
         # wire events
