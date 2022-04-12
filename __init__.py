@@ -53,7 +53,7 @@ else:
 
     # initialize logging
     # ==================
-    if os.environ['LANGUAGETOOLS_DEBUG_LOGGING'] == 'enable':
+    if os.environ.get('LANGUAGETOOLS_DEBUG_LOGGING', '') == 'enable':
         logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', 
                             datefmt='%Y%m%d-%H:%M:%S',
                             stream=sys.stdout, 
