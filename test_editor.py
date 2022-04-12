@@ -10,6 +10,7 @@ import editor_processing
 import constants
 import errors
 
+@pytest.mark.skip(reason="will be reimplemented")
 def test_process_choosetranslation(qtbot):
     # pytest test_editor.py -rPP -k test_process_choosetranslation
 

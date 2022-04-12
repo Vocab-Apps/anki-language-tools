@@ -30,20 +30,6 @@ def configure_editor_component_options(editor: aqt.editor.Editor, live_updates, 
     editor.web.eval(js_command)        
 
 
-# deprecated
-def configure_editor_fields(editor: aqt.editor.Editor, field_options, live_updates, typing_delay):
-    # logging.debug(f'configure_editor_fields, field_options: {field_options}')
-    # js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
-    # print(js_command)
-    # editor.web.eval(js_command)
-
-    live_updates_str = str(live_updates).lower()
-    js_command = f"setLanguageToolsEditorSettings({live_updates_str}, {typing_delay})"
-    print(js_command)
-    editor.web.eval(js_command)    
-
-
-
 def init(languagetools):
     aqt.mw.addonManager.setWebExports(__name__, r".*(css|js)")
     
@@ -68,7 +54,6 @@ def init(languagetools):
         live_updates = languagetools.get_apply_updates_automatically()
         typing_delay = languagetools.get_live_update_delay()
         configure_editor_component_options(editor, live_updates, typing_delay)
-        #configure_editor_fields(editor, field_options, live_updates, typing_delay)
 
 
     def onBridge(handled, str, editor):
