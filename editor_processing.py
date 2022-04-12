@@ -1,6 +1,5 @@
 import logging
 import sys
-import pytest
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -284,7 +283,6 @@ class EditorManager():
         def get_request_translation_lambda(languagetools, field_value, translation_option):
             def request_translation():
                 logging.info('request_translation')
-                # pytest.set_trace()
                 return languagetools.get_translation_async(field_value, translation_option)
             return request_translation
         interpret_response_fn = self.languagetools.interpret_translation_response_async
