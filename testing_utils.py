@@ -108,16 +108,17 @@ class MockAnkiUtils():
     def stop_progress_bar(self):
         self.stop_progress_bar_called = True
 
-    def editor_set_field_value(self, editor, field_index, text):
-        self.editor_set_field_value_calls.append({
-            'field_index': field_index,
-            'text': text
-        })
 
-    def show_loading_indicator(self, editor, field_index):
+    def editor_note_set_field_value(self, editor, field_name, text):
+        self.editor_set_field_value_calls.append({
+            'field_name': field_name,
+            'text': text
+        })        
+
+    def show_loading_indicator_field(self, editor, field_name):
         self.show_loading_indicator_called = True
 
-    def hide_loading_indicator(self, editor, field_index, original_field_value):
+    def hide_loading_indicator_field(self, editor, field_name):
         self.hide_loading_indicator_called = True
 
     def display_dialog(self, dialog):
@@ -428,6 +429,9 @@ class MockNote():
 
     def __setitem__(self, key, value):
         self.set_values[key] = value
+
+    def keys(self):
+        return self.field_dict.keys()        
 
     def flush(self):
         self.flush_called = True

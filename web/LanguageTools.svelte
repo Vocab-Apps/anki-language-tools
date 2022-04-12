@@ -3,12 +3,25 @@
     
     export const liveUpdatesEnabledStore = writable(false);
     export const typingDelayStore = writable(0);
+    export const updateLoading = writable(false);
+    export const updatingFieldName = writable('');
 
     export function setLanguageToolsEditorSettings(liveUpdatesEnabled, typingDelay) {
         console.log('setLanguageToolsEditorSettings: ', liveUpdatesEnabled, typingDelay);
         liveUpdatesEnabledStore.set(liveUpdatesEnabled);
         typingDelayStore.set(typingDelay);
     }
+
+    export function showLoadingIndicator(fieldName) {
+        console.log('showLoadingIndicator: ', fieldName);
+        updateLoading.set(true);
+        updatingFieldName.set(fieldName);
+    }
+
+    export function hideLoadingIndicator(fieldName) {
+        console.log('hideLoadingIndicator: ', fieldName);
+        updateLoading.set(false);
+    }    
 
 </script>
 
@@ -27,14 +40,19 @@
     }
 
     function triggerAllFieldUpdate() {
-        forEditorField([], (field, _data) => {
-            const field_id = field.editingArea.ord;
-            const field_value = field.editingArea.fieldHTML;
-            // console.log('field_id: ', field_id, ' field_value: ', field_value);
-            const cmdString = 'languagetools:forcefieldupdate:' + field_id + ':' + field_value;
-            bridgeCommand(cmdString);
-    });
-}    
+        const cmdString = 'languagetools:fullupdate';
+        bridgeCommand(cmdString);
+    }
+
+    function toggleComponentExpanded() {
+        if( componentExpanded == false ) {
+            componentExpanded = true;
+        } else {
+            componentExpanded = false;
+        }
+    }
+
+    let componentExpanded = false;
 
 </script>
 
@@ -67,14 +85,49 @@ div {
 .delay-input {
     height: 15px;
 }
+.cursor-pointer {
+    cursor: pointer;
+}
+.updating {
+    color: #00c853;
+    animation-name: stretch;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-out;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+    animation-play-state: running;
+}
+@keyframes stretch {
+    0% {
+        opacity: 0.0;
+    }
 
+    50% {
+    }
+
+    100% {
+        opacity: 1.0;
+    }
+}
 </style>
 
 
 <div class="language-tools-block rounded-corners">
-    <div>
-        <b>Language Tools</b>
+    {#if $updateLoading} 
+    <div on:click={toggleComponentExpanded} class="updating cursor-pointer">
+        <b>Updating {$updatingFieldName}</b> 
     </div>
+    {:else if $liveUpdatesEnabledStore}
+    <div on:click={toggleComponentExpanded} class="cursor-pointer">
+        <b>Language Tools</b> 
+    </div>    
+    {:else}
+    <div on:click={toggleComponentExpanded} class="live-updates-off cursor-pointer">
+        <b>Language Tools</b> 
+    </div>
+    {/if}
+
+    {#if componentExpanded}
     <div>
         {#if $liveUpdatesEnabledStore} 
         <span class="live-updates-on">Live Updates: on</span>
@@ -90,4 +143,5 @@ div {
     <div>delay (ms):
         <input class="delay-input" type=number bind:value={$typingDelayStore} on:input={typingDelayChange} min=250 max=4000 step=250>
     </div>
+    {/if}
 </div>

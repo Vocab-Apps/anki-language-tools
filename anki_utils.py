@@ -122,22 +122,17 @@ class AnkiUtils():
     def stop_progress_bar(self):
         aqt.mw.progress.finish()
 
-    def editor_set_field_value(self, editor, field_index, text):
-        if field_index >= len(editor.note.fields):
-            raise Exception(f'there are {len(editor.note.fields)} fields in this note, field index {field_index} not found')
-        # set the field value on the note
-        editor.note.fields[field_index] = text
-        # update the webview
-        js_command = f"""set_field_value({field_index}, "{text}")"""
-        editor.web.eval(js_command)
+    def editor_note_set_field_value(self, editor, field_name, text):
+        editor.note[field_name] = text
+        editor.set_note(editor.note)
 
-    def show_loading_indicator(self, editor: aqt.editor.Editor, field_index):
-        js_command = f"show_loading_indicator({field_index})"
+    def show_loading_indicator_field(self, editor, field_name):
+        js_command= f"showLoadingIndicator('{field_name}')"
         if editor != None and editor.web != None:
             editor.web.eval(js_command)
 
-    def hide_loading_indicator(self, editor: aqt.editor.Editor, field_index, original_field_value):
-        js_command = f"""hide_loading_indicator({field_index}, "{original_field_value}")"""
+    def hide_loading_indicator_field(self, editor, field_name):
+        js_command= f"hideLoadingIndicator('{field_name}')"
         if editor != None and editor.web != None:
             editor.web.eval(js_command)
 

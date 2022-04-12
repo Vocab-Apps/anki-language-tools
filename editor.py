@@ -23,16 +23,23 @@ from .languagetools import LanguageTools
 from . import editor_processing
 
 
-
-def configure_editor_fields(editor: aqt.editor.Editor, field_options, live_updates, typing_delay):
-    # logging.debug(f'configure_editor_fields, field_options: {field_options}')
-    js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
-    # print(js_command)
-    editor.web.eval(js_command)
-
+def configure_editor_component_options(editor: aqt.editor.Editor, live_updates, typing_delay):
     live_updates_str = str(live_updates).lower()
     js_command = f"setLanguageToolsEditorSettings({live_updates_str}, {typing_delay})"
     # print(js_command)
+    editor.web.eval(js_command)        
+
+
+# deprecated
+def configure_editor_fields(editor: aqt.editor.Editor, field_options, live_updates, typing_delay):
+    # logging.debug(f'configure_editor_fields, field_options: {field_options}')
+    # js_command = f"configure_languagetools_fields({json.dumps(field_options)})"
+    # print(js_command)
+    # editor.web.eval(js_command)
+
+    live_updates_str = str(live_updates).lower()
+    js_command = f"setLanguageToolsEditorSettings({live_updates_str}, {typing_delay})"
+    print(js_command)
     editor.web.eval(js_command)    
 
 
@@ -48,7 +55,7 @@ def init(languagetools):
         addon_package = aqt.mw.addonManager.addonFromModule(__name__)
         javascript_path = [
             f"/_addons/{addon_package}/languagetools.js",
-            f"/_addons/{addon_package}/editor_javascript.js"
+            # f"/_addons/{addon_package}/editor_javascript.js"
         ]
         css_path =  [
             f"/_addons/{addon_package}/languagetools.css",
@@ -58,33 +65,10 @@ def init(languagetools):
 
 
     def loadNote(editor: aqt.editor.Editor):
-        note = editor.note
-        deck_note_type = languagetools.deck_utils.build_deck_note_type_from_editor(editor)
-
-        model = note.model()
-        fields = model['flds']
-        field_options = []
-        for index, field in enumerate(fields):
-            field_name = field['name']
-
-            field_type ='regular'
-            # is this field a sound field ?
-            dntf = languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
-            field_language = languagetools.get_language(dntf)
-            if field_language != None:
-                if languagetools.get_batch_translation_setting_field(dntf) != None:
-                    # add translation settings
-                    field_type = 'translation'
-                elif field_language == constants.SpecialLanguage.sound.name:
-                    # add_play_sound_collection(editor, index, field_name)
-                    field_type = 'sound'
-                elif field_language in languagetools.get_voice_selection_settings(): # is there a voice associated with this language ?
-                    # add_tts_speak(editor, index, field_name)
-                    field_type = 'language'
-            field_options.append(field_type)
         live_updates = languagetools.get_apply_updates_automatically()
         typing_delay = languagetools.get_live_update_delay()
-        configure_editor_fields(editor, field_options, live_updates, typing_delay)
+        configure_editor_component_options(editor, live_updates, typing_delay)
+        #configure_editor_fields(editor, field_options, live_updates, typing_delay)
 
 
     def onBridge(handled, str, editor):
@@ -157,7 +141,7 @@ def init(languagetools):
 
             return handled
 
-        if str.startswith("languagetools:"):
+        if str.startswith(constants.COMMAND_PREFIX_LANGUAGETOOLS):
             editor_manager.process_command(editor, str)
             return True, None
 

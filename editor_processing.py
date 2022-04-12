@@ -1,5 +1,6 @@
 import logging
 import sys
+import pytest
 
 if hasattr(sys, '_pytest_mode'):
     import constants
@@ -117,6 +118,7 @@ class EditorManager():
                 to_deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, to_field)
                 self.load_transliteration(editor, note_id, field_value, to_deck_note_type_field, value['transliteration_option'])
 
+
         # do we have any audio rules for this deck_note_type
         audio_settings = self.languagetools.get_batch_audio_settings(deck_note_type)
         relevant_settings = {to_field:from_field for (to_field,from_field) in audio_settings.items() if from_field == from_deck_note_type_field.field_name}
@@ -129,6 +131,7 @@ class EditorManager():
                     # get voice for this language
                     voice_settings = self.languagetools.get_voice_selection_settings()
                     logging.debug(f'voice_settings: {voice_settings}')
+                    logging.debug(f'from_language: {from_language}')
                     if from_language in voice_settings:
                         voice = voice_settings[from_language]
                         self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
@@ -151,8 +154,9 @@ class EditorManager():
                 self.set_live_updates(True)
             else:
                 self.set_live_updates(False)
-        if components[1] == 'forcefieldupdate':
-            self.process_forced_field_update(editor, str)
+
+        if components[1] == constants.COMMAND_FULLUPDATE:
+            self.full_update(editor)
 
         if components[1] == 'typingdelay':
             typing_delay_ms = int(components[2])
@@ -173,7 +177,19 @@ class EditorManager():
             dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language, editor, deck_note_type_field.deck_note_type)
             dialog.exec_()
 
-
+    def full_update(self, editor):
+        logging.info('full_update')
+        # iterate over available field in the note
+        # editor.note
+        note_id = 0
+        deck_note_type = self.languagetools.deck_utils.build_deck_note_type_from_editor(editor)
+        field_list = list(editor.note.keys())
+        for field_name in field_list:
+            deck_note_type_field = deck_utils.DeckNoteTypeField(deck_note_type, field_name)
+            field_change = FieldChange(editor, deck_note_type, deck_note_type_field, note_id, editor.note[field_name])
+            self.buffered_field_changes[deck_note_type_field] = field_change
+        # run immediately
+        self.process_all_field_changes()            
 
 
     def process_forced_field_update(self, editor, str):
@@ -230,14 +246,14 @@ class EditorManager():
     # generic function to load a transformation asynchronously (translation / transliteration / audio)
     def load_transformation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, 
         request_transformation_fn, interpret_response_fn, transformation_type):
-        field_index = self.languagetools.deck_utils.get_field_id(to_deck_note_type_field)
+        # field_index = self.languagetools.deck_utils.get_field_id(to_deck_note_type_field)
 
         # is the source field empty ?
         if self.languagetools.text_utils.is_empty(field_value):
-            self.languagetools.anki_utils.editor_set_field_value(editor, field_index, '')
+            self.languagetools.anki_utils.editor_note_set_field_value(editor, to_deck_note_type_field.field_name, '')
             return
 
-        def get_apply_transformation_lambda(languagetools, editor, field_index, original_note_id, original_field_value, 
+        def get_apply_transformation_lambda(languagetools, editor, original_note_id, original_field_value, 
             interpret_response_fn, transformation_type, to_deck_note_type_field):
             def apply_transformation(future_result):
                 with self.languagetools.error_manager.get_single_action_context(f'loading {transformation_type.name.lower()} for field {to_deck_note_type_field}'):
@@ -249,21 +265,26 @@ class EditorManager():
                             # user switched to a different note, ignore
                             return
 
-                    languagetools.anki_utils.hide_loading_indicator(editor, field_index, original_field_value)
+                    # languagetools.anki_utils.hide_loading_indicator(editor, field_index, original_field_value)
+                    languagetools.anki_utils.hide_loading_indicator_field(editor, to_deck_note_type_field.field_name)
                     transformation_response = future_result.result()
                     result_text = interpret_response_fn(transformation_response)
-                    self.languagetools.anki_utils.editor_set_field_value(editor, field_index, result_text)
+                    logging.debug(f'setting field [{to_deck_note_type_field.field_name}] value: [{result_text}]')
+                    self.languagetools.anki_utils.editor_note_set_field_value(editor, to_deck_note_type_field.field_name, result_text)
             return apply_transformation
 
-        self.languagetools.anki_utils.show_loading_indicator(editor, field_index)
-
+        # self.languagetools.anki_utils.show_loading_indicator(editor, field_index)
+        self.languagetools.anki_utils.show_loading_indicator_field(editor, to_deck_note_type_field.field_name)
+        
         self.languagetools.anki_utils.run_in_background(request_transformation_fn, 
-            get_apply_transformation_lambda(self.languagetools, editor, field_index, original_note_id, field_value, interpret_response_fn, transformation_type, to_deck_note_type_field))
+            get_apply_transformation_lambda(self.languagetools, editor, original_note_id, field_value, interpret_response_fn, transformation_type, to_deck_note_type_field))
 
 
     def load_translation(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, translation_option):
         def get_request_translation_lambda(languagetools, field_value, translation_option):
             def request_translation():
+                logging.info('request_translation')
+                # pytest.set_trace()
                 return languagetools.get_translation_async(field_value, translation_option)
             return request_translation
         interpret_response_fn = self.languagetools.interpret_translation_response_async
@@ -292,6 +313,7 @@ class EditorManager():
 
 
     def load_audio(self, editor, original_note_id, field_value: str, to_deck_note_type_field: deck_utils.DeckNoteTypeField, voice):
+        logging.debug('load_audio')
         def get_request_audio_lambda(languagetools, field_value, voice):
             def request_audio():
                 try:

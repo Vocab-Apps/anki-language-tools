@@ -109,6 +109,7 @@ def test_editor_translation(qtbot):
 
     mock_language_tools.cloud_language_tools.translation_map = {
         '老人': 'old people (short)',
+        '老人家': 'old people (long)',
         '电扇': 'electric fan'
     }    
 
@@ -126,7 +127,7 @@ def test_editor_translation(qtbot):
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_name'] == 'English'
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'old people (short)'
 
     # empty input
@@ -137,7 +138,7 @@ def test_editor_translation(qtbot):
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 2
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[1]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[1]['field_name'] == 'English'
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[1]['text'] == ''
 
 
@@ -149,7 +150,7 @@ def test_editor_translation(qtbot):
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 3
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['field_name'] == 'English'
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[2]['text'] == ''    
 
     # disable live updates
@@ -177,7 +178,7 @@ def test_editor_translation(qtbot):
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 4
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['field_index'] == 1
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['field_name'] == 'English'
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[3]['text'] == 'old people (short)'
 
 
@@ -189,14 +190,13 @@ def test_editor_translation(qtbot):
     editor_manager.process_command(editor, bridge_str)
 
     # force an update
-    field_value = '电扇'
-    bridge_str = f'languagetools:forcefieldupdate:{field_index}:{field_value}'
+    bridge_str = f'languagetools:{constants.COMMAND_FULLUPDATE}'
     editor_manager.process_command(editor, bridge_str)
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 5
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['field_index'] == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['text'] == 'electric fan'
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['field_name'] == 'English'
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[4]['text'] == 'old people (long)'
 
     # change typing delay
     # -------------------
@@ -231,7 +231,7 @@ def test_editor_transliteration(qtbot):
 
     # verify outputs
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 3 # pinyin
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_name'] == 'Pinyin' # pinyin
     assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text'] == 'laoren'
 
 def test_editor_audio(qtbot):
@@ -259,5 +259,5 @@ def test_editor_audio(qtbot):
     assert mock_language_tools.anki_utils.played_sound['text'] == '老人'
 
     assert len(mock_language_tools.anki_utils.editor_set_field_value_calls) == 1
-    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_index'] == 2 # sound
+    assert mock_language_tools.anki_utils.editor_set_field_value_calls[0]['field_name'] == 'Sound' # sound
     assert '.mp3' in mock_language_tools.anki_utils.editor_set_field_value_calls[0]['text']
