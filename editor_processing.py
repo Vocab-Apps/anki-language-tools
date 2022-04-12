@@ -81,6 +81,36 @@ class EditorManager():
             self.languagetools.anki_utils.show_progress_bar("retrieving all translations")
             self.languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_name))
 
+    def run_speak(self, editor, field_name):
+        with self.languagetools.error_manager.get_single_action_context(f'speaking audio'):
+            deck_note_type = self.languagetools.deck_utils.build_deck_note_type_from_editor(editor)
+            dntf = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
+            source_text = editor.note[field_name]
+
+            # do we have a voice set ?
+            field_language = self.languagetools.get_language(dntf)
+            if field_language == None:
+                raise errors.AnkiNoteEditorError(f'No language set for field {dntf}')
+            voice_selection_settings = self.languagetools.get_voice_selection_settings()
+            if field_language not in voice_selection_settings:
+                raise errors.AnkiNoteEditorError(f'No voice set for language {self.languagetools.get_language_name(field_language)}')
+            voice = voice_selection_settings[field_language]
+
+            def play_audio(languagetools, source_text, voice):
+                voice_key = voice['voice_key']
+                service = voice['service']
+                language_code = voice['language_code']
+
+                filename = languagetools.get_tts_audio(source_text, service, language_code, voice_key, {})
+                self.languagetools.anki_utils.play_sound(filename)
+
+            def play_audio_done(future_result):
+                with self.languagetools.error_manager.get_single_action_context(f'loading audio'):
+                    data = future_result.result()
+
+            #aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))            
+            self.languagetools.anki_utils.run_in_background(lambda: play_audio(self.languagetools, source_text, voice), lambda x: play_audio_done(x))
+
     def process_all_field_changes(self):
         logging.info('processing all field changes')
         for dntf, field_change in self.buffered_field_changes.items():
@@ -345,3 +375,8 @@ class EditorManager():
         def choose_translation():
             self.run_choose_translation(editor, field_name)
         return choose_translation
+
+    def get_speak_lambda(self, editor, field_name):
+        def speak():
+            self.run_speak(editor, field_name)
+        return speak
