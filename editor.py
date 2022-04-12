@@ -89,24 +89,40 @@ def init(languagetools):
             # all pre-requisites for translation/transliteration are met, proceed
             # ===================================================================
 
+            show_play_audio = False
+            show_choose_translation = False
+            show_speak = True
+            show_breakdown = True
+
             # is this a sound field ? 
             if language == constants.SpecialLanguage.sound.name:
-                menu_text = f'{constants.MENU_PREFIX} Play Audio'
-                menu.addAction(menu_text, editor_manager.get_play_tag_audio_lambda(editor, field_name))
+                show_play_audio = True
+            if language == constants.SpecialLanguage.sound.name or language == constants.SpecialLanguage.transliteration.name:
+                show_speak = False
+                show_breakdown = False
 
             # is it a translation field ? 
             if languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
                 # translation field
+                show_choose_translation = True
+
+            if show_choose_translation:                
                 menu_text = f'{constants.MENU_PREFIX} Choose Translation'
                 menu.addAction(menu_text, editor_manager.get_choose_translation_lambda(editor, field_name))
 
+            if show_play_audio:
+                menu_text = f'{constants.MENU_PREFIX} Play Audio'
+                menu.addAction(menu_text, editor_manager.get_play_tag_audio_lambda(editor, field_name))
+
             # add speak
-            menu_text = f'{constants.MENU_PREFIX} Speak'
-            menu.addAction(menu_text, editor_manager.get_speak_lambda(editor, field_name))
+            if show_speak:
+                menu_text = f'{constants.MENU_PREFIX} Speak'
+                menu.addAction(menu_text, editor_manager.get_speak_lambda(editor, field_name))
 
             # add breakdown
-            menu_text = f'{constants.MENU_PREFIX} Breakdown'
-            menu.addAction(menu_text, editor_manager.get_breakdown_lambda(editor, field_name))
+            if show_breakdown:
+                menu_text = f'{constants.MENU_PREFIX} Breakdown'
+                menu.addAction(menu_text, editor_manager.get_breakdown_lambda(editor, field_name))
 
 
 
