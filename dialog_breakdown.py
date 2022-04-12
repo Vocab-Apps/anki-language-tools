@@ -135,8 +135,8 @@ class BreakdownDialog(aqt.qt.QDialog):
 
     def copy_to_field(self):
         # get index of field selected
-        target_field_index = self.target_field_dropdown.currentIndex()
-        self.languagetools.anki_utils.editor_set_field_value(self.editor, target_field_index, self.result_html)
+        target_field_name = self.target_field_dropdown.currentText()
+        self.languagetools.anki_utils.editor_note_set_field_value(self.editor, target_field_name, self.result_html)
         self.accept()
 
     def load_breakdown(self):

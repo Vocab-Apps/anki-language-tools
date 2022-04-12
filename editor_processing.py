@@ -111,6 +111,17 @@ class EditorManager():
             #aqt.mw.taskman.run_in_background(lambda: play_audio(languagetools, source_text, voice), lambda x: play_audio_done(x))            
             self.languagetools.anki_utils.run_in_background(lambda: play_audio(self.languagetools, source_text, voice), lambda x: play_audio_done(x))
 
+    def run_breakdown(self, editor, field_name):
+        with self.languagetools.error_manager.get_single_action_context(f'preparing breakdown dialog'):
+            deck_note_type = self.languagetools.deck_utils.build_deck_note_type_from_editor(editor)
+            deck_note_type_field = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
+            field_value = editor.note[field_name]
+            logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
+            field_language = self.languagetools.get_language_validate(deck_note_type_field)
+
+            dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language, editor, deck_note_type_field.deck_note_type)
+            dialog.exec_()
+
     def process_all_field_changes(self):
         logging.info('processing all field changes')
         for dntf, field_change in self.buffered_field_changes.items():
@@ -188,18 +199,6 @@ class EditorManager():
 
         if components[1] == 'breakdown':
             self.process_breakdown(editor, str)
-
-    def process_breakdown(self, editor, str):
-        with self.languagetools.error_manager.get_single_action_context(f'preparing breakdown dialog'):
-            components = str.split(':')
-            field_index = int(components[2])
-            field_value = ':'.join(components[3:])
-            deck_note_type_field = self.languagetools.deck_utils.editor_get_dntf(editor, field_index)
-            logging.info(f'got breakdown on field {deck_note_type_field} value: {field_value}')
-            field_language = self.languagetools.get_language_validate(deck_note_type_field)
-
-            dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language, editor, deck_note_type_field.deck_note_type)
-            dialog.exec_()
 
     def full_update(self, editor):
         logging.info('full_update')
@@ -380,3 +379,8 @@ class EditorManager():
         def speak():
             self.run_speak(editor, field_name)
         return speak
+
+    def get_breakdown_lambda(self, editor, field_name):
+        def breakdown():
+            self.run_breakdown(editor, field_name)
+        return breakdown

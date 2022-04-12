@@ -95,14 +95,19 @@ def init(languagetools):
                 menu.addAction(menu_text, editor_manager.get_play_tag_audio_lambda(editor, field_name))
 
             # is it a translation field ? 
-            elif languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
+            if languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
                 # translation field
                 menu_text = f'{constants.MENU_PREFIX} Choose Translation'
                 menu.addAction(menu_text, editor_manager.get_choose_translation_lambda(editor, field_name))
 
-            else:
-                menu_text = f'{constants.MENU_PREFIX} Speak'
-                menu.addAction(menu_text, editor_manager.get_speak_lambda(editor, field_name))
+            # add speak
+            menu_text = f'{constants.MENU_PREFIX} Speak'
+            menu.addAction(menu_text, editor_manager.get_speak_lambda(editor, field_name))
+
+            # add breakdown
+            menu_text = f'{constants.MENU_PREFIX} Breakdown'
+            menu.addAction(menu_text, editor_manager.get_breakdown_lambda(editor, field_name))
+
 
 
     def onBridge(handled, str, editor):
