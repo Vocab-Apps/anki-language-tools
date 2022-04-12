@@ -42,6 +42,7 @@ def init(languagetools):
     def show_api_key_dialog():
         dialogs.show_api_key_dialog(languagetools)
 
+    # unused for now
     def show_change_language(deck_note_type_field: deck_utils.DeckNoteTypeField):
         current_language = languagetools.get_language(deck_note_type_field)
 
@@ -64,6 +65,7 @@ def init(languagetools):
         languagetools.store_language_detection_result(deck_note_type_field, new_language)
 
 
+    # unused for now
     def show_translation(source_text, from_language, to_language):
         # print(f'translate {source_text} from {from_language} to {to_language}')
         result = languagetools.get_translation_all(source_text, from_language, to_language)
@@ -77,145 +79,11 @@ def init(languagetools):
         """
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Translation', textFormat="rich")
 
+    # unused for now
     def show_transliteration(selected_text, transliteration_option):
         result = languagetools.get_transliteration(selected_text, transliteration_option)
         text = f"""Transliteration of <i>{selected_text}</i>: {result}"""
         aqt.utils.showInfo(text, title=f'{constants.MENU_PREFIX} Transliteration', textFormat="rich")
-
-    def add_inline_translation(note_editor: aqt.editor.Editor, source_language, target_language, deck_note_type_field: deck_utils.DeckNoteTypeField):
-        # choose translation service
-        translation_options = languagetools.get_translation_options(source_language, target_language)
-
-        # ask the user which one they want
-        services = [x['service'] for x in translation_options]
-        choice = aqt.utils.chooseList(f'{constants.MENU_PREFIX} Choose Translation Service', services)
-        chosen_option = translation_options[choice]
-
-        # determine the ranking of this field in the note type
-        languagetools.add_inline_translation(deck_note_type_field, chosen_option, target_language)
-        editor.apply_inline_translation_changes(languagetools, note_editor, deck_note_type_field, chosen_option)
-
-    def disable_inline_translation(note_editor: aqt.editor.Editor, deck_note_type_field: deck_utils.DeckNoteTypeField):
-        languagetools.remove_inline_translations(deck_note_type_field)
-        editor.remove_inline_translation_changes(languagetools, note_editor, deck_note_type_field)
-
-    def on_context_menu(web_view: aqt.editor.EditorWebView, menu: aqt.qt.QMenu):
-        # gather some information about the context from the editor
-        # =========================================================
-
-        editor: aqt.editor.Editor = web_view.editor
-
-        selected_text = web_view.selectedText()
-        current_field_num = editor.currentField
-        if current_field_num == None:
-            # we don't have a field selected, don't do anything
-            return
-        note = web_view.editor.note
-        if note == None:
-            # can't do anything without a note
-            return
-        model_id = note.mid
-        model = aqt.mw.col.models.get(model_id)
-        field_name = model['flds'][current_field_num]['name']
-        card = web_view.editor.card
-        if card == None:
-            # we can't get the deck without a a card
-            return
-        deck_id = card.did
-
-        deck_note_type_field = languagetools.deck_utils.build_deck_note_type_field(deck_id, model_id, field_name)
-        language = languagetools.get_language(deck_note_type_field)
-
-        # check whether a language is set
-        # ===============================
-
-        if language != None:
-            # all pre-requisites for translation/transliteration are met, proceed
-            # ===================================================================
-
-            # is this a sound field ? 
-            if language == constants.SpecialLanguage.sound.name:
-                menu_text = f'{constants.MENU_PREFIX} Play Audio'
-                def get_play_audio_lambda(editor, field_name):
-                    def play_audio():
-                        sound_tag = editor.note[field_name]
-                        languagetools.anki_utils.play_anki_sound_tag(sound_tag)
-                    return play_audio
-                menu.addAction(menu_text, get_play_audio_lambda(editor, field_name))
-
-            if languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
-                # translation field
-                menu_text = f'{constants.MENU_PREFIX} Choose Translation'
-                def get_play_audio_lambda(editor, field_name):
-                    def play_audio():
-                        sound_tag = editor.note[field_name]
-                        languagetools.anki_utils.play_anki_sound_tag(sound_tag)
-                    return play_audio
-                menu.addAction(menu_text, get_play_audio_lambda(editor, field_name))                
-
-            # these options require text to be selected
-
-            if len(selected_text) > 0:
-                source_text_max_length = 25
-                source_text = selected_text
-                if len(selected_text) > source_text_max_length:
-                    source_text = selected_text[0:source_text_max_length]
-
-                # add translation options
-                # =======================
-                menu_text = f'{constants.MENU_PREFIX} translate from {languagetools.get_language_name(language)}'
-                submenu = aqt.qt.QMenu(menu_text, menu)
-                wanted_languages = languagetools.get_wanted_languages()
-                for wanted_language in wanted_languages:
-                    if wanted_language != language:
-                        menu_text = f'To {languagetools.get_language_name(wanted_language)}'
-                        def get_translate_lambda(selected_text, language, wanted_language):
-                            def translate():
-                                show_translation(selected_text, language, wanted_language)
-                            return translate
-                        submenu.addAction(menu_text, get_translate_lambda(selected_text, language, wanted_language))
-                menu.addMenu(submenu)
-
-                # add transliteration options
-                # ===========================
-
-                transliteration_options = languagetools.get_transliteration_options(language)
-                if len(transliteration_options) > 0:
-                    menu_text = f'{constants.MENU_PREFIX} transliterate {languagetools.get_language_name(language)}'
-                    submenu = aqt.qt.QMenu(menu_text, menu)
-                    for transliteration_option in transliteration_options:
-                        menu_text = transliteration_option['transliteration_name']
-                        def get_transliterate_lambda(selected_text, transliteration_option):
-                            def transliterate():
-                                show_transliteration(selected_text, transliteration_option)
-                            return transliterate
-                        submenu.addAction(menu_text, get_transliterate_lambda(selected_text, transliteration_option))
-                    menu.addMenu(submenu)
-
-
-        # was language detection run ?
-        # ============================
-
-        if languagetools.language_detection_done():
-
-            # show information about the field 
-            # ================================
-
-            if language == None:
-                menu_text = f'{constants.MENU_PREFIX} No language set'
-            else:
-                menu_text = f'{constants.MENU_PREFIX} language: {languagetools.get_language_name(language)}'
-            submenu = aqt.qt.QMenu(menu_text, menu)
-
-            # add change language option
-            menu_text = f'Change Language'
-            def get_change_language_lambda(deck_note_type_field):
-                def change_language():
-                    show_change_language(deck_note_type_field)
-                return change_language
-            submenu.addAction(menu_text, get_change_language_lambda(deck_note_type_field))
-
-            menu.addMenu(submenu)
 
 
     # add menu items to anki deck picker / main screen
