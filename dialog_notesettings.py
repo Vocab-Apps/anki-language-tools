@@ -395,6 +395,9 @@ class RunRulesDialog(NoteSettingsDialogBase):
         logging.debug(f'num rules enabled: {num_rules}')
         self.languagetools.anki_utils.run_on_main(lambda: self.progress_bar.setMaximum(len(self.note_id_list) * num_rules))
 
+        action_str = 'Process Rules'
+        self.undo_id = self.languagetools.anki_utils.undo_start(action_str)
+
         progress_value = 0
         self.generate_errors = []
         for note_id in self.note_id_list:
@@ -450,7 +453,9 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
             # write output to note
             if need_to_flush:
-                note.flush()
+                self.languagetools.anki_utils.update_note(note)
+
+        self.languagetools.anki_utils.undo_end(self.undo_id)
 
 
     def process_rules_task_done(self, future_result):
