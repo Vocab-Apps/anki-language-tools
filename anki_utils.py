@@ -136,8 +136,16 @@ class AnkiUtils():
         if editor != None and editor.web != None:
             editor.web.eval(js_command)
 
-    def checkpoint(self, action_str):
-        aqt.mw.checkpoint(action_str)
+    def undo_start(self, action_name):
+        return aqt.mw.col.add_custom_undo_entry(f'{constants.ADDON_NAME}: {action_name}')
+
+    def undo_end(self, undo_id):
+        aqt.mw.col.merge_undo_entries(undo_id)
+        aqt.mw.update_undo_actions()
+        aqt.mw.autosave()
+
+    def update_note(self, note):
+        aqt.mw.col.update_note(note)
 
     def display_dialog(self, dialog):
         return dialog.exec_()

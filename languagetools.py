@@ -580,7 +580,7 @@ class LanguageTools():
         if sound_tag != None:
             # write to note
             note[to_field] = sound_tag
-            note.flush()
+            self.anki_utils.update_note(note)
             return True # success
 
         return False # failure

@@ -209,12 +209,11 @@ class AddAudioDialog(aqt.qt.QDialog):
 
         self.success_count = 0
 
-        action_str = f'Add Audio to {self.to_field}'
-        aqt.mw.checkpoint(action_str)
-
         aqt.mw.taskman.run_in_background(self.add_audio_task, self.add_audio_task_done)
 
     def add_audio_task(self):
+        action_str = f'Add Audio to {self.to_field}'
+        undo_id = self.languagetools.anki_utils.undo_start(action_str)        
         self.generate_audio_errors = []
         i = 0
         for note_id in self.note_id_list:
@@ -226,6 +225,7 @@ class AddAudioDialog(aqt.qt.QDialog):
                 self.generate_audio_errors.append(str(err))
             i += 1
             aqt.mw.taskman.run_on_main(lambda: self.progress_bar.setValue(i))
+        self.languagetools.anki_utils.undo_end(undo_id)
 
     def add_audio_task_done(self, future_result):
         # are there any errors ?

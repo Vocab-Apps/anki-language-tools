@@ -135,8 +135,15 @@ class MockAnkiUtils():
     def ask_user(self, message, parent):
         return True
 
-    def checkpoint(self, action_str):
-        self.checkpoint_name = action_str
+    def undo_start(self, action_name):
+        self.undo_started = True
+
+    def undo_end(self, undo_id):
+        self.undo_finished = True
+
+    def update_note(self, note):
+        # even though we don't call note.flush anymore, some of the tests expect this
+        note.flush()
 
     def reset_exceptions(self):
         self.last_exception = None
