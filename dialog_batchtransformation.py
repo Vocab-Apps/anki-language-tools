@@ -499,14 +499,14 @@ class BatchConversionDialog(aqt.qt.QDialog):
             if proceed == False:
                 return
         # set field on notes
-        action_str = f'Translate from {self.languagetools.get_language_name(self.from_language)} to {self.languagetools.get_language_name(self.to_language)}'
+        action_str = self.transformation_type.name
         self.undo_id = self.languagetools.anki_utils.undo_start(action_str)
         for (note_id, i) in zip(self.note_id_list, range(len(self.note_id_list))):
             to_field_data = self.noteTableModel.to_field_data[i]
             if to_field_data != None:
                 note = self.languagetools.anki_utils.get_note_by_id(note_id)
                 note[self.to_field] = to_field_data
-                note.flush()
+                self.languagetools.anki_utils.update_note(note)
         self.languagetools.anki_utils.undo_end(self.undo_id)
         self.close()
         # memorize this setting
