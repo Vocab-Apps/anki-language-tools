@@ -55,6 +55,51 @@ def init(languagetools):
         configure_editor_component_options(editor, live_updates, typing_delay)
 
 
+    def on_editor_context_menu(web_view: aqt.editor.EditorWebView, menu: aqt.qt.QMenu):
+        # gather some information about the context from the editor
+        # =========================================================
+
+        editor: aqt.editor.Editor = web_view.editor
+
+        selected_text = web_view.selectedText()
+        current_field_num = editor.currentField
+        if current_field_num == None:
+            # we don't have a field selected, don't do anything
+            return
+        note = web_view.editor.note
+        if note == None:
+            # can't do anything without a note
+            return
+        model_id = note.mid
+        model = aqt.mw.col.models.get(model_id)
+        field_name = model['flds'][current_field_num]['name']
+        card = web_view.editor.card
+        if card == None:
+            # we can't get the deck without a a card
+            return
+        deck_id = card.did
+
+        deck_note_type_field = languagetools.deck_utils.build_deck_note_type_field(deck_id, model_id, field_name)
+        language = languagetools.get_language(deck_note_type_field)
+
+        # check whether a language is set
+        # ===============================
+
+        if language != None:
+            # all pre-requisites for translation/transliteration are met, proceed
+            # ===================================================================
+
+            # is this a sound field ? 
+            if language == constants.SpecialLanguage.sound.name:
+                menu_text = f'{constants.MENU_PREFIX} Play Audio'
+                menu.addAction(menu_text, editor_manager.get_play_tag_audio_lambda(editor, field_name))
+
+            # is it a translation field ? 
+            if languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
+                # translation field
+                menu_text = f'{constants.MENU_PREFIX} Choose Translation'
+                menu.addAction(menu_text, editor_manager.get_choose_translation_lambda(editor, field_name))
+
     def onBridge(handled, str, editor):
         # logging.debug(f'bridge str: {str}')
 
@@ -142,3 +187,5 @@ def init(languagetools):
     aqt.gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
     aqt.gui_hooks.editor_did_load_note.append(loadNote)
     aqt.gui_hooks.webview_did_receive_js_message.append(onBridge)
+    # right click menu
+    aqt.gui_hooks.editor_will_show_context_menu.append(on_editor_context_menu)    

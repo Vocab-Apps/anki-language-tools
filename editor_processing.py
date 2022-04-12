@@ -37,19 +37,14 @@ class EditorManager():
     def update_field_change_timer(self, delay_ms):
         self.field_change_timer = FieldChangeTimer(delay_ms)
 
-    def process_choosetranslation(self, editor, input):
+    def run_choose_translation(self, editor, field_name):
         with self.languagetools.error_manager.get_single_action_context(f'choosing translation'):
-            logging.debug(f'choosetranslation command: [{input}]')
-            components = input.split(':')
-            field_index_str = components[1]
-            field_index = int(field_index_str)
-
             note = editor.note
-            current_translation_text = note.fields[field_index]
+            current_translation_text = note[field_name]
 
             deck_note_type = self.languagetools.deck_utils.build_deck_note_type_from_editor(editor)
 
-            target_dntf = self.languagetools.deck_utils.get_dntf_from_fieldindex(deck_note_type, field_index)
+            target_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, field_name)
             translation_from_field = self.languagetools.get_batch_translation_setting_field(target_dntf)
             from_field = translation_from_field['from_field']
             from_dntf = self.languagetools.deck_utils.build_dntf_from_dnt(deck_note_type, from_field)
@@ -68,7 +63,7 @@ class EditorManager():
             def load_translation_all():
                 return self.languagetools.get_translation_all(from_text, from_language, to_language)
 
-            def get_done_callback(from_text, from_language, to_language, editor, field_index):
+            def get_done_callback(from_text, from_language, to_language, editor, field_name):
                 def load_translation_all_done(fut):
                     with self.languagetools.error_manager.get_single_action_context(f'retrieving all translations'):
                         self.languagetools.anki_utils.stop_progress_bar()
@@ -79,12 +74,12 @@ class EditorManager():
                         if retval == True:
                             chosen_translation = dialog.selected_translation
                             #logging.debug(f'chosen translation: {chosen_translation}')
-                            self.languagetools.anki_utils.editor_set_field_value(editor, field_index, chosen_translation)
+                            self.languagetools.anki_utils.editor_note_set_field_value(editor, field_name, chosen_translation)
 
                 return load_translation_all_done
 
             self.languagetools.anki_utils.show_progress_bar("retrieving all translations")
-            self.languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_index))
+            self.languagetools.anki_utils.run_in_background(load_translation_all, get_done_callback(from_text, from_language, to_language, editor, field_name))
 
     def process_all_field_changes(self):
         logging.info('processing all field changes')
@@ -339,3 +334,14 @@ class EditorManager():
                                  to_deck_note_type_field, 
                                  get_request_audio_lambda(self.languagetools, field_value, voice), interpret_response_fn,
                                  constants.TransformationType.Audio)
+
+    def get_play_tag_audio_lambda(self, editor, field_name):
+        def play_audio():
+            sound_tag = editor.note[field_name]
+            self.languagetools.anki_utils.play_anki_sound_tag(sound_tag)
+        return play_audio        
+
+    def get_choose_translation_lambda(self, editor, field_name):
+        def choose_translation():
+            self.run_choose_translation(editor, field_name)
+        return choose_translation

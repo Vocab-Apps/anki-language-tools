@@ -133,6 +133,26 @@ def init(languagetools):
             # all pre-requisites for translation/transliteration are met, proceed
             # ===================================================================
 
+            # is this a sound field ? 
+            if language == constants.SpecialLanguage.sound.name:
+                menu_text = f'{constants.MENU_PREFIX} Play Audio'
+                def get_play_audio_lambda(editor, field_name):
+                    def play_audio():
+                        sound_tag = editor.note[field_name]
+                        languagetools.anki_utils.play_anki_sound_tag(sound_tag)
+                    return play_audio
+                menu.addAction(menu_text, get_play_audio_lambda(editor, field_name))
+
+            if languagetools.get_batch_translation_setting_field(deck_note_type_field) != None:
+                # translation field
+                menu_text = f'{constants.MENU_PREFIX} Choose Translation'
+                def get_play_audio_lambda(editor, field_name):
+                    def play_audio():
+                        sound_tag = editor.note[field_name]
+                        languagetools.anki_utils.play_anki_sound_tag(sound_tag)
+                    return play_audio
+                menu.addAction(menu_text, get_play_audio_lambda(editor, field_name))                
+
             # these options require text to be selected
 
             if len(selected_text) > 0:
@@ -230,7 +250,7 @@ def init(languagetools):
     aqt.mw.form.menuTools.addAction(action)
 
     # right click menu
-    aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
+    # aqt.gui_hooks.editor_will_show_context_menu.append(on_context_menu)
 
     def collectionDidLoad(col: anki.collection.Collection):
         languagetools.setCollectionLoaded()
