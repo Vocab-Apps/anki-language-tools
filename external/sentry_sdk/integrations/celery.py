@@ -3,7 +3,11 @@ from __future__ import absolute_import
 import sys
 
 from sentry_sdk.hub import Hub
-from sentry_sdk.utils import capture_internal_exceptions, event_from_exception
+from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
+from sentry_sdk.utils import (
+    capture_internal_exceptions,
+    event_from_exception,
+)
 from sentry_sdk.tracing import Transaction
 from sentry_sdk._compat import reraise
 from sentry_sdk.integrations import Integration, DidNotEnable
@@ -23,13 +27,14 @@ if MYPY:
 
 
 try:
-    from celery import VERSION as CELERY_VERSION  # type: ignore
+    from celery import VERSION as CELERY_VERSION
     from celery.exceptions import (  # type: ignore
         SoftTimeLimitExceeded,
         Retry,
         Ignore,
         Reject,
     )
+    from celery.app.trace import task_has_custom
 except ImportError:
     raise DidNotEnable("Celery not installed")
 
@@ -57,10 +62,12 @@ class CeleryIntegration(Integration):
         def sentry_build_tracer(name, task, *args, **kwargs):
             # type: (Any, Any, *Any, **Any) -> Any
             if not getattr(task, "_sentry_is_patched", False):
-                # Need to patch both methods because older celery sometimes
-                # short-circuits to task.run if it thinks it's safe.
-                task.__call__ = _wrap_task_call(task, task.__call__)
-                task.run = _wrap_task_call(task, task.run)
+                # determine whether Celery will use __call__ or run and patch
+                # accordingly
+                if task_has_custom(task, "__call__"):
+                    type(task).__call__ = _wrap_task_call(task, type(task).__call__)
+                else:
+                    task.run = _wrap_task_call(task, task.run)
 
                 # `build_tracer` is apparently called for every task
                 # invocation. Can't wrap every celery task for every invocation
@@ -151,8 +158,8 @@ def _wrap_tracer(task, f):
                     args[3].get("headers") or {},
                     op="celery.task",
                     name="unknown celery task",
+                    source=TRANSACTION_SOURCE_TASK,
                 )
-
                 transaction.name = task.name
                 transaction.set_status("ok")
 
