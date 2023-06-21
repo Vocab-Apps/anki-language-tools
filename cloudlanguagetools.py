@@ -9,7 +9,7 @@ from . import version
 
 class CloudLanguageTools():
     def __init__(self):
-        self.base_url = 'https://cloud-language-tools-nlp-prod.anki.study'
+        self.base_url = 'https://cloudlanguagetools-api.vocab.ai'
         if constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL in os.environ:
             self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
 
