@@ -43,13 +43,19 @@ else:
 
         return event
 
+    def filter_transactions(event, hint):
+        # may need to do some more filtering later on
+        return event
+
     sentry_sdk.init(
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
         traces_sample_rate=1.0,
-        release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}-{anki.version}',
+        release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}',
         environment=os.environ.get('SENTRY_ENV', 'production'),
-        before_send=sentry_filter
+        before_send=sentry_filter,
+        before_send_transaction=filter_transactions
     )
+    sentry_sdk.set_tag("anki_version", anki.version)
 
     # initialize logging
     # ==================
