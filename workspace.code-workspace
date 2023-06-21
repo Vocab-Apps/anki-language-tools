@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
+		"python.defaultInterpreterPath": "/home/luc/python-env/anki-language-tools/bin/python",
 		"files.exclude": {
 			"**/__pycache__": true,
 			"**/.pytest_cache": true,
