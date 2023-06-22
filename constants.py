@@ -31,6 +31,8 @@ CLIENT_NAME = 'languagetools'
 COMMAND_PREFIX_LANGUAGETOOLS = 'languagetools:'
 COMMAND_FULLUPDATE = 'fullupdate'
 
+SENTRY_OPERATION = 'languagetools'
+
 class TransformationType(enum.Enum):
     Translation = enum.auto()
     Transliteration = enum.auto()

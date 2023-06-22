@@ -4,6 +4,7 @@ import traceback
 import anki
 import aqt
 import logging
+import pprint
 
 if hasattr(sys, '_pytest_mode'):
     # called from within a test run
@@ -17,6 +18,7 @@ else:
     sys.path.append(external_dir)
     import sentry_sdk
     from . import version
+    from . import constants
 
     api_key = aqt.mw.addonManager.getConfig(__name__).get('api_key', None)
 
@@ -44,8 +46,11 @@ else:
         return event
 
     def filter_transactions(event, hint):
-        # may need to do some more filtering later on
-        return event
+        operation = event.get('contexts', {}).get('trace', {}).get('op', None)
+        if operation == constants.SENTRY_OPERATION:
+            # only report transactions initiated within language tools
+            return event        
+        return None
 
     sentry_sdk.init(
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
