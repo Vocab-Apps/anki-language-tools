@@ -52,11 +52,17 @@ else:
             return event        
         return None
 
+    traces_sample_rate_map = {
+        'development': 1.0,
+        'production': 0.1
+    }    
+
+    sentry_env = os.environ.get('SENTRY_ENV', 'production')
     sentry_sdk.init(
         "https://dbee54f0eff84f0db037e995ae46df11@o968582.ingest.sentry.io/5920286",
-        traces_sample_rate=1.0,
+        traces_sample_rate=traces_sample_rate_map[sentry_env],
         release=f'anki-language-tools@{version.ANKI_LANGUAGE_TOOLS_VERSION}',
-        environment=os.environ.get('SENTRY_ENV', 'production'),
+        environment=sentry_env,
         before_send=sentry_filter,
         before_send_transaction=filter_transactions
     )
