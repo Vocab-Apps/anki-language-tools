@@ -54,7 +54,7 @@ else:
 
     traces_sample_rate_map = {
         'development': 1.0,
-        'production': 0.1
+        'production': 0.035
     }    
 
     sentry_env = os.environ.get('SENTRY_ENV', 'production')
