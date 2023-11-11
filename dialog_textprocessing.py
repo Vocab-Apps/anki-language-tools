@@ -235,9 +235,9 @@ class TextProcessingDialog(aqt.qt.QDialog):
         # ====================
 
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         
         vlayout.addWidget(buttonBox)
@@ -271,7 +271,7 @@ class TextProcessingDialog(aqt.qt.QDialog):
             label_text = BLANK_TEXT
         else:
             # get the text replacements
-            utils = text_utils.TextUtils(self.get_text_processing_settings())
+            utils = text_utils.TextUtils(self.languagetools.anki_utils, self.get_text_processing_settings())
             sample_text_processed = utils.process(sample_text, transformation_type)
             label_text = f'<b>{html.escape(sample_text_processed)}</b>'
 

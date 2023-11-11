@@ -1,5 +1,5 @@
 pytest
 pytest-qt
-aqt[qt6]
-anki
+aqt[qt6]>=23.10.1
+anki>=23.10.1
 coverage

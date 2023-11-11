@@ -117,10 +117,10 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
 
         # buttom buttons
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Save Voice Selection", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("Save Voice Selection", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)

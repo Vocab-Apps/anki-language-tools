@@ -273,9 +273,9 @@ class BatchConversionDialog(aqt.qt.QDialog):
         # ====================
 
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         

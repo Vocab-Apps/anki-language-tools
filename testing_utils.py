@@ -38,6 +38,9 @@ class MockAnkiUtils():
     def get_red_stylesheet(self):
         return constants.RED_STYLESHEET
 
+    def html_to_text_line(self, html):
+        return html
+
     def play_anki_sound_tag(self, text):
         self.last_played_sound_tag = text
 

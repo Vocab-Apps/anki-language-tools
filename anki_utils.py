@@ -34,6 +34,9 @@ class AnkiUtils():
             return constants.RED_STYLESHEET_NIGHTMODE
         return constants.RED_STYLESHEET
 
+    def html_to_text_line(self, html):
+        return anki.utils.html_to_text_line(html)
+
     def play_anki_sound_tag(self, text):
         out = aqt.mw.col.backend.extract_av_tags(text=text, question_side=True)
         file_list = [

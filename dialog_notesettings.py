@@ -263,9 +263,9 @@ class NoteSettingsDialog(NoteSettingsDialogBase):
 
         # buttom buttons
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Save Settings", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("Save Settings", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
   
@@ -351,9 +351,9 @@ class RunRulesDialog(NoteSettingsDialogBase):
 
         # buttom buttons
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply Rules", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("Apply Rules", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setStyleSheet(self.languagetools.anki_utils.get_green_stylesheet())
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         vlayout.addWidget(buttonBox)
 

@@ -41,7 +41,7 @@ class LanguageTools():
         self.cloud_language_tools = cloud_language_tools
         self.error_manager = errors.ErrorManager(self.anki_utils)
         self.config = self.anki_utils.get_config()
-        self.text_utils = text_utils.TextUtils(self.get_text_processing_settings())
+        self.text_utils = text_utils.TextUtils(self.anki_utils, self.get_text_processing_settings())
         self.error_manager = errors.ErrorManager(self.anki_utils)
 
         self.language_data_load_error = False
@@ -230,7 +230,7 @@ class LanguageTools():
                 raise errors.AnkiItemNotFoundError(f'field {field_name} not found')
             original_field_value = note[field_name]
             field_value = stripImagesRe.sub('', original_field_value)
-            field_value = anki.utils.htmlToTextLine(field_value)
+            field_value = self.anki_utils.html_to_text_line(field_value)
             max_len = 200 # restrict to 200 characters
             if len(original_field_value) > max_len:
                 field_value = original_field_value[:max_len]
@@ -422,7 +422,7 @@ class LanguageTools():
     def store_text_processing_settings(self, settings):
         self.config[constants.CONFIG_TEXT_PROCESSING] = settings
         self.anki_utils.write_config(self.config)
-        self.text_utils = text_utils.TextUtils(settings)
+        self.text_utils = text_utils.TextUtils(self.anki_utils, settings)
 
     def store_voice_selection(self, language_code, voice_mapping):
         self.config[constants.CONFIG_VOICE_SELECTION][language_code] = voice_mapping

@@ -61,8 +61,8 @@ class LanguageMappingDialog_UI(object):
 
         self.scrollArea = aqt.qt.QScrollArea()
         
-        self.scrollArea.setVerticalScrollBarPolicy(aqt.qt.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(aqt.qt.Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setVerticalScrollBarPolicy(aqt.qt.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(aqt.qt.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
 
@@ -122,10 +122,10 @@ class LanguageMappingDialog_UI(object):
         self.topLevel.addWidget(self.scrollArea)
 
         self.buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = self.buttonBox.addButton("Apply", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = self.buttonBox.addButton("Apply", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.disableApplyButton()
-        cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         cancelButton.setObjectName('cancel')
         cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)

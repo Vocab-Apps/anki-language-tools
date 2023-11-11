@@ -87,10 +87,10 @@ class ChooseTranslationDialog(aqt.qt.QDialog):
 
         # buttom buttons
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.apply_button = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.apply_button = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.apply_button.setObjectName('apply')
         self.apply_button.setEnabled(False)
-        self.cancel_button = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancel_button = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancel_button.setObjectName('cancel')
         self.cancel_button.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         buttonBox.accepted.connect(self.accept)

@@ -116,9 +116,9 @@ class AddAudioDialog(aqt.qt.QDialog):
         vlayout.addStretch()
 
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = buttonBox.addButton("Apply To Notes", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setEnabled(False)
-        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
 
         vlayout.addWidget(buttonBox)
@@ -298,7 +298,7 @@ class YomichanDialog(aqt.qt.QDialog):
 
         # add buttons
         buttonBox = aqt.qt.QDialogButtonBox()
-        self.okButton = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.okButton = buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         vlayout.addWidget(buttonBox)
 
         # wire events

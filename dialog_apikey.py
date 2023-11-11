@@ -65,10 +65,10 @@ class ApiKeyDialog(aqt.qt.QDialog):
 
 
         self.buttonBox = aqt.qt.QDialogButtonBox()
-        self.applyButton = self.buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.AcceptRole)
+        self.applyButton = self.buttonBox.addButton("OK", aqt.qt.QDialogButtonBox.ButtonRole.AcceptRole)
         self.applyButton.setObjectName('apply')
         self.applyButton.setEnabled(False)
-        self.cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.RejectRole)
+        self.cancelButton = self.buttonBox.addButton("Cancel", aqt.qt.QDialogButtonBox.ButtonRole.RejectRole)
         self.cancelButton.setObjectName('cancel')
         self.cancelButton.setStyleSheet(self.languagetools.anki_utils.get_red_stylesheet())
         self.buttonBox.accepted.connect(self.accept)
