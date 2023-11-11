@@ -60,11 +60,11 @@ class TextUtils():
         self.replacements = [TextReplacement(replacement) for replacement in replacements_array]
 
     def is_empty(self, text):
-        stripped_field_value = anki.utils.html_to_text_line(text)
+        stripped_field_value = self.anki_utils.html_to_text_line(text)
         return len(stripped_field_value) == 0
 
     def process(self, text, transformation_type: constants.TransformationType):
-        result = anki.utils.html_to_text_line(text)
+        result = self.anki_utils.html_to_text_line(text)
 
         # apply replacements
         for replacement in self.replacements:
