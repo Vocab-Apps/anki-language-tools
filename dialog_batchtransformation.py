@@ -265,8 +265,8 @@ class BatchConversionDialog(aqt.qt.QDialog):
         self.table_view = aqt.qt.QTableView()
         self.table_view.setModel(self.noteTableModel)
         header = self.table_view.horizontalHeader()       
-        header.setSectionResizeMode(0, aqt.qt.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, aqt.qt.QHeaderView.Stretch)
+        header.setSectionResizeMode(0, aqt.qt.QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, aqt.qt.QHeaderView.ResizeMode.Stretch)
         vlayout.addWidget(self.table_view)
 
         # setup bottom buttons

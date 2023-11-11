@@ -217,8 +217,8 @@ class TextProcessingDialog(aqt.qt.QDialog):
         self.table_view.setSelectionMode(aqt.qt.QTableView.SelectionMode.SingleSelection)
         # self.table_view.setSelectionBehavior(aqt.qt.QTableView.SelectionBehavior.SelectRows)
         header = self.table_view.horizontalHeader()       
-        header.setSectionResizeMode(0, aqt.qt.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, aqt.qt.QHeaderView.Stretch)
+        header.setSectionResizeMode(0, aqt.qt.QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, aqt.qt.QHeaderView.ResizeMode.Stretch)
         vlayout.addWidget(self.table_view)
         
         # setup buttons below table
