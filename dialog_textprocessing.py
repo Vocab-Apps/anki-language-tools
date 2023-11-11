@@ -48,9 +48,9 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
             # not editable
             return aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
         if col == COL_INDEX_PATTERN or col == COL_INDEX_REPLACEMENT:
-            return aqt.qt.Qt.ItemIsEditable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
+            return aqt.qt.Qt.ItemFlag.ItemIsEditable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
         # should be a transformation type
-        return aqt.qt.Qt.ItemIsUserCheckable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
+        return aqt.qt.Qt.ItemFlag.ItemIsUserCheckable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
 
     def rowCount(self, parent):
         return len(self.replacements)
@@ -84,7 +84,7 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
 
         replacement = self.replacements[row]
 
-        if role == aqt.qt.Qt.ItemDataRole.DisplayRole or role == aqt.qt.Qt.EditRole:
+        if role == aqt.qt.Qt.ItemDataRole.DisplayRole or role == aqt.qt.Qt.ItemDataRole.EditRole:
 
             if column == COL_INDEX_TYPE:
                 return aqt.qt.QVariant(replacement.replace_type.name.title())
@@ -93,7 +93,7 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
             if column == COL_INDEX_REPLACEMENT:
                 return self.data_display(replacement.replace, role)
 
-        if role == aqt.qt.Qt.CheckStateRole:
+        if role == aqt.qt.Qt.ItemDataRole.CheckStateRole:
             if column == COL_INDEX_TYPE or column == COL_INDEX_PATTERN or column == COL_INDEX_REPLACEMENT:
                 # don't support these columns in this role
                 return aqt.qt.QVariant()
@@ -102,8 +102,8 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
             transformation_type = self.col_index_to_transformation_type_map[column]
             is_enabled = replacement.transformation_type_map[transformation_type]
             if is_enabled:
-                return aqt.qt.Qt.Checked
-            return aqt.qt.Qt.Unchecked
+                return aqt.qt.Qt.CheckState.Checked
+            return aqt.qt.Qt.CheckState.Unchecked
 
         return aqt.qt.QVariant()
 
@@ -113,7 +113,7 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
             if value != None:
                 text = '"' + value + '"'
             return aqt.qt.QVariant(text)
-        elif role == aqt.qt.Qt.EditRole:
+        elif role == aqt.qt.Qt.ItemDataRole.EditRole:
             return aqt.qt.QVariant(value)
 
 
@@ -127,7 +127,7 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
 
         replacement = self.replacements[row]
 
-        if role == aqt.qt.Qt.EditRole:
+        if role == aqt.qt.Qt.ItemDataRole.EditRole:
             
             # set the value into a TextReplacement object
             if column == COL_INDEX_TYPE:
@@ -147,9 +147,9 @@ class TextReplacementsTableModel(aqt.qt.QAbstractTableModel):
             self.dataChanged.emit(start_index, end_index)
             self.recompute_sample_callback()
             return True
-        elif role == aqt.qt.Qt.CheckStateRole:
+        elif role == aqt.qt.Qt.ItemDataRole.CheckStateRole:
             transformation_type = self.col_index_to_transformation_type_map[column]
-            is_checked = value == aqt.qt.Qt.Checked
+            is_checked = value == aqt.qt.Qt.CheckState.Checked
             replacement.transformation_type_map[transformation_type] = is_checked
             logging.info(f'setting {transformation_type} to {is_checked}')
             start_index = self.createIndex(row, column)

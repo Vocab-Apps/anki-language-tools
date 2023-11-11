@@ -62,7 +62,7 @@ class NoteTableModel(aqt.qt.QAbstractTableModel):
     def data(self, index, role):
         if not index.isValid():
             return aqt.qt.QVariant()
-        elif role != aqt.qt.Qt.ItemDataRole.DisplayRole and role != aqt.qt.Qt.EditRole: # only support display and edit
+        elif role != aqt.qt.Qt.ItemDataRole.DisplayRole and role != aqt.qt.Qt.ItemDataRole.EditRole: # only support display and edit
            return aqt.qt.QVariant()
         if index.column() == 0:
             # from field
@@ -74,7 +74,7 @@ class NoteTableModel(aqt.qt.QAbstractTableModel):
     def setData(self, index, value, role):
         if index.column() != 1:
             return False
-        if index.isValid() and role == aqt.qt.Qt.EditRole:
+        if index.isValid() and role == aqt.qt.Qt.ItemDataRole.EditRole:
             # memorize the value
             row = index.row()
             self.to_field_data[row] = value

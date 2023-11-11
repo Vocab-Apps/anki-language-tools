@@ -646,9 +646,9 @@ def test_dialog_textprocessing(qtbot):
     # enter pattern and replacement
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, '1234', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, '1234', aqt.qt.Qt.ItemDataRole.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, '5678', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, '5678', aqt.qt.Qt.ItemDataRole.EditRole)
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc5678</b>'
@@ -658,9 +658,9 @@ def test_dialog_textprocessing(qtbot):
     # enter pattern and replacement
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, ' / ', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, ' / ', aqt.qt.Qt.ItemDataRole.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, ' ', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, ' ', aqt.qt.Qt.ItemDataRole.EditRole)
 
     # check processing preview
     dialog.sample_text_input.clear()
@@ -675,7 +675,7 @@ def test_dialog_textprocessing(qtbot):
     # remove the first rule
     dialog.table_view.selectRow(0)
     index_first_row = dialog.textReplacementTableModel.createIndex(0, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.table_view.selectionModel().select(index_first_row, aqt.qt.QItemSelectionModel.Select)
+    dialog.table_view.selectionModel().select(index_first_row, aqt.qt.QItemSelectionModel.SelectionFlag.Select)
     qtbot.mouseClick(dialog.remove_replace_button, aqt.qt.Qt.MouseButton.LeftButton)
 
     # there should only be one row left
@@ -695,16 +695,16 @@ def test_dialog_textprocessing(qtbot):
     qtbot.mouseClick(dialog.add_replace_regex_button, aqt.qt.Qt.MouseButton.LeftButton)
     row = 1
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_pattern, '[0-9]+', aqt.qt.Qt.ItemDataRole.EditRole)
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, 'number', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, 'number', aqt.qt.Qt.ItemDataRole.EditRole)
     # this transformation will only apply to transliteration
     index_translation = dialog.textReplacementTableModel.createIndex(row, 3)
-    dialog.textReplacementTableModel.setData(index_translation, aqt.qt.Qt.Unchecked, aqt.qt.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_translation, aqt.qt.Qt.CheckState.Unchecked, aqt.qt.Qt.ItemDataRole.CheckStateRole)
     index_transliteration = dialog.textReplacementTableModel.createIndex(row, 4)
-    dialog.textReplacementTableModel.setData(index_transliteration, aqt.qt.Qt.Checked, aqt.qt.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_transliteration, aqt.qt.Qt.CheckState.Checked, aqt.qt.Qt.ItemDataRole.CheckStateRole)
     index_audio = dialog.textReplacementTableModel.createIndex(row, 5)
-    dialog.textReplacementTableModel.setData(index_audio, aqt.qt.Qt.Unchecked, aqt.qt.Qt.CheckStateRole)
+    dialog.textReplacementTableModel.setData(index_audio, aqt.qt.Qt.CheckState.Unchecked, aqt.qt.Qt.ItemDataRole.CheckStateRole)
 
     # check the preview in different transformation types
     dialog.sample_transformation_type_combo_box.setCurrentText('Transliteration')
@@ -781,9 +781,9 @@ def test_dialog_textprocessing_simple(qtbot):
     # enter pattern and replacement
     row = 0
     index_pattern = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_PATTERN)
-    dialog.textReplacementTableModel.setData(index_pattern, ' [9]+', aqt.qt.Qt.EditRole) # should not get interpreted as regexp
+    dialog.textReplacementTableModel.setData(index_pattern, ' [9]+', aqt.qt.Qt.ItemDataRole.EditRole) # should not get interpreted as regexp
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
-    dialog.textReplacementTableModel.setData(index_replacement, 'rep', aqt.qt.Qt.EditRole)
+    dialog.textReplacementTableModel.setData(index_replacement, 'rep', aqt.qt.Qt.ItemDataRole.EditRole)
 
     # dialog.exec_()
 
