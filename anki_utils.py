@@ -151,7 +151,7 @@ class AnkiUtils():
         aqt.mw.col.update_note(note)
 
     def display_dialog(self, dialog):
-        return dialog.exec_()
+        return dialog.exec()
 
     def report_known_exception_interactive(self, exception, action):
         error_message = f'Encountered an error while {action}: {str(exception)}'

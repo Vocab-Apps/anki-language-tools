@@ -295,4 +295,4 @@ def prepare_text_processing_dialog(languagetools):
 
 def text_processing_dialog(languagetools):
     dialog = prepare_text_processing_dialog(languagetools)
-    dialog.exec_()
+    dialog.exec()

@@ -246,4 +246,4 @@ def voice_selection_dialog(languagetools, parent_window):
         return
 
     voice_selection_dialog = prepare_voice_selection_dialog(languagetools, languagetools.voice_list)
-    voice_selection_dialog.exec_()            
+    voice_selection_dialog.exec()            

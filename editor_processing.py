@@ -120,7 +120,7 @@ class EditorManager():
             field_language = self.languagetools.get_language_validate(deck_note_type_field)
 
             dialog = dialog_breakdown.prepare_dialog(self.languagetools, field_value, field_language, editor, deck_note_type_field.deck_note_type)
-            dialog.exec_()
+            dialog.exec()
 
     def process_all_field_changes(self):
         logging.info('processing all field changes')

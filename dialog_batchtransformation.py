@@ -26,7 +26,7 @@ class NoteTableModel(aqt.qt.QAbstractTableModel):
 
     def flags(self, index):
         if index.column() == 1: # second column is editable
-            return aqt.qt.Qt.ItemIsEditable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
+            return aqt.qt.Qt.ItemFlag.ItemIsEditable | aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
         # return default
         return aqt.qt.Qt.ItemFlag.ItemIsSelectable | aqt.qt.Qt.ItemFlag.ItemIsEnabled
 

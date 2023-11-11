@@ -310,7 +310,7 @@ class YomichanDialog(aqt.qt.QDialog):
 
 def language_mapping_dialogue(languagetools):
     mapping_dialog = dialog_languagemapping.prepare_language_mapping_dialogue(languagetools)
-    mapping_dialog.exec_()
+    mapping_dialog.exec()
 
 def yomichan_dialog(languagetools):
     if not languagetools.language_detection_done():
@@ -327,7 +327,7 @@ def yomichan_dialog(languagetools):
 
     yomichan_dialog = YomichanDialog(languagetools, japanese_voice)
     yomichan_dialog.setupUi()
-    yomichan_dialog.exec_()
+    yomichan_dialog.exec()
 
 
 def verify_deck_note_type_consistent(note_id_list, deck_utils):
@@ -371,7 +371,7 @@ def add_transformation_dialog(languagetools, browser: aqt.browser.Browser, note_
 
     try:
         dialog = dialog_batchtransformation.prepare_batch_transformation_dialogue(languagetools, deck_note_type, note_id_list, transformation_type)
-        dialog.exec_()
+        dialog.exec()
 
         # force browser to reload notes
         browser.model.reset()
@@ -394,7 +394,7 @@ def run_rules_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
 
     dialog = dialog_notesettings.RunRulesDialog(languagetools, deck_note_type, note_id_list)
     dialog.setupUi()
-    dialog.exec_()
+    dialog.exec()
 
     # force browser to reload notes
     browser.model.reset()        
@@ -406,7 +406,7 @@ def show_settings_dialog(languagetools, browser: aqt.browser.Browser, note_id_li
 
     dialog = dialog_notesettings.NoteSettingsDialog(languagetools, deck_note_type)
     dialog.setupUi()
-    dialog.exec_()
+    dialog.exec()
 
 def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     # did the user perform language mapping ? 
@@ -421,7 +421,7 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
     try:
         dialog = AddAudioDialog(languagetools, deck_note_type, note_id_list)
         dialog.setupUi()
-        dialog.exec_()
+        dialog.exec()
 
         # force browser to reload notes
         browser.model.reset()    
@@ -434,4 +434,4 @@ def add_audio_dialog(languagetools, browser: aqt.browser.Browser, note_id_list):
 
 def show_api_key_dialog(languagetools):
     dialog = dialog_apikey.prepare_api_key_dialog(languagetools)
-    dialog.exec_()
+    dialog.exec()

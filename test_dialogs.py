@@ -76,7 +76,7 @@ def test_add_audio(qtbot):
     testcase_instance.assertRaises(errors.LanguageMappingError, dialogs.AddAudioDialog, mock_language_tools, deck_note_type, note_id_list)
 
     # only uncomment if you want to see the dialog come up
-    # add_audio_dialog.exec_()
+    # add_audio_dialog.exec()
 
 def test_add_translation_transliteration_no_language_mapping(qtbot):
     # pytest test_dialogs.py -rPP -k test_add_translation_transliteration_no_language_mapping
@@ -182,7 +182,7 @@ def test_language_mapping(qtbot):
     assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_chinese] == 'zh_cn'
     assert mock_language_tools.anki_utils.written_config[constants.CONFIG_DECK_LANGUAGES][model_name][deck_name][config_gen.field_english] == 'en'    
 
-    # mapping_dialog.exec_()
+    # mapping_dialog.exec()
 
     # show field samples
     # ==================
@@ -301,7 +301,7 @@ def test_voice_selection(qtbot):
     assert 'Aria' in mock_language_tools.anki_utils.written_config[constants.CONFIG_VOICE_SELECTION]['en']['voice_key']['name']
 
 
-    # voice_selection_dialog.exec_()
+    # voice_selection_dialog.exec()
 
 def test_voice_selection_no_voices(qtbot):
     # pytest test_dialogs.py -rPP -k test_voice_selection_no_voices
@@ -329,7 +329,7 @@ def test_voice_selection_no_voices(qtbot):
     assert mock_language_tools.anki_utils.critical_message_received == 'No voice available for Malagasy'
 
 
-    # voice_selection_dialog.exec_()
+    # voice_selection_dialog.exec()
 
 def test_choose_translation(qtbot):
     # pytest test_dialogs.py -rPP -k test_choose_translation
@@ -528,7 +528,7 @@ def test_batch_transformation(qtbot):
     assert note_3.flush_called == False
 
 
-    # dialog.exec_()
+    # dialog.exec()
 
 def test_batch_transformation_error_handling(qtbot):
     # pytest test_dialogs.py -rPP -k test_batch_transformation_error_handling
@@ -595,7 +595,7 @@ def test_batch_transformation_error_handling(qtbot):
     index = dialog.noteTableModel.createIndex(1, column) # second row
     assert dialog.noteTableModel.data(index, aqt.qt.Qt.ItemDataRole.DisplayRole) == 'translation 2'
 
-    # dialog.exec_()
+    # dialog.exec()
 
     # # apply button should be enabled now
     assert dialog.applyButton.isEnabled() == True
@@ -615,7 +615,7 @@ def test_batch_transformation_error_handling(qtbot):
     assert note_2.set_values == {'English': 'translation 2'}
     assert note_2.flush_called == True    
 
-    # dialog.exec_()
+    # dialog.exec()
 
 def test_dialog_textprocessing(qtbot):
     # pytest test_dialogs.py -rPP -k test_dialog_textprocessing
@@ -785,7 +785,7 @@ def test_dialog_textprocessing_simple(qtbot):
     index_replacement = dialog.textReplacementTableModel.createIndex(row, dialog_textprocessing.COL_INDEX_REPLACEMENT)
     dialog.textReplacementTableModel.setData(index_replacement, 'rep', aqt.qt.Qt.ItemDataRole.EditRole)
 
-    # dialog.exec_()
+    # dialog.exec()
 
     # verify preview
     assert dialog.sample_text_transformed_label.text() == '<b>abdc1234rep</b>'
@@ -866,7 +866,7 @@ def test_dialog_runrules(qtbot):
 
     dialog = dialog_notesettings.RunRulesDialog(mock_language_tools, deck_note_type, note_id_list)
     dialog.setupUi()
-    # dialog.exec_()
+    # dialog.exec()
 
     # click apply button
     qtbot.mouseClick(dialog.applyButton, aqt.qt.Qt.MouseButton.LeftButton)
