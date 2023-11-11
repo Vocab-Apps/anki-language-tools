@@ -59,7 +59,7 @@ class BreakdownDialog(aqt.qt.QDialog):
         self.target_field_dropdown.setDisabled(True)
 
         self.breakdown_result = aqt.qt.QLabel()
-        self.breakdown_result.setTextInteractionFlags(aqt.qt.Qt.TextSelectableByMouse)
+        self.breakdown_result.setTextInteractionFlags(aqt.qt.Qt.TextInteractionFlag.TextSelectableByMouse)
         self.breakdown_result.setText('<i>Press Load Breakdown to see result</i>')
 
         target_language_label = aqt.qt.QLabel()

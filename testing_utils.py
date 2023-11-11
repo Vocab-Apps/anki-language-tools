@@ -1,5 +1,6 @@
 import logging
 import json
+import re
 
 import constants
 import deck_utils
@@ -39,7 +40,11 @@ class MockAnkiUtils():
         return constants.RED_STYLESHEET
 
     def html_to_text_line(self, html):
-        return html
+        html = html.replace('&nbsp;', '')
+        html = html.replace('\n', '')
+        html = html.strip()
+        clean = re.compile('<.*?>')
+        return re.sub(clean, '', html)
 
     def play_anki_sound_tag(self, text):
         self.last_played_sound_tag = text
