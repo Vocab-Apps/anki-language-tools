@@ -143,9 +143,15 @@ class AnkiUtils():
         return aqt.mw.col.add_custom_undo_entry(f'{constants.ADDON_NAME}: {action_name}')
 
     def undo_end(self, undo_id):
-        aqt.mw.col.merge_undo_entries(undo_id)
-        aqt.mw.update_undo_actions()
-        aqt.mw.autosave()
+        def undo_end_fn():
+            logging.debug(f'unfo_end_fn, undo_id: {undo_id}')
+            try:
+                aqt.mw.col.merge_undo_entries(undo_id)
+                aqt.mw.update_undo_actions()
+                aqt.mw.autosave()
+            except Exception as e:
+                logging.error(f'exception in undo_end_fn: {str(e)}, undo_id: {undo_id}')
+        self.run_on_main(undo_end_fn)
 
     def update_note(self, note):
         aqt.mw.col.update_note(note)
