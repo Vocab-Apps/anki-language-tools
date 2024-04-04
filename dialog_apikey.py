@@ -113,7 +113,7 @@ class ApiKeyDialog(aqt.qt.QDialog):
 
     def get_account_info_background(self):
         api_key_text = self.api_text_input.text()
-        return self.languagetools.cloud_language_tools.account_info(api_key_text)
+        return self.languagetools.cloud_language_tools.account_info()
 
     def get_account_info_done(self, future_result):
         result = future_result.result()

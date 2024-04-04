@@ -61,6 +61,10 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         self.assertGreater(len(response['voice_list']), 0)
         self.assertGreater(len(response['tokenization_options']), 0)
 
+    def test_account_info(self):
+        response = self.clt.account_info()
+        self.assertTrue('email' in response)
+        self.assertTrue(len(response['email']) > 0)
 
 
 class CloudLanguageToolsVocabTests(unittest.TestCase):

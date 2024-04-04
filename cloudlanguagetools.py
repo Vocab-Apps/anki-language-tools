@@ -51,12 +51,12 @@ class CloudLanguageTools():
 
     def get_url(self, endpoint):
         clt_endpoint_overrides = {
-            'language_data': '/language_data_v1'
+            'language_data': 'language_data_v1'
         }
         if self.use_vocabai_api == False:
             if endpoint in clt_endpoint_overrides:
                 endpoint = clt_endpoint_overrides[endpoint]
-        return self.get_base_url() + endpoint
+        return self.get_base_url() + '/' + endpoint
 
     def authenticated_get_request(self, endpoint):
         url = self.get_url(endpoint)
@@ -109,11 +109,9 @@ class CloudLanguageTools():
                 'msg': f'API key not found'
             }
 
-    def account_info(self, api_key):
+    def account_info(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='account_info'):
-            response = requests.get(self.base_url + '/account', headers={'api_key': api_key})
-            data = json.loads(response.content)
-            return data
+            return self.authenticated_get_request('account')
 
     def language_detection(self, api_key, field_sample):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='language_detection'):

@@ -379,9 +379,9 @@ class MockCloudLanguageTools():
             'msg': f'api key: {self.verify_api_key_is_valid}'
         }     
 
-    def account_info(self, api_key):
+    def account_info(self):
         self.account_info_called = True
-        self.account_info_api_key = api_key
+        self.account_info_api_key = self.verify_api_key_input
 
         return {
             'type': '250 chars',
