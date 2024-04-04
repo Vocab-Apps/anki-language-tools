@@ -8,6 +8,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 import cloudlanguagetools
+import constants
 
 
 # create unit test class for CLT API tests
@@ -36,6 +37,33 @@ class ValidateAPIKeyTests(unittest.TestCase):
         response = self.clt.api_key_validate_query(api_key)
         self.assertEquals(response['key_valid'], False)
 
+# base class executes CLT tests, derived class executes VOCABAI tests
+class CloudLanguageToolsCLTTests(unittest.TestCase):
+    # setup
+    def setUp(self):
+        # setup test data
+        self.clt = cloudlanguagetools.CloudLanguageTools()
+        api_key = os.environ['ANKI_LANGUAGE_TOOLS_CLT_API_KEY']
+        response = self.clt.api_key_validate_query(api_key)
+        self.assertEquals(response['key_valid'], True)
+
+    # test get_base_url
+    def test_get_base_url(self):
+        self.assertEquals(self.clt.get_base_url(), constants.CLT_API_BASE_URL)
+
+
+class CloudLanguageToolsVocabTests(unittest.TestCase):
+    # setup
+    def setUp(self):
+        # setup test data
+        self.clt = cloudlanguagetools.CloudLanguageTools()
+        api_key = os.environ['ANKI_LANGUAGE_TOOLS_VOCAB_API_KEY']
+        response = self.clt.api_key_validate_query(api_key)
+        self.assertEquals(response['key_valid'], True)
+
+    # test get_base_url
+    def test_get_base_url(self):
+        self.assertEquals(self.clt.get_base_url(), constants.VOCABAI_API_BASE_URL)
 
 if __name__ == '__main__':
     unittest.main()
