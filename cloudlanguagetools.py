@@ -33,12 +33,14 @@ class CloudLanguageTools():
             'client': constants.CLIENT_NAME, 
             'client_version': version.ANKI_LANGUAGE_TOOLS_VERSION
         }
+        return headers
 
     def get_headers_vocabai_api(self, api_key):
         headers={
             'Authorization': f'Api-Key {api_key}',
             'User-Agent': f'anki-language-tools/{version.ANKI_LANGUAGE_TOOLS_VERSION}',
         }
+        return headers
 
     def get_language_data(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='get_language_data'):
@@ -49,12 +51,42 @@ class CloudLanguageTools():
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='verify_api_key'):
             # first, try to validate api key using the account endpoint on vocabai
 
+            # try to get account data on vocabai first
+            response = requests.get(self.vocab_api_base_url + '/account', headers=self.get_headers_vocabai_api(api_key))
+            if response.status_code == 200:
+                # API key is valid on vocab API
+                self.use_vocabai_api = True
+                return {
+                    'key_valid': True,
+                    'msg': f'api key: {api_key}'
+                }
 
-            response = requests.post(self.base_url + '/verify_api_key', json={
-                'api_key': api_key
-            })
-            data = json.loads(response.content)
-            return data
+            # now try to get account data on CLT API
+            url = self.clt_api_base_url + '/account'
+            print(url)
+            response = requests.get(url, headers=self.get_headers_clt_api(api_key))
+            print(response.content)
+            if response.status_code == 200:
+                self.use_vocabai_api = False
+                # API key is valid on CLT API
+                # check if there are errors
+                if 'error' in response.json():
+                    return {
+                        'key_valid': False,
+                        'msg': f'api key: ' + response.json()['error']
+                    }                    
+
+                # otherwise, it's considered valid
+                return {
+                    'key_valid': True,
+                    'msg': f'api key: {api_key}'
+                }
+
+            # default case, API key is not valid
+            return {
+                'key_valid': False,
+                'msg': f'API key not found'
+            }
 
     def account_info(self, api_key):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='account_info'):

@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+import pprint
 
 # add external search path
 import sys
@@ -18,7 +19,9 @@ class CltAPITests(unittest.TestCase):
 
     def test_validate_api_key(self):
         api_key = os.environ['ANKI_LANGUAGE_TOOLS_API_KEY']
+        print(f'verifying api key: [{api_key}]')
         response = self.clt.api_key_validate_query(api_key)
+        pprint.pprint(response)
         self.assertEquals(response['key_valid'], True)
         self.assertEquals(self.clt.use_vocabai_api, False)
 
