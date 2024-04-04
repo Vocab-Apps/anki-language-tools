@@ -1,18 +1,44 @@
 import os
+import sys
 import requests
 import json
 import logging
 import sentry_sdk
 
-from . import constants
-from . import errors
-from . import version
+if hasattr(sys, '_pytest_mode'):
+    import constants
+    import errors
+    import version
+else:
+    from . import constants
+    from . import errors
+    from . import version
 
 class CloudLanguageTools():
     def __init__(self):
-        self.base_url = 'https://cloudlanguagetools-api.vocab.ai'
-        if constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL in os.environ:
-            self.base_url = os.environ[constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL]
+        self.clt_api_base_url = os.environ.get(constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL, constants.CLT_API_BASE_URL)
+        self.vocab_api_base_url = os.environ.get(constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_VOCABAI_BASE_URL, constants.VOCABAI_API_BASE_URL)
+        self.initialization_done = False
+
+    def get_base_url(self):
+        if self.use_vocabai_api:
+            return self.vocab_api_base_url
+        else:
+            return self.clt_api_base_url
+
+    def get_headers_clt_api(self, api_key):
+        headers={
+            'api_key': api_key,
+            'User-Agent': f'anki-language-tools/{version.ANKI_LANGUAGE_TOOLS_VERSION}',
+            'client': constants.CLIENT_NAME, 
+            'client_version': version.ANKI_LANGUAGE_TOOLS_VERSION
+        }
+
+    def get_headers_vocabai_api(self, api_key):
+        headers={
+            'Authorization': f'Api-Key {api_key}',
+            'User-Agent': f'anki-language-tools/{version.ANKI_LANGUAGE_TOOLS_VERSION}',
+        }
 
     def get_language_data(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='get_language_data'):
@@ -21,6 +47,9 @@ class CloudLanguageTools():
 
     def api_key_validate_query(self, api_key):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='verify_api_key'):
+            # first, try to validate api key using the account endpoint on vocabai
+
+
             response = requests.post(self.base_url + '/verify_api_key', json={
                 'api_key': api_key
             })
