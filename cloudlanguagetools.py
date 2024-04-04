@@ -63,9 +63,7 @@ class CloudLanguageTools():
 
             # now try to get account data on CLT API
             url = self.clt_api_base_url + '/account'
-            print(url)
             response = requests.get(url, headers=self.get_headers_clt_api(api_key))
-            print(response.content)
             if response.status_code == 200:
                 self.use_vocabai_api = False
                 # API key is valid on CLT API
