@@ -19,6 +19,7 @@ class CloudLanguageTools():
         self.clt_api_base_url = os.environ.get(constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL, constants.CLT_API_BASE_URL)
         self.vocab_api_base_url = os.environ.get(constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_VOCABAI_BASE_URL, constants.VOCABAI_API_BASE_URL)
         self.initialization_done = False
+        self.api_key = None
 
     def get_base_url(self):
         if self.use_vocabai_api:
@@ -42,10 +43,30 @@ class CloudLanguageTools():
         }
         return headers
 
+    def get_headers(self):
+        if self.use_vocabai_api:
+            return self.get_headers_vocabai_api(self.api_key)
+        else:
+            return self.get_headers_clt_api(self.api_key)
+
+    def get_url(self, endpoint):
+        clt_endpoint_overrides = {
+            'language_data': '/language_data_v1'
+        }
+        if self.use_vocabai_api == False:
+            if endpoint in clt_endpoint_overrides:
+                endpoint = clt_endpoint_overrides[endpoint]
+        return self.get_base_url() + endpoint
+
+    def authenticated_get_request(self, endpoint):
+        url = self.get_url(endpoint)
+        response = requests.get(url, headers=self.get_headers())
+        response.raise_for_status()
+        return response.json()
+
     def get_language_data(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='get_language_data'):
-            response = requests.get(self.base_url + '/language_data_v1')
-            return json.loads(response.content)
+            return self.authenticated_get_request('language_data')
 
     def api_key_validate_query(self, api_key):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='verify_api_key'):
@@ -56,6 +77,7 @@ class CloudLanguageTools():
             if response.status_code == 200:
                 # API key is valid on vocab API
                 self.use_vocabai_api = True
+                self.api_key = api_key
                 return {
                     'key_valid': True,
                     'msg': f'api key: {api_key}'
@@ -75,6 +97,7 @@ class CloudLanguageTools():
                     }                    
 
                 # otherwise, it's considered valid
+                self.api_key = api_key
                 return {
                     'key_valid': True,
                     'msg': f'api key: {api_key}'

@@ -24,6 +24,7 @@ class ValidateAPIKeyTests(unittest.TestCase):
         pprint.pprint(response)
         self.assertEquals(response['key_valid'], True)
         self.assertEquals(self.clt.use_vocabai_api, False)
+        self.assertEquals(self.clt.api_key, api_key)
 
     def test_validate_vocab_api_key(self):
         api_key = os.environ['ANKI_LANGUAGE_TOOLS_VOCAB_API_KEY']
@@ -31,11 +32,13 @@ class ValidateAPIKeyTests(unittest.TestCase):
         pprint.pprint(response)
         self.assertEquals(response['key_valid'], True)
         self.assertEquals(self.clt.use_vocabai_api, True)
+        self.assertEquals(self.clt.api_key, api_key)
 
     def test_validate_bad_api_key(self):
         api_key = 'incorrect_key'
         response = self.clt.api_key_validate_query(api_key)
         self.assertEquals(response['key_valid'], False)
+        self.assertEquals(self.clt.api_key, None)
 
 # base class executes CLT tests, derived class executes VOCABAI tests
 class CloudLanguageToolsCLTTests(unittest.TestCase):
@@ -47,9 +50,17 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         response = self.clt.api_key_validate_query(api_key)
         self.assertEquals(response['key_valid'], True)
 
-    # test get_base_url
     def test_get_base_url(self):
         self.assertEquals(self.clt.get_base_url(), constants.CLT_API_BASE_URL)
+
+    def test_get_language_data(self):
+        response = self.clt.get_language_data()
+        self.assertGreater(len(response['language_list']), 0)
+        self.assertGreater(len(response['translation_options']), 0)
+        self.assertGreater(len(response['transliteration_options']), 0)
+        self.assertGreater(len(response['voice_list']), 0)
+        self.assertGreater(len(response['tokenization_options']), 0)
+
 
 
 class CloudLanguageToolsVocabTests(unittest.TestCase):
