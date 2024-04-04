@@ -66,6 +66,10 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         self.assertTrue('email' in response)
         self.assertTrue(len(response['email']) > 0)
 
+    def test_detect(self):
+        detected_language = self.clt.language_detection(['Bonjour', 'Au revoir'])
+        self.assertEquals(detected_language, 'fr')
+
 
 class CloudLanguageToolsVocabTests(unittest.TestCase):
     # setup

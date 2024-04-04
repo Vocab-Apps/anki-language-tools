@@ -64,6 +64,12 @@ class CloudLanguageTools():
         response.raise_for_status()
         return response.json()
 
+    def authenticated_post_request(self, endpoint, data):
+        url = self.get_url(endpoint)
+        response = requests.post(url, json=data, headers=self.get_headers())
+        response.raise_for_status()
+        return response.json()
+
     def get_language_data(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='get_language_data'):
             return self.authenticated_get_request('language_data')
@@ -113,20 +119,14 @@ class CloudLanguageTools():
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='account_info'):
             return self.authenticated_get_request('account')
 
-    def language_detection(self, api_key, field_sample):
+    def language_detection(self, field_sample):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='language_detection'):
-            response = requests.post(self.base_url + '/detect', json={
+            data = {
                     'text_list': field_sample
-            }, headers={'api_key': api_key})
-            if response.status_code == 200:
-                data = json.loads(response.content)
-                detected_language = data['detected_language']
-
-                return detected_language
-            else:
-                # error occured, return none
-                logging.error(f'could not perform language detection: (status code {response.status_code}) {response.content}')
-                return None        
+            }
+            response_data = self.authenticated_post_request('detect', data)
+            detected_language = response_data['detected_language']
+            return detected_language
 
     def get_tts_voice_list(self, api_key):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='voice_list'):

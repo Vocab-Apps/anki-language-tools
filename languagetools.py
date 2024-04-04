@@ -288,7 +288,7 @@ class LanguageTools():
         if len(field_sample) == 0:
             return None
 
-        return self.cloud_language_tools.language_detection(self.config['api_key'], field_sample)
+        return self.cloud_language_tools.language_detection(field_sample)
 
 
     def guess_language(self, deck_note_type_field: deck_utils.DeckNoteTypeField):

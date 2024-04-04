@@ -389,7 +389,7 @@ class MockCloudLanguageTools():
         }
 
 
-    def language_detection(self, api_key, field_sample):
+    def language_detection(self, field_sample):
         return self.language_detection_result[field_sample[0]]
 
     def get_tts_audio(self, api_key, source_text, service, language_code, voice_key, options):
