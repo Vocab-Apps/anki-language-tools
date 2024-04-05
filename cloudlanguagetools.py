@@ -55,7 +55,8 @@ class CloudLanguageTools():
     def get_url(self, endpoint):
         clt_endpoint_overrides = {
             'language_data': 'language_data_v1',
-            'audio': 'audio_v2'
+            'audio': 'audio_v2',
+            'breakdown': 'breakdown_v1'
         }
         if self.use_vocabai_api == False:
             if endpoint in clt_endpoint_overrides:
@@ -73,6 +74,12 @@ class CloudLanguageTools():
         response = requests.post(url, json=data, headers=self.get_headers())
         response.raise_for_status()
         return response.json()
+
+    def authenticated_post_request_response(self, endpoint, data):
+        # just return the response without any processing
+        url = self.get_url(endpoint)
+        response = requests.post(url, json=data, headers=self.get_headers())
+        return response
 
     def get_language_data(self):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='get_language_data'):
@@ -159,26 +166,27 @@ class CloudLanguageTools():
                     error_msg = 'Error: ' + response_data['error']
                 raise errors.AudioLanguageToolsRequestError(f'Status Code: {response.status_code} ({error_msg})')
 
-    def get_translation(self, api_key, source_text, translation_option):
+    def get_translation(self, source_text, translation_option):
+        # returns the response from requests directly
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='Translation_'+translation_option['service']):
-            response = requests.post(self.base_url + '/translate', json={
+            return self.authenticated_post_request_response('translate', {
                 'text': source_text,
                 'service': translation_option['service'],
                 'from_language_key': translation_option['source_language_id'],
                 'to_language_key': translation_option['target_language_id']
-            }, headers={'api_key': api_key})
-            return response
+            })
 
-    def get_transliteration(self, api_key, source_text, transliteration_option):
+    def get_transliteration(self, source_text, transliteration_option):
+        # returns the response from requests directly
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='Transliteration_'+transliteration_option['service']):
-            response = requests.post(self.base_url + '/transliterate', json={
+            return self.authenticated_post_request_response('transliterate', {
                     'text': source_text,
                     'service': transliteration_option['service'],
                     'transliteration_key': transliteration_option['transliteration_key']
-            }, headers={'api_key': api_key})
-            return response        
+            })
 
-    def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
+    def get_breakdown(self, source_text, tokenization_option, translation_option, transliteration_option):
+        # returns the response from requests directly
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='breakdown'):
             breakdown_request = {
                     'text': source_text,
@@ -189,16 +197,12 @@ class CloudLanguageTools():
             if transliteration_option != None:
                 breakdown_request['transliteration_option'] = transliteration_option
             logging.debug(f'sending breakdown request: {breakdown_request}')
-            response = requests.post(self.base_url + '/breakdown_v1', json=breakdown_request, headers={'api_key': api_key})
-            return response        
+            return self.authenticated_post_request_response('breakdown', breakdown_request)
 
-
-    def get_translation_all(self, api_key, source_text, from_language, to_language):
+    def get_translation_all(self, source_text, from_language, to_language):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name='translation_all'):
-            response = requests.post(self.base_url + '/translate_all', json={
+            return self.authenticated_post_request('translate_all', {
                     'text': source_text,
                     'from_language': from_language,
                     'to_language': to_language
-            }, headers={'api_key': api_key})
-            data = json.loads(response.content)        
-            return data
+            })

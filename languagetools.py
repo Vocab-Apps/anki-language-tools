@@ -481,7 +481,7 @@ class LanguageTools():
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
         if self.text_utils.is_empty(processed_text):
             raise errors.LanguageToolsValidationFieldEmpty()
-        return self.cloud_language_tools.get_translation(self.config['api_key'], processed_text, translation_option)
+        return self.cloud_language_tools.get_translation(processed_text, translation_option)
 
     def interpret_translation_response_async(self, response):
         # print(response.status_code)
@@ -506,7 +506,7 @@ class LanguageTools():
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
         if self.text_utils.is_empty(processed_text):
             raise errors.LanguageToolsValidationFieldEmpty()        
-        return self.cloud_language_tools.get_translation_all(self.config['api_key'], source_text, from_language, to_language)
+        return self.cloud_language_tools.get_translation_all(source_text, from_language, to_language)
     
     # transliteration
     # ===============
@@ -516,7 +516,7 @@ class LanguageTools():
         logging.info(f'before text processing: [{source_text}], after text processing: [{processed_text}]')
         if self.text_utils.is_empty(processed_text):
             raise errors.LanguageToolsValidationFieldEmpty()        
-        return self.cloud_language_tools.get_transliteration(self.config['api_key'], processed_text, transliteration_option)
+        return self.cloud_language_tools.get_transliteration(processed_text, transliteration_option)
 
     def interpret_transliteration_response_async(self, response):
         if response.status_code == 200:
@@ -540,7 +540,7 @@ class LanguageTools():
     # =========
 
     def get_breakdown_async(self, source_text, tokenization_option, translation_option, transliteration_option):
-        return self.cloud_language_tools.get_breakdown(self.config['api_key'], source_text, tokenization_option, translation_option, transliteration_option)
+        return self.cloud_language_tools.get_breakdown(source_text, tokenization_option, translation_option, transliteration_option)
 
     def interpret_breakdown_response_async(self, response):
         if response.status_code == 200:

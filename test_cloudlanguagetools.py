@@ -86,6 +86,24 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         response = self.clt.get_tts_audio_request(source_text, first_voice['service'], first_voice['language_code'], first_voice['voice_key'], {})
         self.assertEquals(response.status_code, 200)
 
+    # def test_translation(self):
+    #     language_data = self.clt.get_language_data()
+    #     translation_language_list = language_data['translation_options']
+    #     chinese_azure = [x for x in translation_language_list if x['language_code'] == 'zh_cn' and x['service'] == 'Azure']
+    #     translation_azure_chinese = chinese_azure[0]
+
+    #     translation_option = {
+    #         'text': '中国有很多外国人',
+    #         'service': 'Azure',
+    #         'from_language_key': translation_azure_chinese['language_id'],
+    #         'to_language_key': 'en'
+    #     }        
+
+    #     pprint.pprint(translation_azure_chinese)
+    #     response = self.clt.get_translation('中国有很多外国人', translation_azure_chinese)
+    #     self.assertEquals(response.status_code, 200)
+
+
 
 class CloudLanguageToolsVocabTests(unittest.TestCase):
     # setup
