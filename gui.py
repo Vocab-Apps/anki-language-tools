@@ -28,15 +28,23 @@ def init(languagetools):
         aqt.qt.QDesktopServices.openUrl(url)
 
     def show_language_mapping():
+        if languagetools.ensure_api_key_checked() == False:
+            return
         dialogs.language_mapping_dialogue(languagetools)
 
     def show_voice_selection():
+        if languagetools.ensure_api_key_checked() == False:
+            return
         dialog_voiceselection.voice_selection_dialog(languagetools, aqt.mw)
 
     def show_text_processing():
+        if languagetools.ensure_api_key_checked() == False:
+            return
         dialog_textprocessing.text_processing_dialog(languagetools)
 
     def show_yomichan_integration():
+        if languagetools.ensure_api_key_checked() == False:
+            return
         dialogs.yomichan_dialog(languagetools)
 
     def show_api_key_dialog():
