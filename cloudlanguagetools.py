@@ -21,6 +21,9 @@ class CloudLanguageTools():
         self.initialization_done = False
         self.api_key = None
 
+    def api_key_set(self):
+        return self.api_key != None
+
     def get_base_url(self):
         if self.use_vocabai_api:
             return self.vocab_api_base_url
