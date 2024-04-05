@@ -224,8 +224,7 @@ def test_voice_selection(qtbot):
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('default')
 
-    voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
-    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools)
 
     # there should be two languages. English And Chinese
     # for each language, there should be two voices
@@ -279,7 +278,7 @@ def test_voice_selection(qtbot):
     # open the dialog box again
     # =========================
 
-    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools)
     apply_button = voice_selection_dialog.findChild(aqt.qt.QPushButton, 'apply')
     assert apply_button.isEnabled() == False # should be disabled
 
@@ -312,8 +311,7 @@ def test_voice_selection_no_voices(qtbot):
     config_gen = testing_utils.TestConfigGenerator()
     mock_language_tools = config_gen.build_languagetools_instance('get_config_language_no_voices')
 
-    voice_list = mock_language_tools.cloud_language_tools.get_tts_voice_list('yoyo')
-    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools, voice_list)
+    voice_selection_dialog = dialog_voiceselection.prepare_voice_selection_dialog(mock_language_tools)
 
     languages_combobox = voice_selection_dialog.findChild(aqt.qt.QComboBox, 'languages_combobox')
     assert languages_combobox.count() == 3
@@ -403,7 +401,7 @@ def test_api_key(qtbot):
     # API key empty 
     # =============
     mock_language_tools = config_gen.build_languagetools_instance('noapikey')
-    assert mock_language_tools.api_key_checked == False
+    assert mock_language_tools.cloud_language_tools.api_key_set() == False
     dialog = dialog_apikey.prepare_api_key_dialog(mock_language_tools)
 
     assert mock_language_tools.cloud_language_tools.verify_api_key_called == False
@@ -440,7 +438,7 @@ def test_api_key(qtbot):
 
     # verify that API key in config is correct
     assert mock_language_tools.anki_utils.written_config['api_key'] == 'validkey1'
-    assert mock_language_tools.api_key_checked == True
+    assert mock_language_tools.cloud_language_tools.api_key_set() == True
 
 def test_batch_transformation(qtbot):
     # pytest test_dialogs.py -rPP -k test_batch_transformation

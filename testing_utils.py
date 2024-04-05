@@ -366,8 +366,8 @@ class MockCloudLanguageTools():
     def get_transliteration_language_list(self):
         return self.transliteration_language_list
 
-    def get_tts_voice_list(self, api_key):
-        return self.voice_list
+    def api_key_set(self):
+        return self.verify_api_key_called and self.verify_api_key_is_valid
 
     def api_key_validate_query(self, api_key):
 

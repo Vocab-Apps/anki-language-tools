@@ -48,7 +48,7 @@ def test_generate_audio_for_field(qtbot):
     from_field = config_gen.field_chinese
     to_field = config_gen.field_sound
 
-    voice_list = mock_language_tools.get_tts_voice_list()
+    voice_list = mock_language_tools.voice_list
     chinese_voices = [x for x in voice_list if x['language_code'] == 'zh_cn']
     voice = chinese_voices[0]
 

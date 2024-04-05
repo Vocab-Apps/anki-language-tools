@@ -234,8 +234,8 @@ class VoiceSelectionDialog(aqt.qt.QDialog):
         self.close()
 
 
-def prepare_voice_selection_dialog(languagetools, voice_list):
-    voice_selection_dialog = VoiceSelectionDialog(languagetools, voice_list)
+def prepare_voice_selection_dialog(languagetools):
+    voice_selection_dialog = VoiceSelectionDialog(languagetools, languagetools.voice_list)
     voice_selection_dialog.setupUi()
     return voice_selection_dialog
 
@@ -245,5 +245,5 @@ def voice_selection_dialog(languagetools, parent_window):
         languagetools.anki_utils.info_message('Please setup Language Mappings, from the Anki main screen: Tools -> Language Tools: Language Mapping', parent_window)
         return
 
-    voice_selection_dialog = prepare_voice_selection_dialog(languagetools, languagetools.voice_list)
+    voice_selection_dialog = prepare_voice_selection_dialog(languagetools)
     voice_selection_dialog.exec()            

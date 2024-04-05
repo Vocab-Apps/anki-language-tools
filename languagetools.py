@@ -650,9 +650,6 @@ class LanguageTools():
         audio_filename = self.get_tts_audio(source_text, service, language_code, voice_key, options)
         self.anki_utils.play_sound(audio_filename)
 
-    def get_tts_voice_list(self):
-        return self.cloud_language_tools.get_tts_voice_list(self.config['api_key'])
-
     def get_transliteration_options(self, language):
         candidates = [x for x in self.transliteration_language_list if x['language_code'] == language]
         return candidates
