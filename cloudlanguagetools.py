@@ -54,7 +54,8 @@ class CloudLanguageTools():
 
     def get_url(self, endpoint):
         clt_endpoint_overrides = {
-            'language_data': 'language_data_v1'
+            'language_data': 'language_data_v1',
+            'audio': 'audio_v2'
         }
         if self.use_vocabai_api == False:
             if endpoint in clt_endpoint_overrides:
@@ -131,20 +132,23 @@ class CloudLanguageTools():
             detected_language = response_data['detected_language']
             return detected_language
 
-    def get_tts_audio(self, api_key, source_text, service, language_code, voice_key, options):
+    def get_tts_audio_request(self, source_text, service, language_code, voice_key, options):
+        url = self.get_url('audio')
+        data = {
+            'text': source_text,
+            'service': service,
+            'voice_key': voice_key,
+            'request_mode': 'batch',
+            'language_code': language_code,
+            'deck_name': 'n/a',
+            'options': options
+        }
+        headers = self.get_headers()
+        return requests.post(url, json=data, headers=headers)
+
+    def get_tts_audio(self, source_text, service, language_code, voice_key, options):
         with sentry_sdk.start_transaction(op=constants.SENTRY_OPERATION, name=f'Audio_{service}'):
-            url_path = '/audio_v2'
-            data = {
-                'text': source_text,
-                'service': service,
-                'voice_key': voice_key,
-                'request_mode': 'batch',
-                'language_code': language_code,
-                'deck_name': 'n/a',
-                'options': options
-            }
-            response = requests.post(self.base_url + url_path, json=data, 
-                headers={'api_key': api_key, 'client': constants.CLIENT_NAME, 'client_version': version.ANKI_LANGUAGE_TOOLS_VERSION})
+            response = self.get_tts_audio_request(source_text, service, language_code, voice_key, options)
 
             if response.status_code == 200:
                 return response.content

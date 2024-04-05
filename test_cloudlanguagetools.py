@@ -76,6 +76,16 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         detected_language = self.clt.language_detection(['Bonjour', 'Au revoir'])
         self.assertEquals(detected_language, 'fr')
 
+    def test_get_tts_audio_request(self):
+        language_data = self.clt.get_language_data()
+        voice_list = language_data['voice_list']
+        service = 'Azure'
+        french_voices = [x for x in voice_list if x['language_code'] == 'fr' and x['service'] == service]
+        first_voice = french_voices[0]
+        source_text = 'Bonjour'
+        response = self.clt.get_tts_audio_request(source_text, first_voice['service'], first_voice['language_code'], first_voice['voice_key'], {})
+        self.assertEquals(response.status_code, 200)
+
 
 class CloudLanguageToolsVocabTests(unittest.TestCase):
     # setup

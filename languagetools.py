@@ -639,7 +639,7 @@ class LanguageTools():
         filename = self.get_audio_filename(processed_text, service, voice_key, options)
         if os.path.isfile(filename):
             return filename
-        audio_content = self.cloud_language_tools.get_tts_audio(self.config['api_key'], processed_text, service, language_code, voice_key, options)
+        audio_content = self.cloud_language_tools.get_tts_audio(processed_text, service, language_code, voice_key, options)
         with open(filename, 'wb') as f:
             f.write(audio_content)
         f.close()
