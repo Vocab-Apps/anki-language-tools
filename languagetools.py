@@ -44,14 +44,13 @@ class LanguageTools():
         self.text_utils = text_utils.TextUtils(self.anki_utils, self.get_text_processing_settings())
         self.error_manager = errors.ErrorManager(self.anki_utils)
 
-        self.language_data_load_error = False
+        self.initialization_error = False
+        self.language_data = None
 
         self.collectionLoaded = False
         self.mainWindowInitialized = False
         self.deckBrowserRendered = False
         self.initDone = False
-
-        self.api_key_checked = False
 
     def setCollectionLoaded(self):
         self.collectionLoaded = True
@@ -73,26 +72,18 @@ class LanguageTools():
         try:
             self.initDone = True
 
-            # get language data
-            self.language_data = self.cloud_language_tools.get_language_data()
-            self.language_list = self.language_data['language_list']
-            self.translation_language_list = self.language_data['translation_options']
-            self.transliteration_language_list = self.language_data['transliteration_options']
-            self.voice_list = self.language_data['voice_list']
-            self.tokenization_options = self.language_data['tokenization_options']
-
             # do we have an API key in the config ?
             if len(self.config['api_key']) > 0:
-                validation_result = self.cloud_language_tools.api_key_validate_query(self.config['api_key'])
-                if validation_result['key_valid'] == True:
-                    self.api_key_checked = True
+                self.verify_api_key(self.config['api_key'])
+                self.load_language_data()
+
         except:
-            self.language_data_load_error = True
+            self.initialization_error = True
             logging.exception(f'could not load language data')
 
     def initializeDone(self, future):
-        if self.language_data_load_error:
-            self.anki_utils.critical_message('Could not load language data from server, please try to restart Anki.', aqt.mw)
+        if self.initialization_error:
+            self.anki_utils.critical_message('Could not verify API key or load language data from server, please try to restart Anki.', aqt.mw)
 
     def get_config_api_key(self):
         return self.config['api_key']
@@ -100,12 +91,12 @@ class LanguageTools():
     def set_config_api_key(self, api_key):
         self.config['api_key'] = api_key
         self.anki_utils.write_config(self.config)
-        self.api_key_checked = True
 
     def verify_api_key(self, api_key):
         result = self.cloud_language_tools.api_key_validate_query(api_key)
         if result['key_valid'] == True:
             message = result['msg']
+            self.load_language_data()
             return True, message
         else:
             message = result['msg']
@@ -113,11 +104,21 @@ class LanguageTools():
 
     def ensure_api_key_checked(self):
         # print(f'self.api_key_checked: {self.api_key_checked}')
-        if self.api_key_checked:
+        if self.cloud_language_tools.api_key_set():
             return True
         aqt.utils.showInfo(f'Please enter API key from menu <b>Tools -> Language Tools: Verify API Key</b>', title=constants.MENU_PREFIX)
         return False
 
+    def load_language_data(self):
+        if self.language_data == None:
+            if self.cloud_language_tools.api_key_set():
+                # get language data
+                self.language_data = self.cloud_language_tools.get_language_data()
+                self.language_list = self.language_data['language_list']
+                self.translation_language_list = self.language_data['translation_options']
+                self.transliteration_language_list = self.language_data['transliteration_options']
+                self.voice_list = self.language_data['voice_list']
+                self.tokenization_options = self.language_data['tokenization_options']
 
     def language_detection_done(self):
         return len(self.config[constants.CONFIG_DECK_LANGUAGES]) > 0
