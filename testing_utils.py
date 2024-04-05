@@ -403,23 +403,23 @@ class MockCloudLanguageTools():
         encoded_dict = json.dumps(self.requested_audio, indent=2).encode('utf-8')
         return encoded_dict
 
-    def get_translation_all(self, api_key, source_text, from_language, to_language):
+    def get_translation_all(self, source_text, from_language, to_language):
         if source_text in self.translation_unhandled_exception_map:
             raise Exception(self.translation_unhandled_exception_map[source_text])
         return self.translate_all_result[source_text]
 
-    def get_translation(self, api_key, source_text, translation_option):
+    def get_translation(self, source_text, translation_option):
         if source_text in self.translation_error_map:
             return MockTranslationResponse(400, {'error': self.translation_error_map[source_text]})
         translated_text = self.translation_map[source_text]
         return MockTranslationResponse(200, {'translated_text': translated_text})
 
-    def get_transliteration(self, api_key, source_text, transliteration_option):
+    def get_transliteration(self, source_text, transliteration_option):
         # if needed, error simulation can be added here
         transliterated_text = self.transliteration_map[source_text]
         return MockTranslationResponse(200, {'transliterated_text': transliterated_text})
 
-    def get_breakdown(self, api_key, source_text, tokenization_option, translation_option, transliteration_option):
+    def get_breakdown(self, source_text, tokenization_option, translation_option, transliteration_option):
         breakdown_response = self.breakdown_map[source_text]
         return MockBreakdownResponse(200, {'breakdown': breakdown_response})
 
