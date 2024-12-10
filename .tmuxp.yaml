@@ -4,6 +4,7 @@ shell_command_before:
   - source ${HOME}/python-env/anki-language-tools/bin/activate
   - source .bash_aliases
   - source ${HOME}/secrets/anki_languagetools/tests.sh
+  - source ${HOME}/secrets/anki_languagetools/clt_tts_prod.sh
   - clear
 windows:
 - window_name: language-tools
