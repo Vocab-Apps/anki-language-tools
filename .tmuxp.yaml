@@ -1,0 +1,21 @@
+session_name: language-tools
+start_directory: ./ # load session relative to config location (project root).
+shell_command_before:
+  - source ${HOME}/python-env/anki-language-tools/bin/activate
+  - source .bash_aliases
+  - source ${HOME}/secrets/anki_languagetools/tests.sh
+  - clear
+windows:
+- window_name: language-tools
+  focus: true
+- window_name: git
+- window_name: aider
+- window_name: log
+  panes:
+    - shell_command: tail -f ${HOME}/logs/languagetools.log
+- window_name: secrets
+  panes:
+    - shell_command: 
+      - cd ${HOME}/secrets/anki_languagetools
+      - clear
+
