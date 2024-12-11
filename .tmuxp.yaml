@@ -5,6 +5,7 @@ shell_command_before:
   - source .bash_aliases
   - source ${HOME}/secrets/anki_languagetools/tests.sh
   - source ${HOME}/secrets/anki_languagetools/clt_tts_prod.sh
+  - source ${HOME}/secrets/anki_languagetools/clt_tts_vocabai_qa.sh
   - clear
 windows:
 - window_name: language-tools
