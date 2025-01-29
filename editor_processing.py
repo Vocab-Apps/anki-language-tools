@@ -171,10 +171,15 @@ class EditorManager():
                         voice = voice_settings[from_language]
                         self.load_audio(editor, note_id, field_value, to_deck_note_type_field, voice)        
 
+    def toggle_live_updates(self):
+        new_value = not self.apply_updates
+        self.set_live_updates(new_value)
+
     def set_live_updates(self, enabled):
         self.apply_updates = enabled
         logging.info(f'live updates enabled: {self.apply_updates}')
         self.languagetools.set_apply_updates_automatically(enabled)
+        self.languagetools.anki_utils.tooltip_message(f'Live updates enabled: {enabled}')
 
     def set_typing_delay(self, delay_ms):
         self.update_field_change_timer(delay_ms)

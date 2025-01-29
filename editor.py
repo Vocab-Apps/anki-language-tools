@@ -207,11 +207,39 @@ def init(languagetools):
 
         return handled
 
-        
+    def run_updates_now(editor):
+        # print('run updates now')
+        editor_manager.full_update(editor)
+
+    def pause_restart_updates(editor):
+        editor_manager.toggle_live_updates()
+
+    def setup_editor_buttons(buttons, editor):
+        new_button = editor.addButton(
+            None,
+            'language_tools_run_updates',
+            run_updates_now,
+            tip = f'Language Tools: Run Updates Now',
+            label='LT: Run',
+            disables=False)
+        buttons.append(new_button)
+
+        new_button = editor.addButton(
+            None,
+            'language_tools_pause_updates',
+            pause_restart_updates,
+            tip = f'Language Tools: Pause/Enable Updates',
+            label='Pause',
+            disables=False)
+        buttons.append(new_button)        
+
+        return buttons        
 
 
     aqt.gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
     aqt.gui_hooks.editor_did_load_note.append(loadNote)
     aqt.gui_hooks.webview_did_receive_js_message.append(onBridge)
+    # editor buttons
+    aqt.gui_hooks.editor_did_init_buttons.append(setup_editor_buttons)
     # right click menu
     aqt.gui_hooks.editor_will_show_context_menu.append(on_editor_context_menu)    

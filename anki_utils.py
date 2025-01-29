@@ -112,6 +112,9 @@ class AnkiUtils():
     def critical_message(self, message, parent):
         aqt.utils.showCritical(message, title=constants.ADDON_NAME, parent=parent)
 
+    def tooltip_message(self, message):
+        aqt.utils.tooltip(message)
+
     def ask_user(self, message, parent):
         result = aqt.utils.askUser(message, parent=parent)
         return result
