@@ -236,7 +236,8 @@ def init(languagetools):
         return buttons        
 
 
-    aqt.gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
+    # disable, as svelte 5 upgrade broke anki/svelte addons
+    # aqt.gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
     aqt.gui_hooks.editor_did_load_note.append(loadNote)
     aqt.gui_hooks.webview_did_receive_js_message.append(onBridge)
     # editor buttons
