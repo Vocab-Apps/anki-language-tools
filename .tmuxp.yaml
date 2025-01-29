@@ -1,11 +1,11 @@
 session_name: language-tools
 start_directory: ./ # load session relative to config location (project root).
 shell_command_before:
-  - source ${HOME}/python-env/anki-language-tools/bin/activate
+  - source ${PYTHON_ENV_DIR}/anki-language-tools/bin/activate
   - source .bash_aliases
-  - source ${HOME}/secrets/anki_languagetools/tests.sh
-  - source ${HOME}/secrets/anki_languagetools/clt_tts_prod.sh
-  - source ${HOME}/secrets/anki_languagetools/clt_tts_vocabai_prod.sh
+  - source ${SECRETS_DIR}/anki_languagetools/tests.sh
+  - source ${SECRETS_DIR}/anki_languagetools/clt_tts_prod.sh
+  - source ${SECRETS_DIR}/anki_languagetools/clt_tts_vocabai_prod.sh
   - clear
 windows:
 - window_name: language-tools
@@ -18,6 +18,6 @@ windows:
 - window_name: secrets
   panes:
     - shell_command: 
-      - cd ${HOME}/secrets/anki_languagetools
+      - cd ${SECRETS_DIR}/anki_languagetools
       - clear
 
