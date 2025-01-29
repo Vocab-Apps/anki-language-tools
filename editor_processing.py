@@ -179,7 +179,7 @@ class EditorManager():
         self.apply_updates = enabled
         logging.info(f'live updates enabled: {self.apply_updates}')
         self.languagetools.set_apply_updates_automatically(enabled)
-        self.languagetools.anki_utils.tooltip_message(f'Live updates enabled: {enabled}')
+        self.languagetools.anki_utils.tooltip_message(f'Language Tools: Live Updates enabled: {enabled}')
 
     def set_typing_delay(self, delay_ms):
         self.update_field_change_timer(delay_ms)
