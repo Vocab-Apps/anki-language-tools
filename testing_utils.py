@@ -105,6 +105,9 @@ class MockAnkiUtils():
         logging.info(f'critical error message: {message}')
         self.critical_message_received = message
 
+    def tooltip_message(self, message):
+        pass
+
     def play_sound(self, filename):
         # load the json inside the file
         with open(filename) as json_file:
