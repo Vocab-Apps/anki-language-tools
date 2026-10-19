@@ -19,46 +19,37 @@ class ValidateAPIKeyTests(unittest.TestCase):
         self.clt = cloudlanguagetools.CloudLanguageTools()
 
     def test_validate_clt_api_key(self):
-        self.assertEquals(self.clt.api_key_set(), False)
+        self.assertEqual(self.clt.api_key_set(), False)
         api_key = os.environ['ANKI_LANGUAGE_TOOLS_CLT_API_KEY']
         response = self.clt.api_key_validate_query(api_key)
         pprint.pprint(response)
-        self.assertEquals(response['key_valid'], True)
-        self.assertEquals(self.clt.use_vocabai_api, False)
-        self.assertEquals(self.clt.api_key, api_key)
-        self.assertEquals(self.clt.api_key_set(), True)
+        # the CLT API has been retired, CLT keys are now rejected with a migration message
+        self.assertEqual(response['key_valid'], False)
+        self.assertIn('Cloud Language Tools has been retired', response['msg'])
+        self.assertEqual(self.clt.use_vocabai_api, False)
+        self.assertEqual(self.clt.api_key, None)
+        self.assertEqual(self.clt.api_key_set(), False)
 
     def test_validate_vocab_api_key(self):
-        self.assertEquals(self.clt.api_key_set(), False)
+        self.assertEqual(self.clt.api_key_set(), False)
         api_key = os.environ['ANKI_LANGUAGE_TOOLS_VOCAB_API_KEY']
         response = self.clt.api_key_validate_query(api_key)
         pprint.pprint(response)
-        self.assertEquals(response['key_valid'], True)
-        self.assertEquals(self.clt.use_vocabai_api, True)
-        self.assertEquals(self.clt.api_key, api_key)
-        self.assertEquals(self.clt.api_key_set(), True)
+        self.assertEqual(response['key_valid'], True)
+        self.assertEqual(self.clt.use_vocabai_api, True)
+        self.assertEqual(self.clt.api_key, api_key)
+        self.assertEqual(self.clt.api_key_set(), True)
 
     def test_validate_bad_api_key(self):
-        self.assertEquals(self.clt.api_key_set(), False)
+        self.assertEqual(self.clt.api_key_set(), False)
         api_key = 'incorrect_key'
         response = self.clt.api_key_validate_query(api_key)
-        self.assertEquals(response['key_valid'], False)
-        self.assertEquals(self.clt.api_key, None)
-        self.assertEquals(self.clt.api_key_set(), False)
+        self.assertEqual(response['key_valid'], False)
+        self.assertEqual(self.clt.api_key, None)
+        self.assertEqual(self.clt.api_key_set(), False)
 
-# base class executes CLT tests, derived class executes VOCABAI tests
-class CloudLanguageToolsCLTTests(unittest.TestCase):
-    # setup
-    def setUp(self):
-        # setup test data
-        self.clt = cloudlanguagetools.CloudLanguageTools()
-        api_key = os.environ['ANKI_LANGUAGE_TOOLS_CLT_API_KEY']
-        response = self.clt.api_key_validate_query(api_key)
-        self.assertEquals(response['key_valid'], True)
-
-    def test_get_base_url(self):
-        self.assertEquals(self.clt.get_base_url(), constants.CLT_API_BASE_URL)
-
+# API tests shared by all backends (the CLT API has been retired, only VOCABAI remains)
+class CloudLanguageToolsAPITestsMixin():
     def test_get_language_data(self):
         response = self.clt.get_language_data()
         self.assertGreater(len(response['language_list']), 0)
@@ -74,7 +65,7 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
 
     def test_detect(self):
         detected_language = self.clt.language_detection(['Bonjour', 'Au revoir'])
-        self.assertEquals(detected_language, 'fr')
+        self.assertEqual(detected_language, 'fr')
 
     def test_get_tts_audio_request(self):
         language_data = self.clt.get_language_data()
@@ -84,21 +75,21 @@ class CloudLanguageToolsCLTTests(unittest.TestCase):
         first_voice = french_voices[0]
         source_text = 'Bonjour'
         response = self.clt.get_tts_audio_request(source_text, first_voice['service'], first_voice['language_code'], first_voice['voice_key'], {})
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
-class CloudLanguageToolsVocabTests(unittest.TestCase):
+class CloudLanguageToolsVocabTests(CloudLanguageToolsAPITestsMixin, unittest.TestCase):
     # setup
     def setUp(self):
         # setup test data
         self.clt = cloudlanguagetools.CloudLanguageTools()
         api_key = os.environ['ANKI_LANGUAGE_TOOLS_VOCAB_API_KEY']
         response = self.clt.api_key_validate_query(api_key)
-        self.assertEquals(response['key_valid'], True)
+        self.assertEqual(response['key_valid'], True)
 
     # test get_base_url
     def test_get_base_url(self):
-        self.assertEquals(self.clt.get_base_url(), constants.VOCABAI_API_BASE_URL)
+        self.assertEqual(self.clt.get_base_url(), constants.VOCABAI_API_BASE_URL)
 
 if __name__ == '__main__':
     unittest.main()
