@@ -24,7 +24,7 @@ def init(languagetools):
     # add context menu handler
 
     def show_getting_started():
-        url = aqt.qt.QUrl('https://languagetools.anki.study/tutorials/language-tools-getting-started?utm_campaign=langtools_menu&utm_source=languagetools&utm_medium=addon')
+        url = aqt.qt.QUrl('https://www.vocab.ai/tutorials/language-tools-getting-started?utm_campaign=langtools_menu&utm_source=languagetools&utm_medium=addon')
         aqt.qt.QDesktopServices.openUrl(url)
 
     def show_language_mapping():
