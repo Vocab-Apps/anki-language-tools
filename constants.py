@@ -3,7 +3,6 @@ import enum
 ENV_VAR_ANKI_LANGUAGE_TOOLS_BASE_URL = 'ANKI_LANGUAGE_TOOLS_BASE_URL'
 ENV_VAR_ANKI_LANGUAGE_TOOLS_VOCABAI_BASE_URL = 'ANKI_LANGUAGE_TOOLS_VOCABAI_BASE_URL'
 
-CLT_API_BASE_URL = 'https://cloudlanguagetools-api.vocab.ai'
 VOCABAI_API_BASE_URL = 'https://app.vocab.ai/languagetools-api/v2'
 
 CONFIG_DECK_LANGUAGES = 'deck_languages'
