@@ -54,6 +54,7 @@ else:
 
     traces_sample_rate_map = {
         'development': 1.0,
+        'qa': 1.0,
         'production': 0.035
     }    
 
