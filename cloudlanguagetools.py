@@ -16,7 +16,8 @@ else:
 
 class CloudLanguageTools():
     def __init__(self):
-        self.base_url = os.environ.get(constants.ENV_VAR_ANKI_LANGUAGE_TOOLS_VOCABAI_BASE_URL, constants.VOCABAI_API_BASE_URL)
+        hostname = os.environ.get(constants.ENV_VAR_VOCABAI_API_HOSTNAME, constants.VOCABAI_API_HOSTNAME)
+        self.base_url = f'https://{hostname}{constants.VOCABAI_API_PATH}'
         self.initialization_done = False
         self.api_key = None
 

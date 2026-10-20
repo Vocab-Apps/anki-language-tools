@@ -45,7 +45,7 @@ class CloudLanguageToolsTests(unittest.TestCase):
 
     # test get_base_url
     def test_get_base_url(self):
-        self.assertEqual(self.clt.get_base_url(), constants.VOCABAI_API_BASE_URL)
+        self.assertEqual(self.clt.get_base_url(), f'https://{constants.VOCABAI_API_HOSTNAME}{constants.VOCABAI_API_PATH}')
 
     def test_get_language_data(self):
         response = self.clt.get_language_data()
